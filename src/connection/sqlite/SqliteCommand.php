@@ -24,6 +24,8 @@ final readonly class SqliteCommand implements Command
     #[Override]
     public function fetchSavedMigrationNames(): array
     {
+        // SQLSTATE[HY000]: General error: 1 no such table:
+
         $statement = $this->connection->prepare(
             sprintf('SELECT name FROM %s ORDER BY atime DESC', $this->params->table)
         );
@@ -38,12 +40,12 @@ final readonly class SqliteCommand implements Command
     }
 
     #[Override]
-    public function up(string $sql, string $filename): bool
+    public function up(string $queryString, string $filename): bool
     {
         $hasTransaction = $this->connection->beginTransaction();
 
         try {
-            $this->connection->exec($sql);
+            $this->connection->exec($queryString);
             $this->connection->exec(
                 sprintf(
                     'INSERT INTO %s ("name", "atime") VALUES (\'%s\', \'%s\')',
@@ -64,12 +66,12 @@ final readonly class SqliteCommand implements Command
     }
 
     #[Override]
-    public function down(string $sql, string $filename): bool
+    public function down(string $queryString, string $filename): bool
     {
         $hasTransaction = $this->connection->beginTransaction();
 
         try {
-            $this->connection->exec($sql);
+            $this->connection->exec($queryString);
             $this->connection->exec(
                 sprintf(
                     'DELETE FROM %s WHERE name=\'%s\'',
@@ -89,12 +91,12 @@ final readonly class SqliteCommand implements Command
     }
 
     #[Override]
-    public function exec(string $sql, string $filename): bool
+    public function exec(string $queryString, string $filename): bool
     {
         $hasTransaction = $this->connection->beginTransaction();
 
         try {
-            $this->connection->exec($sql);
+            $this->connection->exec($queryString);
         } catch (Throwable $exception) {
             if ($hasTransaction) {
                 $this->connection->rollBack();

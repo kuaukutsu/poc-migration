@@ -34,9 +34,9 @@ final readonly class MyISAMCommand implements Command
     }
 
     #[Override]
-    public function up(string $sql, string $filename): true
+    public function up(string $queryString, string $filename): true
     {
-        $this->connection->exec($sql);
+        $this->connection->exec($queryString);
         $this->connection->exec(
             sprintf(
                 'INSERT INTO %s ("name", "atime") VALUES (\'%s\', \'%s\')',
@@ -50,9 +50,9 @@ final readonly class MyISAMCommand implements Command
     }
 
     #[Override]
-    public function down(string $sql, string $filename): true
+    public function down(string $queryString, string $filename): true
     {
-        $this->connection->exec($sql);
+        $this->connection->exec($queryString);
         $this->connection->exec(
             sprintf(
                 'DELETE FROM %s WHERE name=\'%s\'',
@@ -65,9 +65,9 @@ final readonly class MyISAMCommand implements Command
     }
 
     #[Override]
-    public function exec(string $sql, string $filename): true
+    public function exec(string $queryString, string $filename): true
     {
-        $this->connection->exec($sql);
+        $this->connection->exec($queryString);
         return true;
     }
 }

@@ -1,5 +1,11 @@
 # Proof of Concept: Database Migrator
 
+[![PHP Version Require](http://poser.pugx.org/kuaukutsu/poc-migration/require/php)](https://packagist.org/packages/kuaukutsu/poc-migration)
+[![Latest Stable Version](https://poser.pugx.org/kuaukutsu/poc-migration/v/stable)](https://packagist.org/packages/kuaukutsu/poc-migration)
+[![License](http://poser.pugx.org/kuaukutsu/poc-migration/license)](https://packagist.org/packages/kuaukutsu/poc-migration)
+[![Psalm Level](https://shepherd.dev/github/kuaukutsu/poc-migration/level.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
+[![Psalm Type Coverage](https://shepherd.dev/github/kuaukutsu/poc-migration/coverage.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
+
 draft...
 
 ## example

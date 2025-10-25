@@ -16,7 +16,7 @@ final class FilesRepeatableTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/data/postgres/main');
+        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/main');
     }
 
     public function testFixtureFile(): void
@@ -55,7 +55,7 @@ final class FilesRepeatableTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        $fs = new ActionFilesystem(dirname(__DIR__) . '/data/postgres/not-exists');
+        $fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/not-exists');
         $fs->repeatable()->valid();
     }
 }

@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\stub;
 
-use kuaukutsu\poc\migration\connection\Command;
 use Override;
+use kuaukutsu\poc\migration\connection\Command;
 
 final readonly class TestCommand implements Command
 {
+    public function __construct(
+        private TestStorage $storage,
+    ) {
+    }
+
     /**
      * @inheritDoc
      */
     #[Override]
     public function fetchSavedMigrationNames(): array
     {
-        return [];
+        return $this->storage->getMigration();
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function up(string $sql, string $filename): bool
+    public function up(string $queryString, string $filename): bool
     {
+        $this->storage->set($filename, $queryString);
+        $this->storage->saveMigration($filename);
         return true;
     }
 
@@ -31,8 +38,10 @@ final readonly class TestCommand implements Command
      * @inheritDoc
      */
     #[Override]
-    public function down(string $sql, string $filename): bool
+    public function down(string $queryString, string $filename): bool
     {
+        $this->storage->set($filename, $queryString);
+        $this->storage->dropMigration($filename);
         return true;
     }
 
@@ -40,8 +49,9 @@ final readonly class TestCommand implements Command
      * @inheritDoc
      */
     #[Override]
-    public function exec(string $sql, string $filename): bool
+    public function exec(string $queryString, string $filename): bool
     {
+        $this->storage->set($filename, $queryString);
         return true;
     }
 }
