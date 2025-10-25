@@ -86,4 +86,26 @@ final class MigrationTest extends TestCase
             $this->storage->get('202501011024_entity_create.sql') ?? '',
         );
     }
+
+    public function testDownEmpty(): void
+    {
+        $this->migrator->down();
+
+        self::assertEmpty($this->storage->getMigration());
+        self::assertEmpty($this->storage->get('202501011024_entity_create.sql'));
+    }
+
+    public function testFixture(): void
+    {
+        $this->migrator->fixture();
+
+        self::assertEmpty($this->storage->getMigration());
+        self::assertStringContainsString(
+            "INSERT INTO entity (name) VALUES ('fixture');",
+            $this->storage->get('202501011024_entity_fixture.sql') ?? '',
+        );
+
+        self::assertEmpty($this->storage->get('202501011024_entity_skip.sql'));
+        self::assertEmpty($this->storage->get('202501011024_skip.sql'));
+    }
 }
