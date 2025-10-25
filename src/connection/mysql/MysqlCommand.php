@@ -35,12 +35,12 @@ final readonly class MysqlCommand implements Command
     }
 
     #[Override]
-    public function up(string $sql, string $filename): bool
+    public function up(string $queryString, string $filename): bool
     {
         $hasTransaction = $this->connection->beginTransaction();
 
         try {
-            $this->connection->exec($sql);
+            $this->connection->exec($queryString);
             $this->connection->exec(
                 sprintf(
                     'INSERT INTO %s ("name", "atime") VALUES (\'%s\', \'%s\')',
@@ -61,12 +61,12 @@ final readonly class MysqlCommand implements Command
     }
 
     #[Override]
-    public function down(string $sql, string $filename): bool
+    public function down(string $queryString, string $filename): bool
     {
         $hasTransaction = $this->connection->beginTransaction();
 
         try {
-            $this->connection->exec($sql);
+            $this->connection->exec($queryString);
             $this->connection->exec(
                 sprintf(
                     'DELETE FROM %s WHERE name=\'%s\'',
@@ -86,12 +86,12 @@ final readonly class MysqlCommand implements Command
     }
 
     #[Override]
-    public function exec(string $sql, string $filename): bool
+    public function exec(string $queryString, string $filename): bool
     {
         $hasTransaction = $this->connection->beginTransaction();
 
         try {
-            $this->connection->exec($sql);
+            $this->connection->exec($queryString);
         } catch (Throwable $exception) {
             if ($hasTransaction) {
                 $this->connection->rollBack();

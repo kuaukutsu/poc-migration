@@ -16,7 +16,7 @@ final class FilesUpTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/data/postgres/main');
+        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/main');
     }
 
     public function testUpFile(): void
@@ -79,7 +79,7 @@ final class FilesUpTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        $manager = new ActionFilesystem(dirname(__DIR__) . '/data/postgres/not-exists');
+        $manager = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/not-exists');
         $manager->up([])->valid();
     }
 }

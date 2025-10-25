@@ -14,23 +14,23 @@ interface Command
     public function fetchSavedMigrationNames(): array;
 
     /**
-     * @param non-empty-string $sql
+     * @param non-empty-string $queryString
      * @param non-empty-string $filename
      * @throws Throwable
      */
-    public function up(string $sql, string $filename): bool;
+    public function up(string $queryString, string $filename): bool;
 
     /**
-     * @param non-empty-string $sql
+     * @param non-empty-string $queryString
      * @param non-empty-string $filename
      * @throws Throwable
      */
-    public function down(string $sql, string $filename): bool;
+    public function down(string $queryString, string $filename): bool;
 
     /**
-     * @param non-empty-string $sql
+     * @param non-empty-string $queryString
      * @param non-empty-string $filename
      * @throws Throwable
      */
-    public function exec(string $sql, string $filename): bool;
+    public function exec(string $queryString, string $filename): bool;
 }

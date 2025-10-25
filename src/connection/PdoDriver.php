@@ -15,14 +15,18 @@ use kuaukutsu\poc\migration\connection\pgsql\PgsqlCommand;
 use kuaukutsu\poc\migration\connection\sqlite\SqliteCommand;
 use kuaukutsu\poc\migration\ConnectionDriver;
 
-final readonly class PdoDriver implements Driver
+final class PdoDriver implements Driver
 {
-    private ConnectionDriver $driver;
-
     /**
      * @var Closure():PDO
      */
-    private Closure $connectionFactory;
+    private readonly Closure $connectionFactory;
+
+    private readonly ConnectionDriver $driver;
+
+    private int $connectionTimer = 0;
+
+    private ?PDO $connectionInstance = null;
 
     /**
      * @param non-empty-string $dsn
@@ -68,10 +72,15 @@ final readonly class PdoDriver implements Driver
      */
     private function makePDOConnection(): PDO
     {
-        try {
-            return ($this->connectionFactory)();
-        } catch (PDOException $exception) {
-            throw new ConnectionException($this->driver, $exception);
+        if ($this->connectionInstance === null || $this->connectionTimer < time()) {
+            $this->connectionTimer = time() + 600;
+            try {
+                return $this->connectionInstance = ($this->connectionFactory)();
+            } catch (PDOException $exception) {
+                throw new ConnectionException($this->driver, $exception);
+            }
         }
+
+        return $this->connectionInstance;
     }
 }
