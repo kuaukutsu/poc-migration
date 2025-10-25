@@ -1,0 +1,65 @@
+{
+  "name": "kuaukutsu/poc-migration",
+  "description": "Proof of Concept: Database migration",
+  "type": "library",
+  "license": "MIT",
+  "version": "0.0.1",
+  "authors": [
+    {
+      "name": "Dmitriy Krivopalov",
+      "email": "dimarik82@gmail.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/kuaukutsu/poc-migration/issues",
+    "source": "https://github.com/kuaukutsu/poc-migration"
+  },
+  "require": {
+    "php": "^8.3",
+    "ext-pdo": "*",
+    "kuaukutsu/ds-collection": "^2.1",
+    "symfony/console": "^7.3"
+  },
+  "require-dev": {
+    "php-di/php-di": "^7.0",
+    "phpstan/phpstan": "^2.0",
+    "phpunit/phpunit": "^10.5",
+    "rector/rector": "^2.0",
+    "roave/security-advisories": "dev-latest",
+    "slevomat/coding-standard": "^8.7",
+    "squizlabs/php_codesniffer": "^3.7",
+    "vimeo/psalm": "^6.13"
+  },
+  "autoload": {
+    "psr-4": {
+      "kuaukutsu\\poc\\migration\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "kuaukutsu\\poc\\migration\\tests\\": "tests"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "8.3.21"
+    },
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "check": [
+      "@phpcs",
+      "@psalm",
+      "@phpstan"
+    ],
+    "phpcs": "vendor/bin/phpcs",
+    "psalm": "vendor/bin/psalm --show-info --no-diff --no-cache",
+    "phpstan": "vendor/bin/phpstan analyze",
+    "rector": "vendor/bin/rector"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

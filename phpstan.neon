@@ -1,0 +1,10 @@
+parameters:
+	level: 9
+	paths:
+		- src
+		- tests
+	reportUnmatchedIgnoredErrors: false
+	ignoreErrors:
+		- identifiers:
+		  - missingType.iterableValue
+		  - missingType.generics

@@ -1,0 +1,46 @@
+name: PHPUnit
+
+on: [ pull_request ]
+
+jobs:
+  tests:
+    name: unit tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.3"
+          - "8.4"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo
+          coverage: none
+        env:
+          fail-fast: true
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Composer install dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          dependency-versions: "highest"
+          composer-options: "--optimize-autoloader"
+
+      - name: PHPUnit
+        uses: php-actions/phpunit@v3
+        env:
+          XDEBUG_MODE: coverage
+        with:
+          bootstrap: vendor/autoload.php
+          configuration: phpunit.xml.dist
+          php_extensions: pdo xdebug
+          args: tests --coverage-clover ./coverage.xml
+          test_suffix: Test.php
