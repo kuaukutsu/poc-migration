@@ -11,7 +11,7 @@ interface Command
     /**
      * @return list<non-empty-string>
      */
-    public function fetchSavedMigrationNames(): array;
+    public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array;
 
     /**
      * @param non-empty-string $queryString

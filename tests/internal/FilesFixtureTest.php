@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\internal;
 
+use kuaukutsu\poc\migration\internal\FilesystemArgs;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
@@ -29,6 +30,32 @@ final class FilesFixtureTest extends TestCase
             self::assertStringContainsString('INSERT INTO', $sql);
             break;
         }
+    }
+
+    public function testLimitFile(): void
+    {
+        $iterator = $this->fs->fixture(new FilesystemArgs(limit: 1));
+        self::assertTrue($iterator->valid());
+
+        $files = [];
+        foreach ($iterator as $filename => $_) {
+            $files[] = $filename;
+        }
+
+        self::assertCount(1, $files);
+        self::assertEquals('202501011024_entity_base.sql', $files[0]);
+
+        $iterator = $this->fs->fixture(new FilesystemArgs(limit: 2));
+        self::assertTrue($iterator->valid());
+
+        $files = [];
+        foreach ($iterator as $filename => $_) {
+            $files[] = $filename;
+        }
+
+        self::assertCount(2, $files);
+        self::assertEquals('202501011024_entity_base.sql', $files[0]);
+        self::assertEquals('202501011034_entity_correction.sql', $files[1]);
     }
 
     public function testSkipFile(): void

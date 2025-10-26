@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration\internal;
 
 use Throwable;
 use kuaukutsu\poc\migration\connection\Command;
+use kuaukutsu\poc\migration\connection\CommandArgs;
 use kuaukutsu\poc\migration\event\EventAction;
 use kuaukutsu\poc\migration\event\EventDispatcher;
 use kuaukutsu\poc\migration\event\FilesystemErrorEvent;
@@ -31,7 +32,7 @@ final readonly class ActionWorkflow
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function up(Db $db, Command $command): void
+    public function up(Db $db, Command $command, MigrateArgs $args): void
     {
         try {
             $savedMigration = $command->fetchSavedMigrationNames();
@@ -41,7 +42,7 @@ final readonly class ActionWorkflow
 
         $fs = new ActionFilesystem($db->path);
         try {
-            $files = $fs->up($savedMigration);
+            $files = $fs->up($savedMigration, FilesystemArgs::makeFromMigrateArgs($args));
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 new FilesystemErrorEvent($db->path, $exception)
@@ -64,10 +65,12 @@ final readonly class ActionWorkflow
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function down(Db $db, Command $command): void
+    public function down(Db $db, Command $command, MigrateArgs $args): void
     {
         try {
-            $savedMigration = $command->fetchSavedMigrationNames();
+            $savedMigration = $command->fetchSavedMigrationNames(
+                CommandArgs::makeFromMigrateArgs($args)
+            );
         } catch (Throwable $exception) {
             throw new InitializationException('Error reading system data.', $exception);
         }
@@ -96,11 +99,11 @@ final readonly class ActionWorkflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function fixture(Db $db, Command $command): void
+    public function fixture(Db $db, Command $command, MigrateArgs $args): void
     {
         $fs = new ActionFilesystem($db->path);
         try {
-            $files = $fs->fixture();
+            $files = $fs->fixture(FilesystemArgs::makeFromMigrateArgs($args));
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 new FilesystemErrorEvent($db->path, $exception)
@@ -122,7 +125,7 @@ final readonly class ActionWorkflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function repeatable(Db $db, Command $command): void
+    public function repeatable(Db $db, Command $command, MigrateArgs $args): void
     {
         $fs = new ActionFilesystem($db->path);
         try {

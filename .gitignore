@@ -22,3 +22,5 @@ composer.lock
 phpunit.phar
 .phpunit.result.cache
 
+# local
+*.local.php

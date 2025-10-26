@@ -7,6 +7,7 @@ namespace kuaukutsu\poc\migration\connection\mysql;
 use PDO;
 use Override;
 use kuaukutsu\poc\migration\connection\Command;
+use kuaukutsu\poc\migration\connection\CommandArgs;
 use kuaukutsu\poc\migration\connection\Params;
 
 final readonly class MyISAMCommand implements Command
@@ -18,11 +19,18 @@ final readonly class MyISAMCommand implements Command
     }
 
     #[Override]
-    public function fetchSavedMigrationNames(): array
+    public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array
     {
-        $statement = $this->connection->prepare(
-            sprintf('SELECT name FROM %s ORDER BY atime DESC', $this->params->table)
-        );
+        $query = sprintf('SELECT name FROM %s ORDER BY atime, name DESC', $this->params->table);
+        if ($args->limit > 0) {
+            $query = sprintf(
+                'SELECT name FROM %s ORDER BY atime, name DESC LIMIT %d',
+                $this->params->table,
+                $args->limit
+            );
+        }
+
+        $statement = $this->connection->prepare($query);
         if ($statement->execute()) {
             /**
              * @var list<non-empty-string>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\internal;
 
+use kuaukutsu\poc\migration\internal\FilesystemArgs;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
@@ -29,6 +30,48 @@ final class FilesUpTest extends TestCase
             self::assertStringContainsString('CREATE TABLE IF NOT EXISTS', $sql);
             break;
         }
+    }
+
+    public function testLimitFile(): void
+    {
+        $iterator = $this->fs->up([], new FilesystemArgs(limit: 1));
+        self::assertTrue($iterator->valid());
+
+        $files = [];
+        foreach ($iterator as $filename => $_) {
+            $files[] = $filename;
+        }
+
+        self::assertCount(1, $files);
+        self::assertEquals('202501011024_entity_create.sql', $files[0]);
+
+        $iterator = $this->fs->up([], new FilesystemArgs(limit: 2));
+        self::assertTrue($iterator->valid());
+
+        $files = [];
+        foreach ($iterator as $filename => $_) {
+            $files[] = $filename;
+        }
+
+        self::assertCount(2, $files);
+        self::assertEquals('202501011024_entity_create.sql', $files[0]);
+        self::assertEquals('202501021024_account_create.sql', $files[1]);
+    }
+
+    public function testOrderFile(): void
+    {
+        $iterator = $this->fs->up([]);
+        self::assertTrue($iterator->valid());
+
+        $files = [];
+        foreach ($iterator as $filename => $_) {
+            $files[] = $filename;
+        }
+
+        self::assertCount(3, $files);
+        self::assertEquals('202501011024_entity_create.sql', $files[0]);
+        self::assertEquals('202501021024_account_create.sql', $files[1]);
+        self::assertEquals('202501021025_account_email.sql', $files[2]);
     }
 
     public function testSkipFile(): void

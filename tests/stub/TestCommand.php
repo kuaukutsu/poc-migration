@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration\tests\stub;
 
 use Override;
 use kuaukutsu\poc\migration\connection\Command;
+use kuaukutsu\poc\migration\connection\CommandArgs;
 
 final readonly class TestCommand implements Command
 {
@@ -18,8 +19,12 @@ final readonly class TestCommand implements Command
      * @inheritDoc
      */
     #[Override]
-    public function fetchSavedMigrationNames(): array
+    public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array
     {
+        if ($args->limit > 0) {
+            return array_slice($this->storage->getMigration(), 0, $args->limit);
+        }
+
         return $this->storage->getMigration();
     }
 
