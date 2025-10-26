@@ -20,6 +20,7 @@
     </projectFiles>
 
     <issueHandlers>
+        <DocblockTypeContradiction errorLevel="info"/>
         <MixedAssignment errorLevel="suppress"/>
     </issueHandlers>
 </psalm>

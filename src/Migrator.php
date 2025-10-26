@@ -14,7 +14,11 @@ use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\internal\ActionWorkflow;
+use kuaukutsu\poc\migration\internal\MigrateArgs;
 
+/**
+ * @api
+ */
 final readonly class Migrator
 {
     private ActionWorkflow $actionWorkflow;
@@ -48,12 +52,12 @@ final readonly class Migrator
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function up(): void
+    public function up(MigrateArgs $args = new MigrateArgs()): void
     {
         foreach ($this->dbCollection as $db) {
             $command = $this->makeCommand($db);
-            $this->actionWorkflow->up($db, $command);
-            $this->actionWorkflow->repeatable($db, $command);
+            $this->actionWorkflow->up($db, $command, $args);
+            $this->actionWorkflow->repeatable($db, $command, $args);
         }
     }
 
@@ -62,10 +66,10 @@ final readonly class Migrator
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function down(): void
+    public function down(MigrateArgs $args = new MigrateArgs()): void
     {
         foreach ($this->dbCollection as $db) {
-            $this->actionWorkflow->down($db, $this->makeCommand($db));
+            $this->actionWorkflow->down($db, $this->makeCommand($db), $args);
         }
     }
 
@@ -73,10 +77,10 @@ final readonly class Migrator
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
      */
-    public function fixture(): void
+    public function fixture(MigrateArgs $args = new MigrateArgs()): void
     {
         foreach ($this->dbCollection as $db) {
-            $this->actionWorkflow->fixture($db, $this->makeCommand($db));
+            $this->actionWorkflow->fixture($db, $this->makeCommand($db), $args);
         }
     }
 

@@ -37,7 +37,7 @@ check:
 psalm: ## psalm
 	docker run --init -it --rm -u ${USER} -v "$$(pwd):/app" -w /app \
 		ghcr.io/kuaukutsu/php:${PHP_VERSION}-cli \
-		./vendor/bin/psalm --php-version=${PHP_VERSION} --no-cache
+		./vendor/bin/psalm --php-version=${PHP_VERSION} --no-cache --show-info=true
 
 phpstan: ## phpstan
 	docker run --init -it --rm -u ${USER} -v "$$(pwd):/app" -w /app \

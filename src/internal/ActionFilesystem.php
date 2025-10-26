@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\internal;
 
 use Iterator;
-use FilesystemIterator;
+use GlobIterator;
 use RegexIterator;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 
@@ -29,12 +29,17 @@ final readonly class ActionFilesystem
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function up(array $listSavedFilename): Iterator
+    public function up(array $listSavedFilename, FilesystemArgs $args = new FilesystemArgs()): Iterator
     {
+        $_iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
             $filepath = $matchFilename[0];
             if (in_array(basename($filepath), $listSavedFilename, true)) {
                 continue;
+            }
+
+            if ($args->limit > 0 && $_iternum++ > $args->limit) {
+                break;
             }
 
             $command = $this->prepareCommand($filepath, 'up');
@@ -64,9 +69,14 @@ final readonly class ActionFilesystem
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function fixture(): Iterator
+    public function fixture(FilesystemArgs $args = new FilesystemArgs()): Iterator
     {
+        $_iternum = 0;
         foreach ($this->makeIterator(rtrim($this->path, '/') . '-fixture/') as $matchFilename) {
+            if ($args->limit > 0 && $_iternum++ > $args->limit) {
+                break;
+            }
+
             $filepath = $matchFilename[0];
             $command = $this->prepareCommand($filepath, 'up');
             if ($command !== null) {
@@ -103,7 +113,7 @@ final readonly class ActionFilesystem
              * @var Iterator<list<non-empty-string>>
              */
             return new RegexIterator(
-                new FilesystemIterator($path, FilesystemIterator::CURRENT_AS_PATHNAME | FilesystemIterator::SKIP_DOTS),
+                new GlobIterator($path . '*.sql'),
                 '/.+(?<!skip)+\.sql/i',
                 RegexIterator::GET_MATCH,
             );
