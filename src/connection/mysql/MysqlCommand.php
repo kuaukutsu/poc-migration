@@ -22,10 +22,10 @@ final readonly class MysqlCommand implements Command
     #[Override]
     public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array
     {
-        $query = sprintf('SELECT name FROM %s ORDER BY atime, name DESC', $this->params->table);
+        $query = sprintf('SELECT name FROM %s ORDER BY atime DESC, name DESC', $this->params->table);
         if ($args->limit > 0) {
             $query = sprintf(
-                'SELECT name FROM %s ORDER BY atime, name DESC LIMIT %d',
+                'SELECT name FROM %s ORDER BY atime DESC, name DESC LIMIT %d',
                 $this->params->table,
                 $args->limit
             );
@@ -45,13 +45,13 @@ final readonly class MysqlCommand implements Command
     #[Override]
     public function up(string $queryString, string $filename): bool
     {
-        $hasTransaction = $this->connection->beginTransaction();
+        $hasTransaction = $this->tryBeginTransaction($queryString);
 
         try {
             $this->connection->exec($queryString);
             $this->connection->exec(
                 sprintf(
-                    'INSERT INTO %s ("name", "atime") VALUES (\'%s\', \'%s\')',
+                    'INSERT INTO %s (`name`, `atime`) VALUES (\'%s\', \'%s\')',
                     $this->params->table,
                     $filename,
                     gmdate('Y-m-d H:i:s'),
@@ -71,7 +71,7 @@ final readonly class MysqlCommand implements Command
     #[Override]
     public function down(string $queryString, string $filename): bool
     {
-        $hasTransaction = $this->connection->beginTransaction();
+        $hasTransaction = $this->tryBeginTransaction($queryString);
 
         try {
             $this->connection->exec($queryString);
@@ -96,7 +96,7 @@ final readonly class MysqlCommand implements Command
     #[Override]
     public function exec(string $queryString, string $filename): bool
     {
-        $hasTransaction = $this->connection->beginTransaction();
+        $hasTransaction = $this->tryBeginTransaction($queryString);
 
         try {
             $this->connection->exec($queryString);
@@ -111,5 +111,15 @@ final readonly class MysqlCommand implements Command
         // There is no active transaction
 
         return $hasTransaction === false || $this->connection->commit();
+    }
+
+    private function tryBeginTransaction(string $queryString): bool
+    {
+        $pattern = '/(?:create|alter|drop)\s+(?:table|(?:unique\s?)?index)\s+/i';
+        if (preg_match($pattern, $queryString, $_)) {
+            return false;
+        }
+
+        return $this->connection->beginTransaction();
     }
 }
