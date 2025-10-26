@@ -26,10 +26,10 @@ final readonly class PgsqlCommand implements Command
     public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array
     {
         // SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "migration" does not exist
-        $query = sprintf('SELECT name FROM %s ORDER BY atime, name DESC', $this->params->table);
+        $query = sprintf('SELECT name FROM %s ORDER BY atime DESC, name DESC', $this->params->table);
         if ($args->limit > 0) {
             $query = sprintf(
-                'SELECT name FROM %s ORDER BY atime, name DESC LIMIT %d',
+                'SELECT name FROM %s ORDER BY atime DESC, name DESC LIMIT %d',
                 $this->params->table,
                 $args->limit
             );

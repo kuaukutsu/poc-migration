@@ -21,10 +21,10 @@ final readonly class MyISAMCommand implements Command
     #[Override]
     public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array
     {
-        $query = sprintf('SELECT name FROM %s ORDER BY atime, name DESC', $this->params->table);
+        $query = sprintf('SELECT name FROM %s ORDER BY atime DESC, name DESC', $this->params->table);
         if ($args->limit > 0) {
             $query = sprintf(
-                'SELECT name FROM %s ORDER BY atime, name DESC LIMIT %d',
+                'SELECT name FROM %s ORDER BY atime DESC, name DESC LIMIT %d',
                 $this->params->table,
                 $args->limit
             );
@@ -47,7 +47,7 @@ final readonly class MyISAMCommand implements Command
         $this->connection->exec($queryString);
         $this->connection->exec(
             sprintf(
-                'INSERT INTO %s ("name", "atime") VALUES (\'%s\', \'%s\')',
+                'INSERT INTO %s (`name`, `atime`) VALUES (\'%s\', \'%s\')',
                 $this->params->table,
                 $filename,
                 gmdate('Y-m-d H:i:s'),
