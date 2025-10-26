@@ -15,15 +15,4 @@ final readonly class MigrateArgs
     ) {
         assert($this->limit >= 0);
     }
-
-    /**
-     * @param positive-int $limit
-     */
-    public function withLimit(int $limit): self
-    {
-        return new self(
-            limit: $limit,
-            dryRun: $this->dryRun,
-        );
-    }
 }

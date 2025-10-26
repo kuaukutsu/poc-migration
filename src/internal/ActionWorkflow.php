@@ -124,6 +124,7 @@ final readonly class ActionWorkflow
     /**
      * @throws ConfigurationException
      * @throws ConnectionException
+     * @noinspection PhpUnusedParameterInspection
      */
     public function repeatable(Db $db, Command $command, MigrateArgs $args): void
     {

@@ -72,8 +72,12 @@ final class PdoDriver implements Driver
      */
     private function makePDOConnection(): PDO
     {
+        /**
+         * @note если вдруг экземпляр класса Migrator будет использоваться как сервис, то переиспользуем коннект.
+         * Но с ограничением по времени, долго держать в памяти не будем.
+         */
         if ($this->connectionInstance === null || $this->connectionTimer < time()) {
-            $this->connectionTimer = time() + 600;
+            $this->connectionTimer = time() + 300;
             try {
                 return $this->connectionInstance = ($this->connectionFactory)();
             } catch (PDOException $exception) {

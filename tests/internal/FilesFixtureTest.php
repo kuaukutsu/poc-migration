@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\internal;
 
-use kuaukutsu\poc\migration\internal\FilesystemArgs;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\internal\ActionFilesystem;
+use kuaukutsu\poc\migration\internal\FilesystemArgs;
 
 final class FilesFixtureTest extends TestCase
 {

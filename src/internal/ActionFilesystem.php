@@ -72,8 +72,7 @@ final readonly class ActionFilesystem
     public function fixture(FilesystemArgs $args = new FilesystemArgs()): Iterator
     {
         $_iternum = 0;
-        $path = rtrim($this->path, '/') . '-fixture/';
-        foreach ($this->makeIterator($path) as $matchFilename) {
+        foreach ($this->makeIterator(rtrim($this->path, '/') . '-fixture/') as $matchFilename) {
             if ($args->limit > 0 && $_iternum++ > $args->limit) {
                 break;
             }
