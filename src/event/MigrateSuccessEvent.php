@@ -19,12 +19,6 @@ final readonly class MigrateSuccessEvent implements EventInterface
     }
 
     #[Override]
-    public function getEvent(): Event
-    {
-        return Event::MigrateSuccess;
-    }
-
-    #[Override]
     public function getName(): string
     {
         return $this->context->getName();
@@ -33,6 +27,11 @@ final readonly class MigrateSuccessEvent implements EventInterface
     #[Override]
     public function getMessage(): string
     {
-        return 'done';
+        return sprintf(
+            "[%s] %s: %s",
+            $this->context->dbName,
+            $this->action,
+            $this->context->filename,
+        );
     }
 }

@@ -18,7 +18,8 @@
     "php": "^8.3",
     "ext-pdo": "*",
     "kuaukutsu/ds-collection": "^2.1",
-    "symfony/console": "^7.3"
+    "symfony/console": "^7.3",
+    "league/climate": "^3.10"
   },
   "require-dev": {
     "php-di/php-di": "^7.0",

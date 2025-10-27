@@ -8,6 +8,7 @@ use Iterator;
 use GlobIterator;
 use SplFileInfo;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
+use kuaukutsu\poc\migration\Db;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
@@ -30,6 +31,11 @@ final readonly class SetupFilesystem
         $this->path = rtrim($path, '/') . '/';
     }
 
+    public static function make(Db $db): self
+    {
+        return new self($db->getSetupFilepath(), $db->table);
+    }
+
     /**
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException if path not exist
@@ -37,7 +43,17 @@ final readonly class SetupFilesystem
      */
     public function all(): Iterator
     {
-        foreach ($this->makeIterator($this->path) as $fileInfo) {
+        if (file_exists($this->path) === false) {
+            throw new ConfigurationException(
+                sprintf('the directory [%s] does not exist.', $this->path)
+            );
+        }
+
+        /**
+         * @var Iterator<SplFileInfo> $iterator
+         */
+        $iterator = new GlobIterator($this->path . '*.sql');
+        foreach ($iterator as $fileInfo) {
             $queryString = $this->prepareCommand($fileInfo->getPathname());
             if ($queryString !== null) {
                 /** @phpstan-ignore generator.keyType */
@@ -67,20 +83,5 @@ final readonly class SetupFilesystem
          * @var non-empty-string
          */
         return str_replace('%SYSTEM_TABLE%', $this->table, $queryString);
-    }
-
-    /**
-     * @return Iterator<SplFileInfo>
-     * @throws ConfigurationException
-     */
-    private function makeIterator(string $path): Iterator
-    {
-        if (file_exists($path)) {
-            return new GlobIterator($path . '*.sql');
-        }
-
-        throw new ConfigurationException(
-            sprintf('the directory [%s] does not exist.', $path)
-        );
     }
 }

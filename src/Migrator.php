@@ -6,8 +6,8 @@ namespace kuaukutsu\poc\migration;
 
 use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\Params;
-use kuaukutsu\poc\migration\event\ConfigurationErrorEvent;
-use kuaukutsu\poc\migration\event\ConnectionErrorEvent;
+use kuaukutsu\poc\migration\event\ConfigurationEvent;
+use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventDispatcher;
 use kuaukutsu\poc\migration\event\EventSubscriberInterface;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
@@ -96,13 +96,15 @@ final readonly class Migrator
             );
         } catch (ConnectionException $exception) {
             $this->eventDispatcher->trigger(
-                new ConnectionErrorEvent($db->getName(), $exception)
+                Event::ConnectionError,
+                new ConfigurationEvent($db, $exception)
             );
 
             throw $exception;
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
-                new ConfigurationErrorEvent($db->getName(), $exception)
+                Event::ConfigurationError,
+                new ConfigurationEvent($db, $exception)
             );
 
             throw $exception;

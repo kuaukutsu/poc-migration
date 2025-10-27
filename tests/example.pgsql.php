@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\Console\Output\ConsoleOutput;
+use League\CLImate\CLImate;
 use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
 use kuaukutsu\poc\migration\Migrator;
-use kuaukutsu\poc\migration\tools\TraceConsoleOutput;
+use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -23,7 +23,7 @@ $migrator = new Migrator(
         )
     ),
     eventSubscribers: [
-        new TraceConsoleOutput(new ConsoleOutput()),
+        new PrettyConsoleOutput(new CLImate()),
     ],
 );
 

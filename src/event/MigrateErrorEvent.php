@@ -15,26 +15,26 @@ final readonly class MigrateErrorEvent implements EventInterface
      */
     public function __construct(
         public string $action,
-        public MigrateContext $migrate,
+        public MigrateContext $context,
         public Throwable $exception,
     ) {
     }
 
     #[Override]
-    public function getEvent(): Event
-    {
-        return Event::MigrateError;
-    }
-
-    #[Override]
     public function getName(): string
     {
-        return $this->migrate->getName();
+        return $this->context->getName();
     }
 
     #[Override]
     public function getMessage(): string
     {
-        return $this->exception->getMessage();
+        return sprintf(
+            "[%s] %s: %s\r\n%s",
+            $this->context->dbName,
+            $this->action,
+            $this->context->filename,
+            $this->exception->getMessage(),
+        );
     }
 }

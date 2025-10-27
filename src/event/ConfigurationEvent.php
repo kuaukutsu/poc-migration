@@ -6,28 +6,20 @@ namespace kuaukutsu\poc\migration\event;
 
 use Override;
 use Throwable;
+use kuaukutsu\poc\migration\Db;
 
-final readonly class ConfigurationErrorEvent implements EventInterface
+final readonly class ConfigurationEvent implements EventInterface
 {
-    /**
-     * @param non-empty-string $dbName
-     */
     public function __construct(
-        public string $dbName,
+        public Db $db,
         public Throwable $exception,
     ) {
     }
 
     #[Override]
-    public function getEvent(): Event
-    {
-        return Event::ConnectionError;
-    }
-
-    #[Override]
     public function getName(): string
     {
-        return $this->dbName;
+        return $this->db->getName();
     }
 
     #[Override]
