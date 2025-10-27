@@ -21,12 +21,6 @@ final readonly class MigrateErrorEvent implements EventInterface
     }
 
     #[Override]
-    public function getEvent(): Event
-    {
-        return Event::MigrateError;
-    }
-
-    #[Override]
     public function getName(): string
     {
         return $this->context->getName();

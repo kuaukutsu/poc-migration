@@ -31,9 +31,8 @@ final readonly class EventDispatcher
         $this->eventHandlers = $subscriptions;
     }
 
-    public function trigger(EventInterface $event): void
+    public function trigger(Event $name, EventInterface $event): void
     {
-        $name = $event->getEvent();
         if (array_key_exists($name->value, $this->eventHandlers)) {
             foreach ($this->eventHandlers[$name->value] as $subscriberCallback) {
                 try {

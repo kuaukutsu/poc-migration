@@ -19,12 +19,6 @@ final readonly class MigrateSuccessEvent implements EventInterface
     }
 
     #[Override]
-    public function getEvent(): Event
-    {
-        return Event::MigrateSuccess;
-    }
-
-    #[Override]
     public function getName(): string
     {
         return $this->context->getName();

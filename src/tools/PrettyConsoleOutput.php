@@ -29,6 +29,7 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
             $subscriptions[$event->value] = match ($event) {
                 Event::MigrateSuccess => $this->success(...),
                 Event::MigrateError => $this->errorMigration(...),
+                Event::FilesystemNotice => $this->notice(...),
                 default => $this->error(...),
             };
         }
@@ -80,7 +81,21 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
     {
         $this->output->out(
             sprintf(
-                '[<bold>%s</bold>] <red>%s</red>',
+                '[<bold>%s</bold>] error: <red>%s</red>',
+                $event->getName(),
+                $event->getMessage()
+            )
+        );
+    }
+
+    /**
+     * @noinspection PhpUnusedParameterInspection
+     */
+    public function notice(Event $name, EventInterface $event): void
+    {
+        $this->output->out(
+            sprintf(
+                '[<bold>%s</bold>] notice: %s',
                 $event->getName(),
                 $event->getMessage()
             )

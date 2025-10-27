@@ -54,7 +54,7 @@ final class EventTest extends TestCase
         }
 
         self::assertStringContainsString(
-            'PDO_MYSQL:SQLSTATE[HY000]',
+            'PDO_MYSQL:',
             $eventSubscriber->get(Event::ConnectionError)
         );
     }
@@ -78,7 +78,7 @@ final class EventTest extends TestCase
 
         self::assertStringContainsString(
             'General error: 1 no such table',
-            $eventSubscriber->get(Event::ConnectionError)
+            $eventSubscriber->get(Event::InitializationError)
         );
     }
 

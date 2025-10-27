@@ -28,6 +28,18 @@ $migrator = new Migrator(
 );
 
 try {
+    $migrator->init();
+} catch (Throwable $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+
+try {
+    $migrator->up();
+} catch (Throwable $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+
+try {
     $migrator->up();
 } catch (Throwable $exception) {
     echo $exception->getMessage() . PHP_EOL;
