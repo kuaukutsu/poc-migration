@@ -118,9 +118,8 @@ final readonly class ActionWorkflow
     public function repeatable(Db $db, Command $command, MigrateArgs $args): void
     {
         $fs = new ActionFilesystem($db->path);
-        $files = $fs->repeatable();
-
         try {
+            $files = $fs->repeatable();
             if ($files->valid() === false) {
                 return;
             }
