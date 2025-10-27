@@ -117,23 +117,8 @@ final readonly class ActionWorkflow
      */
     public function repeatable(Db $db, Command $command, MigrateArgs $args): void
     {
-        $fs = new ActionFilesystem($db->path);
-        try {
-            $files = $fs->repeatable();
-            if ($files->valid() === false) {
-                return;
-            }
-        } catch (ConfigurationException $exception) {
-            $this->eventDispatcher->trigger(
-                Event::FilesystemNotice,
-                new ConfigurationEvent($db, $exception)
-            );
-
-            // для repeatable допускатся отсутствие целевого каталога.
-            return;
-        }
-
-        foreach ($files as $filename => $queryString) {
+        $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->repeatable();
+        foreach ($this->iteratorHandler($db, $fsHandler, false) as $filename => $queryString) {
             $this->handler(
                 $command->exec(...),
                 new MigrateContext($db->getName(), $filename, $queryString),
@@ -195,7 +180,7 @@ final readonly class ActionWorkflow
      * @return iterable<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    private function iteratorHandler(Db $db, callable $handler): iterable
+    private function iteratorHandler(Db $db, callable $handler, bool $useException = true): iterable
     {
         try {
             $iterator = $handler(new ActionFilesystem($db->path));
@@ -214,11 +199,15 @@ final readonly class ActionWorkflow
             }
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
-                Event::FilesystemError,
+                $useException ? Event::FilesystemError : Event::FilesystemNotice,
                 new ConfigurationEvent($db, $exception)
             );
 
-            throw $exception;
+            if ($useException) {
+                throw $exception;
+            }
+
+            return [];
         }
 
         return $iterator;
