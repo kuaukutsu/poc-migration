@@ -40,7 +40,7 @@ final readonly class TraceConsoleOutput implements EventSubscriberInterface
      */
     public function success(Event $name, MigrateSuccessEvent $event): void
     {
-        $this->stdout($event->getName() . ', ' . $event->getMessage());
+        $this->stdout($event->getMessage());
     }
 
     /**
@@ -48,7 +48,13 @@ final readonly class TraceConsoleOutput implements EventSubscriberInterface
      */
     public function error(Event $name, EventInterface $event): void
     {
-        $this->stdout($event->getName() . ', error: ' . $event->getMessage());
+        $this->stdout(
+            sprintf(
+                '[%s] %s',
+                $event->getName(),
+                $event->getMessage()
+            )
+        );
     }
 
     private function stdout(string $message): void

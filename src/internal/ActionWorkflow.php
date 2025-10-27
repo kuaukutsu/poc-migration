@@ -7,6 +7,7 @@ namespace kuaukutsu\poc\migration\internal;
 use Throwable;
 use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\CommandArgs;
+use kuaukutsu\poc\migration\event\ConnectionErrorEvent;
 use kuaukutsu\poc\migration\event\EventAction;
 use kuaukutsu\poc\migration\event\EventDispatcher;
 use kuaukutsu\poc\migration\event\FilesystemErrorEvent;
@@ -37,6 +38,10 @@ final readonly class ActionWorkflow
         try {
             $savedMigration = $command->fetchSavedMigrationNames();
         } catch (Throwable $exception) {
+            $this->eventDispatcher->trigger(
+                new ConnectionErrorEvent($db->getName(), $exception)
+            );
+
             throw new InitializationException('Error reading system data.', $exception);
         }
 
@@ -72,6 +77,10 @@ final readonly class ActionWorkflow
                 CommandArgs::makeFromMigrateArgs($args)
             );
         } catch (Throwable $exception) {
+            $this->eventDispatcher->trigger(
+                new ConnectionErrorEvent($db->getName(), $exception)
+            );
+
             throw new InitializationException('Error reading system data.', $exception);
         }
 

@@ -33,6 +33,11 @@ final readonly class MigrateSuccessEvent implements EventInterface
     #[Override]
     public function getMessage(): string
     {
-        return 'done';
+        return sprintf(
+            "[%s] %s: %s",
+            $this->context->dbName,
+            $this->action,
+            $this->context->filename,
+        );
     }
 }

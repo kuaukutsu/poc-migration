@@ -21,7 +21,7 @@ final readonly class ConfigurationErrorEvent implements EventInterface
     #[Override]
     public function getEvent(): Event
     {
-        return Event::ConnectionError;
+        return Event::ConfigurationError;
     }
 
     #[Override]
