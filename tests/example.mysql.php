@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use League\CLImate\CLImate;
 use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
@@ -23,7 +22,7 @@ $migrator = new Migrator(
         )
     ),
     eventSubscribers: [
-        new PrettyConsoleOutput(new CLImate()),
+        new PrettyConsoleOutput(),
     ],
 );
 

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use League\CLImate\CLImate;
 use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
@@ -23,9 +22,21 @@ $migrator = new Migrator(
         )
     ),
     eventSubscribers: [
-        new PrettyConsoleOutput(new CLImate()),
+        new PrettyConsoleOutput(),
     ],
 );
+
+try {
+    $migrator->init();
+} catch (Throwable $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+
+try {
+    $migrator->up();
+} catch (Throwable $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
 
 try {
     $migrator->up();

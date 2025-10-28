@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\PdoDriver;
@@ -22,6 +23,7 @@ final class MigrationTest extends TestCase
 
     private Command $command;
 
+    #[Override]
     protected function setUp(): void
     {
         $driver = new PdoDriver(

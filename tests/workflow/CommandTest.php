@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use Override;
 use PDO;
 use PDOException;
 use Throwable;
@@ -17,6 +18,7 @@ final class CommandTest extends TestCase
 {
     private Command $command;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->command = new SqliteCommand(
