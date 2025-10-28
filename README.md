@@ -6,7 +6,7 @@
 [![Psalm Level](https://shepherd.dev/github/kuaukutsu/poc-migration/level.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
 [![Psalm Type Coverage](https://shepherd.dev/github/kuaukutsu/poc-migration/coverage.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
 
-Консольная прогармма для управления миграциями.
+Консольная программа для управления миграциями.
 
 ### setup
 
