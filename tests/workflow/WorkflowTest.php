@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\tests\stub\TestDriver;
 use kuaukutsu\poc\migration\tests\stub\TestStorage;
@@ -21,6 +22,7 @@ final class WorkflowTest extends TestCase
 
     private TestStorage $storage;
 
+    #[Override]
     protected function setUp(): void
     {
         $driver = new TestDriver(

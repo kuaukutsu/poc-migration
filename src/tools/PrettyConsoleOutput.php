@@ -17,8 +17,9 @@ use kuaukutsu\poc\migration\event\MigrateSuccessEvent;
  */
 final readonly class PrettyConsoleOutput implements EventSubscriberInterface
 {
-    public function __construct(private CLImate $output)
-    {
+    public function __construct(
+        private CLImate $output = new CLImate(),
+    ) {
     }
 
     #[Override]

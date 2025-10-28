@@ -7,11 +7,13 @@ namespace kuaukutsu\poc\migration\tests\stub;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventInterface;
 use kuaukutsu\poc\migration\event\EventSubscriberInterface;
+use Override;
 
 final class TestSubscriber implements EventSubscriberInterface
 {
     private array $storage = [];
 
+    #[Override]
     public function subscriptions(): array
     {
         $subscriptions = [];
