@@ -6,44 +6,116 @@
 [![Psalm Level](https://shepherd.dev/github/kuaukutsu/poc-migration/level.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
 [![Psalm Type Coverage](https://shepherd.dev/github/kuaukutsu/poc-migration/coverage.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
 
-draft...
+Консольная прогармма для управления миграциями.
 
-## example
+### setup
 
+Например, для базы данных с именем _main_ под управлением сервера **postgres**:
+```shell
+mkdir -p ./migration/pgsql/{main,main-fixture} 
+```
+
+Описываем конфигурацию:
 ```php
 $migrator = new Migrator(
     dbCollection: new DbCollection(
         new Db(
-            path: __DIR__ . '/data/postgres/main',
+            path: __DIR__ . '/migration/postgres/main',
             driver: new PdoDriver(
                 dsn: 'pgsql:host=postgres;port=5432;dbname=main',
                 username: 'postgres',
                 password: 'postgres',
             )
-        ),
-        new Db(
-            path: __DIR__ . '/data/mysql/main',
-            driver: new PdoDriver(
-                dsn: 'mysql:host=mysql;dbname=main',
-                username: 'dbuser',
-                password: 'dbpassword',
+        )
+    ),
+);
+```
+
+### Migration
+
+Команды миграции описываются на языке SQL, например:
+```sql
+-- @up
+CREATE TABLE IF NOT EXISTS public.entity (
+    id serial NOT NULL,
+    parent_id integer NOT NULL,
+    created_at timestamp(0) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp(0) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT entity_pkey PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS "I_entity_parent_id" ON public.entity USING btree (parent_id);
+
+-- @down
+DROP INDEX IF EXISTS I_entity_parent_id;
+DROP TABLE IF EXISTS public.entity;
+```
+
+Управляющие команды:
+
+- `@up`
+- `@down`
+- `@skip`
+
+Если команды не указаны, то весь код будет вычитан как секция `up`.  
+Если нужно скипнуть файл целиком, то можно добавить в название постфикс `skip`, например `202501011025_name_skip.sql`
+
+### CLI example
+
+```php
+use DI\Container;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
+use kuaukutsu\poc\migration\connection\PdoDriver;
+use kuaukutsu\poc\migration\presentation\DownCommand;
+use kuaukutsu\poc\migration\presentation\FixtureCommand;
+use kuaukutsu\poc\migration\presentation\InitCommand;
+use kuaukutsu\poc\migration\presentation\UpCommand;
+use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
+use kuaukutsu\poc\migration\Db;
+use kuaukutsu\poc\migration\DbCollection;
+use kuaukutsu\poc\migration\Migrator;
+
+use function DI\factory;
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+$container = new Container(
+    [
+        Migrator::class => factory(
+            fn(): Migrator => new Migrator(
+                dbCollection: new DbCollection(
+                    new Db(
+                        path: __DIR__ . '/migration/sqlite/memory',
+                        driver: new PdoDriver(
+                            dsn: 'sqlite:' . __DIR__ . '/data/sqlite/db.sqlite3',
+                        )
+                    )
+                ),
+                eventSubscribers: [
+                    new PrettyConsoleOutput(),
+                ],
             )
         ),
-    ),
-    eventSubscribers: [
-        new TraceConsoleOutput(new ConsoleOutput()),
-    ],
+    ]
+);
+
+$console = new Application();
+$console->setCommandLoader(
+    new ContainerCommandLoader(
+        $container,
+        [
+            'migrate:init' => InitCommand::class,
+            'migrate:up' => UpCommand::class,
+            'migrate:down' => DownCommand::class,
+            'migrate:fixture' => FixtureCommand::class,
+        ],
+    )
 );
 
 try {
-    $migrator->up();
-} catch (Throwable $exception) {
-    echo $exception->getMessage() . PHP_EOL;
-}
-
-try {
-    $migrator->down();
-} catch (Throwable $exception) {
-    echo $exception->getMessage() . PHP_EOL;
+    exit($console->run());
+} catch (Exception $e) {
+    exit(Command::FAILURE);
 }
 ```
