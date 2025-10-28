@@ -31,7 +31,7 @@ $migrator = new Migrator(
 );
 ```
 
-### Migration
+### migration
 
 Команды миграции описываются на языке SQL, например:
 ```sql
@@ -59,7 +59,7 @@ DROP TABLE IF EXISTS public.entity;
 Если команды не указаны, то весь код будет вычитан как секция `up`.  
 Если нужно скипнуть файл целиком, то можно добавить в название постфикс `skip`, например `202501011025_name_skip.sql`
 
-### CLI example
+### CLI application
 
 ```php
 use DI\Container;
@@ -118,4 +118,24 @@ try {
 } catch (Exception $e) {
     exit(Command::FAILURE);
 }
+```
+
+### Static analysis
+
+To run static analysis:
+
+```shell
+make psalm
+```
+
+```shell
+make phpstan
+```
+
+### Unit testing
+
+The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
+
+```shell
+make phpunit
 ```
