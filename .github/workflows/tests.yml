@@ -35,12 +35,13 @@ jobs:
           composer-options: "--optimize-autoloader"
 
       - name: PHPUnit
-        uses: php-actions/phpunit@v3
+        uses: php-actions/phpunit@v4
         env:
           XDEBUG_MODE: coverage
         with:
+          php_version: ${{ matrix.php-version }}
+          php_extensions: pdo xdebug
           bootstrap: vendor/autoload.php
           configuration: phpunit.xml.dist
-          php_extensions: pdo xdebug
           args: tests --coverage-clover ./coverage.xml
           test_suffix: Test.php
