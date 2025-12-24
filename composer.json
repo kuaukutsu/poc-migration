@@ -19,7 +19,7 @@
     "ext-pdo": "*",
     "kuaukutsu/ds-collection": "^2.1",
     "league/climate": "^3.10",
-    "symfony/console": "^7.3"
+    "symfony/console": "^8.0"
   },
   "require-dev": {
     "php-di/php-di": "^7.0",
@@ -61,6 +61,5 @@
     "phpstan": "vendor/bin/phpstan analyze",
     "rector": "vendor/bin/rector"
   },
-  "minimum-stability": "dev",
   "prefer-stable": true
 }
