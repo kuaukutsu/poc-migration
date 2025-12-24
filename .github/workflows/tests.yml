@@ -16,32 +16,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: pdo
-          coverage: none
+          extensions: pdo xdebug
+          coverage: xdebug
         env:
           fail-fast: true
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Composer install dependencies
-        uses: ramsey/composer-install@v2
+        uses: ramsey/composer-install@v3
         with:
           dependency-versions: "highest"
           composer-options: "--optimize-autoloader"
 
       - name: PHPUnit
-        uses: php-actions/phpunit@v4
+        run: vendor/bin/phpunit --configuration phpunit.xml.dist --coverage-clover ./coverage.xml
         env:
           XDEBUG_MODE: coverage
-        with:
-          php_version: ${{ matrix.php-version }}
-          php_extensions: pdo xdebug
-          bootstrap: vendor/autoload.php
-          configuration: phpunit.xml.dist
-          args: tests --coverage-clover ./coverage.xml
-          test_suffix: Test.php
