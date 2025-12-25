@@ -10,8 +10,8 @@ use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\Params;
 use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\Migrator;
 use kuaukutsu\poc\migration\MigratorArgs;
+use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 
 /**
@@ -19,7 +19,7 @@ use kuaukutsu\poc\migration\tests\MigratorFactory;
  */
 final class MigrationTest extends TestCase
 {
-    private Migrator $migrator;
+    private MigratorInterface $migrator;
 
     private Command $command;
 

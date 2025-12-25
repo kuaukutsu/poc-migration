@@ -15,7 +15,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\MigratorArgs;
-use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
     name: 'migrate:up',
@@ -26,7 +26,7 @@ final class UpCommand extends Command
     /**
      * @throws LogicException
      */
-    public function __construct(private readonly Migrator $migrator)
+    public function __construct(private readonly MigratorInterface $migrator)
     {
         parent::__construct();
     }

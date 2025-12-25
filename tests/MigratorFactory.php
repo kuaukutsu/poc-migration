@@ -9,6 +9,7 @@ use kuaukutsu\poc\migration\event\EventSubscriberInterface;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
 use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\MigratorInterface;
 
 final readonly class MigratorFactory
 {
@@ -16,7 +17,7 @@ final readonly class MigratorFactory
     {
     }
 
-    public static function makeFromDriver(Driver $driver): Migrator
+    public static function makeFromDriver(Driver $driver): MigratorInterface
     {
         return new Migrator(
             dbCollection: new DbCollection(
@@ -31,7 +32,7 @@ final readonly class MigratorFactory
     /**
      * @param list<EventSubscriberInterface> $eventSubscribers
      */
-    public static function makeFromEvent(Driver $driver, array $eventSubscribers = []): Migrator
+    public static function makeFromEvent(Driver $driver, array $eventSubscribers = []): MigratorInterface
     {
         return new Migrator(
             dbCollection: new DbCollection(
