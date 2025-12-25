@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\exception;
 
 use Throwable;
-use RuntimeException;
 use kuaukutsu\poc\migration\ConnectionDriver;
 
-final class ConnectionException extends RuntimeException
+final class ConnectionException extends MigratorException
 {
     public function __construct(ConnectionDriver $driver, Throwable $previous)
     {

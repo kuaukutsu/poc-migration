@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal;
+namespace kuaukutsu\poc\migration;
 
-final readonly class MigrateArgs
+final readonly class MigratorArgs
 {
     /**
      * @param non-negative-int $limit

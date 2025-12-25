@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\exception;
 
-use RuntimeException;
-
-final class ConfigurationException extends RuntimeException
+final class ConfigurationException extends MigratorException
 {
     public function __construct(string $message)
     {

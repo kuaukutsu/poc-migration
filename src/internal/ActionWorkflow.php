@@ -14,11 +14,12 @@ use kuaukutsu\poc\migration\event\EventAction;
 use kuaukutsu\poc\migration\event\EventDispatcher;
 use kuaukutsu\poc\migration\event\MigrateErrorEvent;
 use kuaukutsu\poc\migration\event\MigrateSuccessEvent;
+use kuaukutsu\poc\migration\exception\ActionException;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\exception\MigrationException;
 use kuaukutsu\poc\migration\Db;
+use kuaukutsu\poc\migration\MigratorArgs;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
@@ -30,11 +31,12 @@ final readonly class ActionWorkflow
     }
 
     /**
+     * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function up(Db $db, Command $command, MigrateArgs $args): void
+    public function up(Db $db, Command $command, MigratorArgs $args): void
     {
         try {
             $savedMigration = $command->fetchSavedMigrationNames();
@@ -61,11 +63,12 @@ final readonly class ActionWorkflow
     }
 
     /**
+     * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function down(Db $db, Command $command, MigrateArgs $args): void
+    public function down(Db $db, Command $command, MigratorArgs $args): void
     {
         try {
             $savedMigration = $command->fetchSavedMigrationNames(
@@ -93,10 +96,11 @@ final readonly class ActionWorkflow
     }
 
     /**
+     * @throws ActionException
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function fixture(Db $db, Command $command, MigrateArgs $args): void
+    public function fixture(Db $db, Command $command, MigratorArgs $args): void
     {
         $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->fixture(
             FilesystemArgs::makeFromMigrateArgs($args)
@@ -111,11 +115,12 @@ final readonly class ActionWorkflow
     }
 
     /**
+     * @throws ActionException
      * @throws ConfigurationException
      * @throws ConnectionException
      * @noinspection PhpUnusedParameterInspection
      */
-    public function repeatable(Db $db, Command $command, MigrateArgs $args): void
+    public function repeatable(Db $db, Command $command, MigratorArgs $args): void
     {
         $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->repeatable();
         foreach ($this->iteratorHandler($db, $fsHandler, false) as $filename => $queryString) {
@@ -128,6 +133,7 @@ final readonly class ActionWorkflow
     }
 
     /**
+     * @throws ActionException
      * @throws ConfigurationException
      * @throws ConnectionException
      */
@@ -155,7 +161,7 @@ final readonly class ActionWorkflow
 
     /**
      * @param callable(non-empty-string $queryString, non-empty-string $filename):bool $handler
-     * @throws MigrationException
+     * @throws ActionException
      */
     private function handler(callable $handler, MigrateContext $context, EventAction $action): void
     {
@@ -171,7 +177,7 @@ final readonly class ActionWorkflow
                 new MigrateErrorEvent($action->name, $context, $exception)
             );
 
-            throw new MigrationException($context->filename, $exception);
+            throw new ActionException($context->filename, $exception);
         }
     }
 

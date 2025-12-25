@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal;
 
+use kuaukutsu\poc\migration\MigratorArgs;
+
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
@@ -18,7 +20,7 @@ final readonly class FilesystemArgs
         assert($this->limit >= 0);
     }
 
-    public static function makeFromMigrateArgs(MigrateArgs $args): self
+    public static function makeFromMigrateArgs(MigratorArgs $args): self
     {
         return new self(
             limit: $args->limit,

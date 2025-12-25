@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration;
 
+use Override;
 use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\Params;
 use kuaukutsu\poc\migration\event\ConfigurationEvent;
@@ -12,14 +13,12 @@ use kuaukutsu\poc\migration\event\EventDispatcher;
 use kuaukutsu\poc\migration\event\EventSubscriberInterface;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\internal\ActionWorkflow;
-use kuaukutsu\poc\migration\internal\MigrateArgs;
 
 /**
  * @api
  */
-final readonly class Migrator
+final readonly class Migrator implements MigratorInterface
 {
     private ActionWorkflow $actionWorkflow;
 
@@ -36,10 +35,7 @@ final readonly class Migrator
         $this->actionWorkflow = new ActionWorkflow($this->eventDispatcher);
     }
 
-    /**
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     */
+    #[Override]
     public function init(): void
     {
         foreach ($this->dbCollection as $db) {
@@ -47,12 +43,8 @@ final readonly class Migrator
         }
     }
 
-    /**
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     * @throws InitializationException
-     */
-    public function up(MigrateArgs $args = new MigrateArgs()): void
+    #[Override]
+    public function up(MigratorArgs $args = new MigratorArgs()): void
     {
         foreach ($this->dbCollection as $db) {
             $command = $this->makeCommand($db);
@@ -61,23 +53,16 @@ final readonly class Migrator
         }
     }
 
-    /**
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     * @throws InitializationException
-     */
-    public function down(MigrateArgs $args = new MigrateArgs()): void
+    #[Override]
+    public function down(MigratorArgs $args = new MigratorArgs()): void
     {
         foreach ($this->dbCollection as $db) {
             $this->actionWorkflow->down($db, $this->makeCommand($db), $args);
         }
     }
 
-    /**
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     */
-    public function fixture(MigrateArgs $args = new MigrateArgs()): void
+    #[Override]
+    public function fixture(MigratorArgs $args = new MigratorArgs()): void
     {
         foreach ($this->dbCollection as $db) {
             $this->actionWorkflow->fixture($db, $this->makeCommand($db), $args);

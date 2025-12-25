@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal;
 
+/**
+ * @psalm-internal kuaukutsu\poc\migration
+ */
 final readonly class MigrateContext
 {
     /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\connection;
 
-use kuaukutsu\poc\migration\internal\MigrateArgs;
+use kuaukutsu\poc\migration\MigratorArgs;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
@@ -20,7 +20,7 @@ final readonly class CommandArgs
         assert($this->limit >= 0);
     }
 
-    public static function makeFromMigrateArgs(MigrateArgs $args): self
+    public static function makeFromMigrateArgs(MigratorArgs $args): self
     {
         return new self(
             limit: $args->limit,
