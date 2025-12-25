@@ -21,9 +21,8 @@ final class FixtureCommand extends Command
     /**
      * @throws LogicException
      */
-    public function __construct(
-        private readonly Migrator $migrator,
-    ) {
+    public function __construct(private readonly Migrator $migrator)
+    {
         parent::__construct();
     }
 

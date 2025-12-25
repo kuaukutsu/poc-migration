@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\exception;
 
 use Throwable;
-use RuntimeException;
 
-final class MigrationException extends RuntimeException
+final class ActionException extends MigratorException
 {
     public function __construct(string $filename, Throwable $previous)
     {

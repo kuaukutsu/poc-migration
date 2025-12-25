@@ -1,10 +1,9 @@
 /.*                     export-ignore
-/benchmark/             export-ignore
-/example/               export-ignore
-/tests/                 export-ignore
 /runtime/               export-ignore
+/tests/                 export-ignore
 /*.neon                 export-ignore
 /*.xml                  export-ignore
+/*.xsd                  export-ignore
 /*.xml.dist             export-ignore
 docker-compose.yml      export-ignore
 Makefile                export-ignore

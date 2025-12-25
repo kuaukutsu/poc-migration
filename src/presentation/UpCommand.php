@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\internal\MigrateArgs;
+use kuaukutsu\poc\migration\MigratorArgs;
 use kuaukutsu\poc\migration\Migrator;
 
 #[AsCommand(
@@ -26,9 +26,8 @@ final class UpCommand extends Command
     /**
      * @throws LogicException
      */
-    public function __construct(
-        private readonly Migrator $migrator,
-    ) {
+    public function __construct(private readonly Migrator $migrator)
+    {
         parent::__construct();
     }
 
@@ -63,16 +62,16 @@ final class UpCommand extends Command
     /**
      * @throws InvalidArgumentException
      */
-    private function getArguments(InputInterface $input): MigrateArgs
+    private function getArguments(InputInterface $input): MigratorArgs
     {
         /** @phpstan-ignore cast.int */
         $limit = (int)$input->getOption('limit');
         if ($limit === 0) {
-            return new MigrateArgs();
+            return new MigratorArgs();
         }
 
         if ($limit > 0) {
-            return new MigrateArgs(limit: $limit);
+            return new MigratorArgs(limit: $limit);
         }
 
         throw new InvalidArgumentException('Argument (limit) must be greater than to 0.');
