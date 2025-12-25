@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use Override;
+use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\Params;
 use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\MigratorArgs;
 use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\MigratorArgs;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use Override;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Верхнеуровневая работа приложения.
