@@ -11,14 +11,14 @@ use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\tests\stub\TestDriver;
 use kuaukutsu\poc\migration\tests\stub\TestStorage;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\MigratorInterface;
 
 /**
  * Проверяем корректность выполняемых запросов.
  */
 final class WorkflowTest extends TestCase
 {
-    private Migrator $migrator;
+    private MigratorInterface $migrator;
 
     private TestStorage $storage;
 

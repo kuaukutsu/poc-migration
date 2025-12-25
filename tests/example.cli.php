@@ -15,6 +15,7 @@ use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
 use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\MigratorInterface;
 
 use function DI\factory;
 
@@ -23,7 +24,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 $container = new Container(
     [
         Migrator::class => factory(
-            fn(): Migrator => new Migrator(
+            fn(): MigratorInterface => new Migrator(
                 dbCollection: new DbCollection(
                     new Db(
                         path: __DIR__ . '/migration/sqlite/memory',
