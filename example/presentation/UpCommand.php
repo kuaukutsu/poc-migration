@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\presentation;
+namespace kuaukutsu\poc\migration\example\presentation;
 
 use Override;
 use Throwable;
@@ -18,10 +18,10 @@ use kuaukutsu\poc\migration\MigratorArgs;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
-    name: 'migrate:down',
-    description: 'Down migration',
+    name: 'migrate:up',
+    description: 'Up migration',
 )]
-final class DownCommand extends Command
+final class UpCommand extends Command
 {
     /**
      * @throws LogicException
@@ -44,7 +44,7 @@ final class DownCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->down($this->getArguments($input));
+            $this->migrator->up($this->getArguments($input));
         } catch (InvalidArgumentException $e) {
             $output->writeln($e->getMessage());
             return Command::INVALID;

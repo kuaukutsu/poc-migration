@@ -67,16 +67,15 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 use kuaukutsu\poc\migration\connection\PdoDriver;
-use kuaukutsu\poc\migration\presentation\DownCommand;
-use kuaukutsu\poc\migration\presentation\FixtureCommand;
-use kuaukutsu\poc\migration\presentation\InitCommand;
-use kuaukutsu\poc\migration\presentation\UpCommand;
 use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
 use kuaukutsu\poc\migration\Migrator;
-
-use function DI\factory;
+use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\example\presentation\DownCommand;
+use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
+use kuaukutsu\poc\migration\example\presentation\InitCommand;
+use kuaukutsu\poc\migration\example\presentation\UpCommand;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -118,6 +117,29 @@ try {
 } catch (Exception $e) {
     exit(Command::FAILURE);
 }
+```
+
+### Example
+
+```shell
+make app
+```
+
+```shell
+/example $ php cli.php migrate:init
+[sqlite/memory] initialization: setup.sql done
+
+/example $ php cli.php migrate:up
+[sqlite/memory] up: 202501011024_entity_create.sql done
+[sqlite/memory] up: 202501021024_account_create.sql done
+[sqlite/memory] up: 202501021025_account_email.sql done
+[sqlite/memory] repeatable: 202501011024_entity_correction.sql done
+[sqlite/memory] repeatable: 202501011024_entity_correction_2.sql done
+
+/example $ php cli.php migrate:down
+[sqlite/memory] down: 202501021025_account_email.sql done
+[sqlite/memory] down: 202501021024_account_create.sql done
+[sqlite/memory] down: 202501011024_entity_create.sql done
 ```
 
 ### Static analysis
