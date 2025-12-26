@@ -9,6 +9,9 @@ x-service-volume: &service-volume
     source: ./src
     target: /src
   - type: bind
+    source: ./example
+    target: /example
+  - type: bind
     source: ./tests
     target: /tests
   - type: bind

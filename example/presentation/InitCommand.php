@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\presentation;
+namespace kuaukutsu\poc\migration\example\presentation;
 
 use Throwable;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -13,10 +13,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
-    name: 'migrate:fixture',
-    description: 'Fixture',
+    name: 'migrate:init',
+    description: 'Initialization',
 )]
-final class FixtureCommand extends Command
+final class InitCommand extends Command
 {
     /**
      * @throws LogicException
@@ -29,7 +29,7 @@ final class FixtureCommand extends Command
     public function __invoke(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->fixture();
+            $this->migrator->init();
         } catch (Throwable) {
             return Command::FAILURE;
         }

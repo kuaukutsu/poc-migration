@@ -7,15 +7,15 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 use kuaukutsu\poc\migration\connection\PdoDriver;
-use kuaukutsu\poc\migration\presentation\DownCommand;
-use kuaukutsu\poc\migration\presentation\FixtureCommand;
-use kuaukutsu\poc\migration\presentation\InitCommand;
-use kuaukutsu\poc\migration\presentation\UpCommand;
 use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 use kuaukutsu\poc\migration\Db;
 use kuaukutsu\poc\migration\DbCollection;
 use kuaukutsu\poc\migration\Migrator;
 use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\example\presentation\DownCommand;
+use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
+use kuaukutsu\poc\migration\example\presentation\InitCommand;
+use kuaukutsu\poc\migration\example\presentation\UpCommand;
 
 use function DI\factory;
 
@@ -23,7 +23,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 $container = new Container(
     [
-        Migrator::class => factory(
+        MigratorInterface::class => factory(
             fn(): MigratorInterface => new Migrator(
                 dbCollection: new DbCollection(
                     new Db(
