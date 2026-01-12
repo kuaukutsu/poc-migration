@@ -96,4 +96,3 @@ volumes:
 
 networks:
   migration:
-    driver: bridge

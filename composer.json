@@ -51,15 +51,20 @@
     "sort-packages": true
   },
   "scripts": {
+    "fix": [
+      "@phpcbf",
+      "@rector"
+    ],
     "check": [
       "@phpcs",
       "@psalm",
       "@phpstan"
     ],
+    "phpcbf": "vendor/bin/phpcbf",
+    "rector": "vendor/bin/rector",
     "phpcs": "vendor/bin/phpcs",
     "psalm": "vendor/bin/psalm --show-info --no-diff --no-cache",
-    "phpstan": "vendor/bin/phpstan analyze",
-    "rector": "vendor/bin/rector"
+    "phpstan": "vendor/bin/phpstan analyze -c phpstan.neon"
   },
   "prefer-stable": true
 }

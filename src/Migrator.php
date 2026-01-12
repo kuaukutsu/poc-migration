@@ -62,6 +62,13 @@ final readonly class Migrator implements MigratorInterface
     }
 
     #[Override]
+    public function redo(MigratorArgs $args = new MigratorArgs()): void
+    {
+        $this->down($args);
+        $this->up();
+    }
+
+    #[Override]
     public function fixture(MigratorArgs $args = new MigratorArgs()): void
     {
         foreach ($this->dbCollection as $db) {

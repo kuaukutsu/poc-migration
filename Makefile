@@ -29,6 +29,11 @@ composer-cli: ## composer console
 		composer:latest \
 		sh
 
+fix:
+	docker run --init -it --rm -u ${USER} -v "$$(pwd):/app" -w /app \
+		composer:latest \
+		composer fix
+
 check:
 	docker run --init -it --rm -u ${USER} -v "$$(pwd):/app" -w /app \
 		composer:latest \

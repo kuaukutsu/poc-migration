@@ -15,6 +15,7 @@ use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\example\presentation\DownCommand;
 use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
 use kuaukutsu\poc\migration\example\presentation\InitCommand;
+use kuaukutsu\poc\migration\example\presentation\RedoCommand;
 use kuaukutsu\poc\migration\example\presentation\UpCommand;
 
 use function DI\factory;
@@ -49,6 +50,7 @@ $console->setCommandLoader(
             'migrate:init' => InitCommand::class,
             'migrate:up' => UpCommand::class,
             'migrate:down' => DownCommand::class,
+            'migrate:redo' => RedoCommand::class,
             'migrate:fixture' => FixtureCommand::class,
         ],
     )

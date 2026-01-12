@@ -22,7 +22,7 @@ interface MigratorInterface
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
-     * @throws InitializationException
+     * @throws InitializationException initialization step is required
      */
     public function up(MigratorArgs $args = new MigratorArgs()): void;
 
@@ -30,9 +30,17 @@ interface MigratorInterface
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
-     * @throws InitializationException
+     * @throws InitializationException initialization step is required
      */
     public function down(MigratorArgs $args = new MigratorArgs()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
+     * @throws InitializationException initialization step is required
+     */
+    public function redo(MigratorArgs $args = new MigratorArgs()): void;
 
     /**
      * @throws ActionException
