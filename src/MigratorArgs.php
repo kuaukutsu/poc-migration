@@ -12,7 +12,16 @@ final readonly class MigratorArgs
     public function __construct(
         public int $limit = 0,
         public bool $dryRun = false,
+        public ?string $dbName = null,
     ) {
         assert($this->limit >= 0);
+    }
+
+    public function withResetLimit(): self
+    {
+        return new self(
+            dryRun: $this->dryRun,
+            dbName: $this->dbName,
+        );
     }
 }

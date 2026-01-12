@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\example\presentation;
 
+use Override;
 use Throwable;
+use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use kuaukutsu\poc\migration\exception\MigratorException;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
@@ -18,6 +22,8 @@ use kuaukutsu\poc\migration\MigratorInterface;
 )]
 final class FixtureCommand extends Command
 {
+    use CommandOptions;
+
     /**
      * @throws LogicException
      */
@@ -26,10 +32,24 @@ final class FixtureCommand extends Command
         parent::__construct();
     }
 
-    public function __invoke(InputInterface $input, OutputInterface $output): int
+    /**
+     * @throws InvalidArgumentException
+     */
+    #[Override]
+    protected function configure(): void
+    {
+        $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'Name database');
+        $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Dry run');
+    }
+
+    #[Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->fixture();
+            $this->migrator->fixture($this->getArguments($input));
+        } catch (InvalidArgumentException | MigratorException $e) {
+            $output->writeln($e->getMessage());
+            return Command::INVALID;
         } catch (Throwable) {
             return Command::FAILURE;
         }

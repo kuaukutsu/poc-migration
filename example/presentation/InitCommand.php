@@ -10,6 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use kuaukutsu\poc\migration\exception\MigratorException;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
@@ -30,6 +31,9 @@ final class InitCommand extends Command
     {
         try {
             $this->migrator->init();
+        } catch (MigratorException $e) {
+            $output->writeln($e->getMessage());
+            return Command::INVALID;
         } catch (Throwable) {
             return Command::FAILURE;
         }

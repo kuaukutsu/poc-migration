@@ -6,12 +6,11 @@ namespace kuaukutsu\poc\migration\event;
 
 use Override;
 use Throwable;
-use kuaukutsu\poc\migration\Db;
 
 final readonly class ConfigurationEvent implements EventInterface
 {
     public function __construct(
-        public Db $db,
+        public string $dbName,
         public Throwable $exception,
     ) {
     }
@@ -19,7 +18,7 @@ final readonly class ConfigurationEvent implements EventInterface
     #[Override]
     public function getName(): string
     {
-        return $this->db->getName();
+        return $this->dbName;
     }
 
     #[Override]
