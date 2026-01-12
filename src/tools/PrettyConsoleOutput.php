@@ -49,10 +49,11 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
     {
         $this->output->out(
             sprintf(
-                '[<bold>%s</bold>] %s: %s <green>done</green>',
+                '[<bold>%s</bold>] %s: %s <green>%s</green>',
                 $event->context->dbName,
                 $event->action,
                 $event->context->filename,
+                $event->context->dryRun ? 'dry-run' : 'done',
             )
         );
     }

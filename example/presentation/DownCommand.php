@@ -14,7 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\MigratorArgs;
+use kuaukutsu\poc\migration\exception\MigratorException;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
@@ -23,6 +23,8 @@ use kuaukutsu\poc\migration\MigratorInterface;
 )]
 final class DownCommand extends Command
 {
+    use CommandOptions;
+
     /**
      * @throws LogicException
      */
@@ -37,7 +39,9 @@ final class DownCommand extends Command
     #[Override]
     protected function configure(): void
     {
+        $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'Name database');
         $this->addOption('limit', null, InputOption::VALUE_OPTIONAL, 'Number of files processed');
+        $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Dry run');
     }
 
     #[Override]
@@ -45,11 +49,10 @@ final class DownCommand extends Command
     {
         try {
             $this->migrator->down($this->getArguments($input));
-        } catch (InvalidArgumentException $e) {
-            $output->writeln($e->getMessage());
-            return Command::INVALID;
-        } catch (InitializationException $e) {
-            $output->writeln('Calling the command "migrate:init" may help fix the error.');
+        } catch (InvalidArgumentException | MigratorException $e) {
+            if ($e instanceof InitializationException) {
+                $output->writeln('Calling the command "migrate:init" may help fix the error.');
+            }
             $output->writeln($e->getMessage());
             return Command::INVALID;
         } catch (Throwable) {
@@ -57,23 +60,5 @@ final class DownCommand extends Command
         }
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    private function getArguments(InputInterface $input): MigratorArgs
-    {
-        /** @phpstan-ignore cast.int */
-        $limit = (int)$input->getOption('limit');
-        if ($limit === 0) {
-            return new MigratorArgs();
-        }
-
-        if ($limit > 0) {
-            return new MigratorArgs(limit: $limit);
-        }
-
-        throw new InvalidArgumentException('Argument (limit) must be greater than to 0.');
     }
 }

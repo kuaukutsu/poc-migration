@@ -43,7 +43,7 @@ final readonly class ActionWorkflow
         } catch (Throwable $exception) {
             $this->eventDispatcher->trigger(
                 Event::InitializationError,
-                new ConfigurationEvent($db, $exception)
+                new ConfigurationEvent($db->getName(), $exception)
             );
 
             throw new InitializationException('Error reading system data.', $exception);
@@ -56,7 +56,12 @@ final readonly class ActionWorkflow
         foreach ($this->iteratorHandler($db, $fsHandler) as $filename => $queryString) {
             $this->handler(
                 $command->up(...),
-                new MigrateContext($db->getName(), $filename, $queryString),
+                new MigrateContext(
+                    dbName: $db->getName(),
+                    filename: $filename,
+                    queryString: $queryString,
+                    dryRun: $args->dryRun,
+                ),
                 EventAction::up,
             );
         }
@@ -77,7 +82,7 @@ final readonly class ActionWorkflow
         } catch (Throwable $exception) {
             $this->eventDispatcher->trigger(
                 Event::InitializationError,
-                new ConfigurationEvent($db, $exception)
+                new ConfigurationEvent($db->getName(), $exception)
             );
 
             throw new InitializationException('Error reading system data.', $exception);
@@ -89,7 +94,12 @@ final readonly class ActionWorkflow
         foreach ($this->iteratorHandler($db, $fsHandler) as $filename => $queryString) {
             $this->handler(
                 $command->down(...),
-                new MigrateContext($db->getName(), $filename, $queryString),
+                new MigrateContext(
+                    dbName: $db->getName(),
+                    filename: $filename,
+                    queryString: $queryString,
+                    dryRun: $args->dryRun,
+                ),
                 EventAction::down,
             );
         }
@@ -108,7 +118,12 @@ final readonly class ActionWorkflow
         foreach ($this->iteratorHandler($db, $fsHandler) as $filename => $queryString) {
             $this->handler(
                 $command->exec(...),
-                new MigrateContext($db->getName(), $filename, $queryString),
+                new MigrateContext(
+                    dbName: $db->getName(),
+                    filename: $filename,
+                    queryString: $queryString,
+                    dryRun: $args->dryRun,
+                ),
                 EventAction::fixture,
             );
         }
@@ -118,7 +133,6 @@ final readonly class ActionWorkflow
      * @throws ActionException
      * @throws ConfigurationException
      * @throws ConnectionException
-     * @noinspection PhpUnusedParameterInspection
      */
     public function repeatable(Db $db, Command $command, MigratorArgs $args): void
     {
@@ -126,7 +140,12 @@ final readonly class ActionWorkflow
         foreach ($this->iteratorHandler($db, $fsHandler, false) as $filename => $queryString) {
             $this->handler(
                 $command->exec(...),
-                new MigrateContext($db->getName(), $filename, $queryString),
+                new MigrateContext(
+                    dbName: $db->getName(),
+                    filename: $filename,
+                    queryString: $queryString,
+                    dryRun: $args->dryRun,
+                ),
                 EventAction::repeatable,
             );
         }
@@ -144,7 +163,7 @@ final readonly class ActionWorkflow
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 Event::FilesystemError,
-                new ConfigurationEvent($db, $exception)
+                new ConfigurationEvent($db->getName(), $exception)
             );
 
             throw $exception;
@@ -153,7 +172,11 @@ final readonly class ActionWorkflow
         foreach ($files as $filename => $queryString) {
             $this->handler(
                 $command->exec(...),
-                new MigrateContext($db->getName(), $filename, $queryString),
+                new MigrateContext(
+                    dbName: $db->getName(),
+                    filename: $filename,
+                    queryString: $queryString,
+                ),
                 EventAction::initialization,
             );
         }
@@ -165,6 +188,14 @@ final readonly class ActionWorkflow
      */
     private function handler(callable $handler, MigrateContext $context, EventAction $action): void
     {
+        if ($context->dryRun) {
+            $this->eventDispatcher->trigger(
+                Event::MigrateSuccess,
+                new MigrateSuccessEvent($action->name, $context)
+            );
+            return;
+        }
+
         try {
             $handler($context->queryString, $context->filename);
             $this->eventDispatcher->trigger(
@@ -194,7 +225,7 @@ final readonly class ActionWorkflow
                 $this->eventDispatcher->trigger(
                     Event::FilesystemNotice,
                     new ConfigurationEvent(
-                        $db,
+                        $db->getName(),
                         new ConfigurationException(
                             sprintf('the directory [%s] does not contain migration files.', $db->path)
                         )
@@ -206,7 +237,7 @@ final readonly class ActionWorkflow
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 $useException ? Event::FilesystemError : Event::FilesystemNotice,
-                new ConfigurationEvent($db, $exception)
+                new ConfigurationEvent($db->getName(), $exception)
             );
 
             if ($useException) {

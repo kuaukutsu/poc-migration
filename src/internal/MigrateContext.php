@@ -18,6 +18,7 @@ final readonly class MigrateContext
         public string $dbName,
         public string $filename,
         public string $queryString,
+        public bool $dryRun = false,
     ) {
     }
 

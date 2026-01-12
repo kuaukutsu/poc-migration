@@ -46,7 +46,7 @@ final readonly class Migrator implements MigratorInterface
     #[Override]
     public function up(MigratorArgs $args = new MigratorArgs()): void
     {
-        foreach ($this->dbCollection as $db) {
+        foreach ($this->selectDb($args) as $db) {
             $command = $this->makeCommand($db);
             $this->actionWorkflow->up($db, $command, $args);
             $this->actionWorkflow->repeatable($db, $command, $args);
@@ -56,7 +56,7 @@ final readonly class Migrator implements MigratorInterface
     #[Override]
     public function down(MigratorArgs $args = new MigratorArgs()): void
     {
-        foreach ($this->dbCollection as $db) {
+        foreach ($this->selectDb($args) as $db) {
             $this->actionWorkflow->down($db, $this->makeCommand($db), $args);
         }
     }
@@ -65,15 +65,42 @@ final readonly class Migrator implements MigratorInterface
     public function redo(MigratorArgs $args = new MigratorArgs()): void
     {
         $this->down($args);
-        $this->up();
+        $this->up($args->withResetLimit());
     }
 
     #[Override]
     public function fixture(MigratorArgs $args = new MigratorArgs()): void
     {
-        foreach ($this->dbCollection as $db) {
+        foreach ($this->selectDb($args) as $db) {
             $this->actionWorkflow->fixture($db, $this->makeCommand($db), $args);
         }
+    }
+
+    /**
+     * @return iterable<Db>
+     * @throws ConfigurationException
+     */
+    private function selectDb(MigratorArgs $args): iterable
+    {
+        if ($args->dbName === null) {
+            return $this->dbCollection;
+        }
+
+        $db = $this->dbCollection->get($args->dbName);
+        if ($db instanceof Db) {
+            return [$db];
+        }
+
+        $exception = new ConfigurationException(
+            "[$args->dbName] no such database in the configuration."
+        );
+
+        $this->eventDispatcher->trigger(
+            Event::ConfigurationError,
+            new ConfigurationEvent($args->dbName, $exception)
+        );
+
+        throw $exception;
     }
 
     /**
@@ -89,14 +116,14 @@ final readonly class Migrator implements MigratorInterface
         } catch (ConnectionException $exception) {
             $this->eventDispatcher->trigger(
                 Event::ConnectionError,
-                new ConfigurationEvent($db, $exception)
+                new ConfigurationEvent($db->getName(), $exception)
             );
 
             throw $exception;
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 Event::ConfigurationError,
-                new ConfigurationEvent($db, $exception)
+                new ConfigurationEvent($db->getName(), $exception)
             );
 
             throw $exception;

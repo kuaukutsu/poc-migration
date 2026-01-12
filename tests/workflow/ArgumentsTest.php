@@ -6,17 +6,18 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
 use PHPUnit\Framework\TestCase;
+use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\connection\Command;
 use kuaukutsu\poc\migration\connection\Params;
 use kuaukutsu\poc\migration\connection\PdoDriver;
-use kuaukutsu\poc\migration\exception\InitializationException;
+use kuaukutsu\poc\migration\MigratorArgs;
 use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 
 /**
  * Верхнеуровневая работа приложения.
  */
-final class MigrationTest extends TestCase
+final class ArgumentsTest extends TestCase
 {
     private MigratorInterface $migrator;
 
@@ -33,31 +34,53 @@ final class MigrationTest extends TestCase
         $this->command = $driver->makeCommand(new Params(table: 'migration'));
     }
 
-    public function testUp(): void
+    public function testUpWithLimit(): void
     {
         $this->migrator->init();
         $data = $this->command->fetchSavedMigrationNames();
         self::assertEmpty($data);
 
-        $this->migrator->up();
+        $this->migrator->up(new MigratorArgs(limit: 1));
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertCount(1, $data);
+        self::assertEquals('202501011024_entity_create.sql', $data[0]);
+
+        $this->migrator->up(new MigratorArgs(limit: 2));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(3, $data);
         self::assertEquals('202501021025_account_email.sql', $data[0]);
         self::assertEquals('202501021024_account_create.sql', $data[1]);
         self::assertEquals('202501011024_entity_create.sql', $data[2]);
-
-        $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
-        self::assertCount(3, $data);
     }
 
-    public function testDown(): void
+    public function testDownWithLimit(): void
     {
         $this->migrator->init();
         $data = $this->command->fetchSavedMigrationNames();
         self::assertEmpty($data);
 
         $this->migrator->up();
+
+        $this->migrator->down(new MigratorArgs(limit: 1));
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertCount(2, $data);
+
+        $this->migrator->down(new MigratorArgs(limit: 2));
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertEmpty($data);
+    }
+
+    public function testWithDryRun(): void
+    {
+        $this->migrator->init();
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertEmpty($data);
+
+        $this->migrator->up();
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertCount(3, $data);
+
+        $this->migrator->down(new MigratorArgs(dryRun: true));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(3, $data);
 
@@ -66,24 +89,24 @@ final class MigrationTest extends TestCase
         self::assertEmpty($data);
     }
 
-    public function testRedo(): void
+    public function testWithDb(): void
     {
         $this->migrator->init();
         $data = $this->command->fetchSavedMigrationNames();
         self::assertEmpty($data);
 
-        $this->migrator->up();
+        $this->migrator->up(new MigratorArgs(limit: 2, dbName: 'sqlite/memory'));
         $data = $this->command->fetchSavedMigrationNames();
-        self::assertCount(3, $data);
-
-        $this->migrator->redo();
-        $data = $this->command->fetchSavedMigrationNames();
-        self::assertCount(3, $data);
+        self::assertCount(2, $data);
     }
 
-    public function testInitializationException(): void
+    public function testWithUnknownDb(): void
     {
-        $this->expectException(InitializationException::class);
-        $this->migrator->up();
+        $this->migrator->init();
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertEmpty($data);
+
+        $this->expectException(ConfigurationException::class);
+        $this->migrator->up(new MigratorArgs(dbName: 'sqlite/unknown'));
     }
 }
