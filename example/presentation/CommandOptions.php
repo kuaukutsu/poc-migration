@@ -15,11 +15,20 @@ trait CommandOptions
      */
     protected function getArguments(InputInterface $input): MigratorArgs
     {
-        return new MigratorArgs(
-            limit: $this->getOptionLimit($input),
-            dryRun: $this->getOptionDryRun($input),
-            dbName: $this->getOptionDbName($input),
-        );
+        $options = [];
+        if ($input->hasOption('limit')) {
+            $options['limit'] = $this->getOptionLimit($input);
+        }
+
+        if ($input->hasOption('dry-run')) {
+            $options['dryRun'] = $this->getOptionDryRun($input);
+        }
+
+        if ($input->hasOption('db')) {
+            $options['dbName'] = $this->getOptionDbName($input);
+        }
+
+        return new MigratorArgs(...$options);
     }
 
     /**
