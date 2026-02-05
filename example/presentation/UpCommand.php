@@ -42,6 +42,7 @@ final class UpCommand extends Command
         $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'Name database');
         $this->addOption('limit', null, InputOption::VALUE_OPTIONAL, 'Number of files processed');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Dry run');
+        $this->addOption('without-repeatable', null, InputOption::VALUE_NONE, 'Repeatable disable');
     }
 
     #[Override]

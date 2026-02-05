@@ -12,6 +12,7 @@ final readonly class MigratorArgs
     public function __construct(
         public int $limit = 0,
         public bool $dryRun = false,
+        public bool $hasRepeatable = true,
         public ?string $dbName = null,
     ) {
         assert($this->limit >= 0);

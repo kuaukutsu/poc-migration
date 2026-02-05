@@ -11,6 +11,9 @@ use Override;
 
 final class TestSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var array<string, string>
+     */
     private array $storage = [];
 
     #[Override]

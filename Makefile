@@ -29,12 +29,12 @@ composer-cli: ## composer console
 		composer:latest \
 		sh
 
-fix:
+fix: ## run fix tools
 	docker run --init -it --rm -u ${USER} -v "$$(pwd):/app" -w /app \
 		composer:latest \
 		composer fix
 
-check:
+check: ## run analysis tools
 	docker run --init -it --rm -u ${USER} -v "$$(pwd):/app" -w /app \
 		composer:latest \
 		composer check
@@ -77,7 +77,7 @@ up: ## Run server
 stop: ## Stop server
 	docker compose -f ./docker-compose.yml --profile serve stop
 
-restart:
+restart: ## Restart server
 	USER=$(USER) docker compose -f ./docker-compose.yml --profile serve restart
 
 down: stop
