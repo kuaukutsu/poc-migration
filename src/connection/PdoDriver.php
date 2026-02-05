@@ -32,6 +32,7 @@ final class PdoDriver implements Driver
      * @param non-empty-string $dsn
      * @param non-empty-string|null $username
      * @param non-empty-string|null $password
+     * @phpstan-ignore missingType.iterableValue
      */
     public function __construct(
         string $dsn,
@@ -72,12 +73,14 @@ final class PdoDriver implements Driver
      */
     private function makePDOConnection(): PDO
     {
+        $timeout = 300;
+
         /**
          * @note если вдруг экземпляр класса Migrator будет использоваться как сервис, то переиспользуем коннект.
          * Но с ограничением по времени, долго держать в памяти не будем.
          */
         if ($this->connectionInstance === null || $this->connectionTimer < time()) {
-            $this->connectionTimer = time() + 300;
+            $this->connectionTimer = time() + $timeout;
             try {
                 return $this->connectionInstance = ($this->connectionFactory)();
             } catch (PDOException $exception) {

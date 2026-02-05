@@ -28,6 +28,10 @@ trait CommandOptions
             $options['dbName'] = $this->getOptionDbName($input);
         }
 
+        if ($input->hasOption('without-repeatable')) {
+            $options['hasRepeatable'] = $this->getOptionWithoutRepeatable($input) === false; // inversion
+        }
+
         return new MigratorArgs(...$options);
     }
 
@@ -52,6 +56,14 @@ trait CommandOptions
     private function getOptionDryRun(InputInterface $input): bool
     {
         return $input->getOption('dry-run') === true;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getOptionWithoutRepeatable(InputInterface $input): bool
+    {
+        return $input->getOption('without-repeatable') === true;
     }
 
     /**

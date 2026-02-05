@@ -6,7 +6,3 @@ parameters:
 		- tests
 	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: false
-	ignoreErrors:
-		- identifiers:
-		  - missingType.iterableValue
-		  - missingType.generics

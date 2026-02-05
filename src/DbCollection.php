@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration;
 
-use kuaukutsu\ds\collection\Collection;
 use Override;
+use kuaukutsu\ds\collection\Collection;
 
 /**
  * @extends Collection<Db>

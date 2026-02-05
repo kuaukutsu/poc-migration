@@ -49,7 +49,10 @@ final readonly class Migrator implements MigratorInterface
         foreach ($this->selectDb($args) as $db) {
             $command = $this->makeCommand($db);
             $this->actionWorkflow->up($db, $command, $args);
-            $this->actionWorkflow->repeatable($db, $command, $args);
+
+            if ($args->hasRepeatable) {
+                $this->actionWorkflow->repeatable($db, $command, $args);
+            }
         }
     }
 
