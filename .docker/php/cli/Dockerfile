@@ -1,4 +1,4 @@
-FROM ghcr.io/kuaukutsu/php:8.3-cli AS app_setup
+FROM ghcr.io/kuaukutsu/php:8.3-cli AS build
 
 # Arguments
 ARG UID=10001
@@ -24,9 +24,9 @@ RUN <<EOF
 EOF
 ENV COMPOSER_CACHE_DIR=/var/.composer
 
-FROM app_setup AS app_devel
+FROM build AS devel
 
-RUN install-php-extensions opcache xdebug
+RUN install-php-extensions xdebug
 
 USER $UID
 WORKDIR $WORKDIR

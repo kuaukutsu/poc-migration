@@ -22,7 +22,7 @@
   "require-dev": {
     "php-di/php-di": "^7.0",
     "phpstan/phpstan": "^2.0",
-    "phpunit/phpunit": "^10.5",
+    "phpunit/phpunit": "^12.5",
     "rector/rector": "^2.0",
     "roave/security-advisories": "dev-latest",
     "slevomat/coding-standard": "^8.7",

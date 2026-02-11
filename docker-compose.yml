@@ -25,7 +25,7 @@ services:
     profiles: [ "cli" ]
     build:
       context: .docker/php/cli
-      target: app_devel
+      target: devel
       args:
         UID: ${USER:-1} # ID:1 daemon, support: linux, mac
         WORKDIR: "/src"
