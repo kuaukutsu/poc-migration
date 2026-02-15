@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use kuaukutsu\poc\migration\exception\ConfigurationException;
+use kuaukutsu\poc\migration\exception\ConnectionException;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\connection\Command;
@@ -85,5 +87,29 @@ final class MigrationTest extends TestCase
     {
         $this->expectException(InitializationException::class);
         $this->migrator->up();
+    }
+
+    public function testConfigurationException()
+    {
+        $driver = new PdoDriver(
+            dsn: 'unknown:',
+        );
+
+        $this->expectException(ConfigurationException::class);
+
+        $migrator = MigratorFactory::makeFromDriver($driver);
+        $migrator->init();
+    }
+
+    public function testConnectionException()
+    {
+        $driver = new PdoDriver(
+            dsn: 'mysql:host=mysql;dbname=main',
+        );
+
+        $this->expectException(ConnectionException::class);
+
+        $migrator = MigratorFactory::makeFromDriver($driver);
+        $migrator->init();
     }
 }

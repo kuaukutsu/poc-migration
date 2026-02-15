@@ -30,3 +30,10 @@ RUN install-php-extensions xdebug
 
 USER $UID
 WORKDIR $WORKDIR
+
+FROM build AS tests
+
+RUN install-php-extensions pcov xdebug
+
+USER $UID
+WORKDIR $WORKDIR
