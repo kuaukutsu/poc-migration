@@ -89,7 +89,7 @@ final class MigrationTest extends TestCase
         $this->migrator->up();
     }
 
-    public function testConfigurationException()
+    public function testConfigurationException(): void
     {
         $driver = new PdoDriver(
             dsn: 'unknown:',
@@ -101,7 +101,7 @@ final class MigrationTest extends TestCase
         $migrator->init();
     }
 
-    public function testConnectionException()
+    public function testConnectionException(): void
     {
         $driver = new PdoDriver(
             dsn: 'mysql:host=mysql;dbname=main',
