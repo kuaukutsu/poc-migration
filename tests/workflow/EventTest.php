@@ -10,6 +10,7 @@ use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\tests\stub\TestSubscriber;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
+use kuaukutsu\poc\migration\MigratorArgs;
 
 final class EventTest extends TestCase
 {
@@ -32,6 +33,30 @@ final class EventTest extends TestCase
 
         self::assertEquals(
             'PDODriver: is not implemented.',
+            $eventSubscriber->get(Event::ConfigurationError)
+        );
+    }
+
+    public function testSelectDatabaseError(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ]
+        );
+
+        try {
+            $migrator->init();
+            $migrator->up(new MigratorArgs(dbName: 'test'));
+        } catch (Throwable) {
+        }
+
+        self::assertEquals(
+            '[test] no such database in the configuration.',
             $eventSubscriber->get(Event::ConfigurationError)
         );
     }
