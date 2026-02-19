@@ -6,37 +6,14 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Throwable;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\connection\PdoDriver;
+use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\event\Event;
-use kuaukutsu\poc\migration\tests\stub\TestSubscriber;
+use kuaukutsu\poc\migration\InputArgs;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use kuaukutsu\poc\migration\MigratorArgs;
+use kuaukutsu\poc\migration\tests\stub\TestSubscriber;
 
 final class EventTest extends TestCase
 {
-    public function testConfigurationError(): void
-    {
-        $eventSubscriber = new TestSubscriber();
-        $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
-                dsn: 'test::memory:',
-            ),
-            [
-                $eventSubscriber,
-            ]
-        );
-
-        try {
-            $migrator->init();
-        } catch (Throwable) {
-        }
-
-        self::assertEquals(
-            'PDODriver: is not implemented.',
-            $eventSubscriber->get(Event::ConfigurationError)
-        );
-    }
-
     public function testSelectDatabaseError(): void
     {
         $eventSubscriber = new TestSubscriber();
@@ -51,7 +28,7 @@ final class EventTest extends TestCase
 
         try {
             $migrator->init();
-            $migrator->up(new MigratorArgs(dbName: 'test'));
+            $migrator->up(new InputArgs(dbName: 'test'));
         } catch (Throwable) {
         }
 

@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\internal;
 
-use kuaukutsu\poc\migration\internal\FilesystemArgs;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\internal\ActionFilesystem;
+use kuaukutsu\poc\migration\internal\filesystem\Action;
+use kuaukutsu\poc\migration\internal\filesystem\Args;
 
 final class FilesUpTest extends TestCase
 {
-    private ActionFilesystem $fs;
+    private Action $fs;
 
     #[Override]
     protected function setUp(): void
     {
-        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/main');
+        $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
     public function testUpFile(): void
@@ -34,7 +34,7 @@ final class FilesUpTest extends TestCase
 
     public function testLimitFile(): void
     {
-        $iterator = $this->fs->up([], new FilesystemArgs(limit: 1));
+        $iterator = $this->fs->up([], new Args(limit: 1));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -45,7 +45,7 @@ final class FilesUpTest extends TestCase
         self::assertCount(1, $files);
         self::assertEquals('202501011024_entity_create.sql', $files[0]);
 
-        $iterator = $this->fs->up([], new FilesystemArgs(limit: 2));
+        $iterator = $this->fs->up([], new Args(limit: 2));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -122,7 +122,7 @@ final class FilesUpTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        $manager = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/not-exists');
+        $manager = new Action(dirname(__DIR__) . '/migration/postgres/not-exists');
         $manager->up([])->valid();
     }
 }

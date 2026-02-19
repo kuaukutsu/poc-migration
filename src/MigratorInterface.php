@@ -24,7 +24,7 @@ interface MigratorInterface
      * @throws ConnectionException
      * @throws InitializationException initialization step is required
      */
-    public function up(MigratorArgs $args = new MigratorArgs()): void;
+    public function up(InputArgs $args = new InputArgs()): void;
 
     /**
      * @throws ActionException
@@ -32,7 +32,7 @@ interface MigratorInterface
      * @throws ConnectionException
      * @throws InitializationException initialization step is required
      */
-    public function down(MigratorArgs $args = new MigratorArgs()): void;
+    public function down(InputArgs $args = new InputArgs()): void;
 
     /**
      * @throws ActionException
@@ -40,12 +40,12 @@ interface MigratorInterface
      * @throws ConnectionException
      * @throws InitializationException initialization step is required
      */
-    public function redo(MigratorArgs $args = new MigratorArgs()): void;
+    public function redo(InputArgs $args = new InputArgs()): void;
 
     /**
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
      */
-    public function fixture(MigratorArgs $args = new MigratorArgs()): void;
+    public function fixture(InputArgs $args = new InputArgs()): void;
 }

@@ -8,18 +8,18 @@ use Override;
 use kuaukutsu\ds\collection\Collection;
 
 /**
- * @extends Collection<Db>
+ * @extends Collection<Migration>
  */
-final class DbCollection extends Collection
+final class MigrationCollection extends Collection
 {
     #[Override]
     public function getType(): string
     {
-        return Db::class;
+        return Migration::class;
     }
 
     /**
-     * @param Db $item
+     * @param Migration $item
      */
     #[Override]
     protected function indexBy($item): string

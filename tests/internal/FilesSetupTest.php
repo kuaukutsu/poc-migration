@@ -8,13 +8,13 @@ namespace kuaukutsu\poc\migration\tests\internal;
 
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\internal\SetupFilesystem;
+use kuaukutsu\poc\migration\internal\filesystem\Setup;
 
 final class FilesSetupTest extends TestCase
 {
     public function testSimple(): void
     {
-        $fs = new SetupFilesystem(dirname(__DIR__) . '/migration/postgres/setup', 'test');
+        $fs = new Setup(dirname(__DIR__) . '/migration/postgres/setup', 'test');
         self::assertTrue($fs->all()->valid());
 
         foreach ($fs->all() as $filename => $sql) {
@@ -27,7 +27,7 @@ final class FilesSetupTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        $fs = new SetupFilesystem(dirname(__DIR__) . '/migration/postgres/not-exists', 'test');
+        $fs = new Setup(dirname(__DIR__) . '/migration/postgres/not-exists', 'test');
         $fs->all()->valid();
     }
 }

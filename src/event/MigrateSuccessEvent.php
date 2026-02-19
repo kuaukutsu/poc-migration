@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\event;
 
 use Override;
-use kuaukutsu\poc\migration\internal\MigrateContext;
+use kuaukutsu\poc\migration\Context;
 
 final readonly class MigrateSuccessEvent implements EventInterface
 {
@@ -14,7 +14,7 @@ final readonly class MigrateSuccessEvent implements EventInterface
      */
     public function __construct(
         public string $action,
-        public MigrateContext $context,
+        public Context $context,
     ) {
     }
 

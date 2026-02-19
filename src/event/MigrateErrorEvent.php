@@ -6,7 +6,7 @@ namespace kuaukutsu\poc\migration\event;
 
 use Override;
 use Throwable;
-use kuaukutsu\poc\migration\internal\MigrateContext;
+use kuaukutsu\poc\migration\Context;
 
 final readonly class MigrateErrorEvent implements EventInterface
 {
@@ -15,7 +15,7 @@ final readonly class MigrateErrorEvent implements EventInterface
      */
     public function __construct(
         public string $action,
-        public MigrateContext $context,
+        public Context $context,
         public Throwable $exception,
     ) {
     }

@@ -7,7 +7,7 @@ namespace kuaukutsu\poc\migration\event;
 use Override;
 use Throwable;
 
-final readonly class ConfigurationEvent implements EventInterface
+final readonly class ExceptionEvent implements EventInterface
 {
     public function __construct(
         public string $dbName,

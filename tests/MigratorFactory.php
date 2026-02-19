@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests;
 
-use kuaukutsu\poc\migration\connection\Driver;
+use kuaukutsu\poc\migration\Migration;
+use kuaukutsu\poc\migration\MigrationCollection;
+use kuaukutsu\poc\migration\driver\DriverInterface;
 use kuaukutsu\poc\migration\event\EventSubscriberInterface;
-use kuaukutsu\poc\migration\Db;
-use kuaukutsu\poc\migration\DbCollection;
 use kuaukutsu\poc\migration\Migrator;
 use kuaukutsu\poc\migration\MigratorInterface;
 
@@ -17,11 +17,11 @@ final readonly class MigratorFactory
     {
     }
 
-    public static function makeFromDriver(Driver $driver): MigratorInterface
+    public static function makeFromDriver(DriverInterface $driver): MigratorInterface
     {
         return new Migrator(
-            dbCollection: new DbCollection(
-                new Db(
+            dbCollection: new MigrationCollection(
+                new Migration(
                     path: __DIR__ . '/migration/sqlite/memory',
                     driver: $driver
                 ),
@@ -32,11 +32,11 @@ final readonly class MigratorFactory
     /**
      * @param list<EventSubscriberInterface> $eventSubscribers
      */
-    public static function makeFromEvent(Driver $driver, array $eventSubscribers = []): MigratorInterface
+    public static function makeFromEvent(DriverInterface $driver, array $eventSubscribers = []): MigratorInterface
     {
         return new Migrator(
-            dbCollection: new DbCollection(
-                new Db(
+            dbCollection: new MigrationCollection(
+                new Migration(
                     path: __DIR__ . '/migration/sqlite/event',
                     driver: $driver
                 ),

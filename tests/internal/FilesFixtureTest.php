@@ -7,17 +7,17 @@ namespace kuaukutsu\poc\migration\tests\internal;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\internal\ActionFilesystem;
-use kuaukutsu\poc\migration\internal\FilesystemArgs;
+use kuaukutsu\poc\migration\internal\filesystem\Action;
+use kuaukutsu\poc\migration\internal\filesystem\Args;
 
 final class FilesFixtureTest extends TestCase
 {
-    private ActionFilesystem $fs;
+    private Action $fs;
 
     #[Override]
     protected function setUp(): void
     {
-        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/main');
+        $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
     public function testFixtureFile(): void
@@ -34,7 +34,7 @@ final class FilesFixtureTest extends TestCase
 
     public function testLimitFile(): void
     {
-        $iterator = $this->fs->fixture(new FilesystemArgs(limit: 1));
+        $iterator = $this->fs->fixture(new Args(limit: 1));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -45,7 +45,7 @@ final class FilesFixtureTest extends TestCase
         self::assertCount(1, $files);
         self::assertEquals('202501011024_entity_base.sql', $files[0]);
 
-        $iterator = $this->fs->fixture(new FilesystemArgs(limit: 2));
+        $iterator = $this->fs->fixture(new Args(limit: 2));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -82,7 +82,7 @@ final class FilesFixtureTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        $fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/not-exists');
+        $fs = new Action(dirname(__DIR__) . '/migration/postgres/not-exists');
         $fs->fixture()->valid();
     }
 }

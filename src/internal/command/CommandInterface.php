@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\connection;
+namespace kuaukutsu\poc\migration\internal\command;
 
 use Throwable;
+use kuaukutsu\poc\migration\internal\command;
 
-interface Command
+interface CommandInterface
 {
     /**
      * @return list<non-empty-string>
      */
-    public function fetchSavedMigrationNames(CommandArgs $args = new CommandArgs()): array;
+    public function fetchSavedMigrationNames(command\Args $args = new command\Args()): array;
 
     /**
      * @param non-empty-string $queryString

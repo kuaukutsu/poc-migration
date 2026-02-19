@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration;
 
-final readonly class MigratorArgs
+final readonly class InputArgs
 {
     /**
      * @param non-negative-int $limit
@@ -22,6 +22,7 @@ final readonly class MigratorArgs
     {
         return new self(
             dryRun: $this->dryRun,
+            hasRepeatable: $this->hasRepeatable,
             dbName: $this->dbName,
         );
     }

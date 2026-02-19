@@ -71,19 +71,20 @@ DROP TABLE IF EXISTS public.entity;
 
 ```php
 use DI\Container;
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
-use kuaukutsu\poc\migration\connection\PdoDriver;
-use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
-use kuaukutsu\poc\migration\Db;
-use kuaukutsu\poc\migration\DbCollection;
-use kuaukutsu\poc\migration\Migrator;
-use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\Migration;
+use kuaukutsu\poc\migration\MigrationCollection;
+use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\example\presentation\DownCommand;
 use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
 use kuaukutsu\poc\migration\example\presentation\InitCommand;
+use kuaukutsu\poc\migration\example\presentation\RedoCommand;
 use kuaukutsu\poc\migration\example\presentation\UpCommand;
+use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -91,8 +92,8 @@ $container = new Container(
     [
         Migrator::class => factory(
             fn(): Migrator => new Migrator(
-                dbCollection: new DbCollection(
-                    new Db(
+                dbCollection: new MigrationCollection(
+                    new Migration(
                         path: __DIR__ . '/migration/sqlite/memory',
                         driver: new PdoDriver(
                             dsn: 'sqlite:' . __DIR__ . '/data/sqlite/db.sqlite3',
@@ -115,6 +116,7 @@ $console->setCommandLoader(
             'migrate:init' => InitCommand::class,
             'migrate:up' => UpCommand::class,
             'migrate:down' => DownCommand::class,
+            'migrate:redo' => RedoCommand::class,
             'migrate:fixture' => FixtureCommand::class,
         ],
     )

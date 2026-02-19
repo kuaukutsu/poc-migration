@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal;
+namespace kuaukutsu\poc\migration\internal\filesystem;
 
 use Iterator;
 use GlobIterator;
@@ -12,7 +12,7 @@ use kuaukutsu\poc\migration\exception\ConfigurationException;
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
-final readonly class ActionFilesystem
+final readonly class Action
 {
     private string $path;
 
@@ -29,7 +29,7 @@ final readonly class ActionFilesystem
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function up(array $listSavedFilename, FilesystemArgs $args = new FilesystemArgs()): Iterator
+    public function up(array $listSavedFilename, Args $args = new Args()): Iterator
     {
         $_iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
@@ -69,7 +69,7 @@ final readonly class ActionFilesystem
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function fixture(FilesystemArgs $args = new FilesystemArgs()): Iterator
+    public function fixture(Args $args = new Args()): Iterator
     {
         $_iternum = 0;
         foreach ($this->makeIterator(rtrim($this->path, '/') . '-fixture/') as $matchFilename) {
