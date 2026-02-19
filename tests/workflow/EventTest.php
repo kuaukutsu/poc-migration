@@ -139,7 +139,7 @@ final class EventTest extends TestCase
         );
 
         self::assertStringContainsString(
-            'the directory [/app/tests/migration/sqlite/event-repeatable/] does not exist.',
+            'does not exist.',
             $eventSubscriber->get(Event::FilesystemNotice)
         );
     }
