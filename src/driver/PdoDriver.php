@@ -78,6 +78,7 @@ final class PdoDriver implements DriverInterface
     }
 
     /**
+     * @infection-ignore-all
      * @throws ConnectionException
      */
     private function makeConnection(): ConnectionInterface

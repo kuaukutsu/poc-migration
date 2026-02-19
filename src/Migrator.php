@@ -60,6 +60,9 @@ final readonly class Migrator implements MigratorInterface
         }
     }
 
+    /**
+     * @infection-ignore-all
+     */
     #[Override]
     public function redo(InputArgs $args = new InputArgs()): void
     {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\stub;
 
+use Override;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventInterface;
 use kuaukutsu\poc\migration\event\EventSubscriberInterface;
-use Override;
 
 final class TestSubscriber implements EventSubscriberInterface
 {
@@ -39,5 +39,10 @@ final class TestSubscriber implements EventSubscriberInterface
     public function get(Event $name): string
     {
         return $this->storage[$name->value] ?? '';
+    }
+
+    public function clear(): void
+    {
+        $this->storage = [];
     }
 }
