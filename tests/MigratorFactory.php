@@ -17,7 +17,7 @@ final readonly class MigratorFactory
     {
     }
 
-    public static function makeFromDriver(DriverInterface $driver, array $eventSubscribers = []): MigratorInterface
+    public static function makeFromDriver(DriverInterface $driver): MigratorInterface
     {
         return new Migrator(
             collection: new MigrationCollection(
@@ -26,19 +26,22 @@ final readonly class MigratorFactory
                     driver: $driver
                 ),
             ),
-            eventSubscribers: $eventSubscribers,
         );
     }
 
     /**
      * @param list<EventSubscriberInterface> $eventSubscribers
+     * @param non-empty-string $path
      */
-    public static function makeFromEvent(DriverInterface $driver, array $eventSubscribers = []): MigratorInterface
-    {
+    public static function makeFromEvent(
+        DriverInterface $driver,
+        array $eventSubscribers = [],
+        string $path = __DIR__ . '/migration/sqlite/event',
+    ): MigratorInterface {
         return new Migrator(
             collection: new MigrationCollection(
                 new Migration(
-                    path: __DIR__ . '/migration/sqlite/event',
+                    path: $path,
                     driver: $driver
                 ),
             ),

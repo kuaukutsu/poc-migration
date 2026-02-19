@@ -147,13 +147,14 @@ final class EventTest extends TestCase
     public function testMigrationDoesNotContainFiles(): void
     {
         $eventSubscriber = new TestSubscriber();
-        $migrator = MigratorFactory::makeFromDriver(
+        $migrator = MigratorFactory::makeFromEvent(
             new PdoDriver(
                 dsn: 'sqlite::memory:',
             ),
             [
                 $eventSubscriber,
-            ]
+            ],
+            dirname(__DIR__) . '/migration/sqlite/memory'
         );
 
         $migrator->init();
