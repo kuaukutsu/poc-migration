@@ -25,7 +25,7 @@ final readonly class Migrator implements MigratorInterface
      * @param list<EventSubscriberInterface> $eventSubscribers
      */
     public function __construct(
-        private MigrationCollection $dbCollection,
+        private MigrationCollection $collection,
         array $eventSubscribers = [],
     ) {
         $this->eventDispatcher = new EventDispatcher($eventSubscribers);
@@ -35,19 +35,19 @@ final readonly class Migrator implements MigratorInterface
     #[Override]
     public function init(): void
     {
-        foreach ($this->dbCollection as $db) {
-            $this->actionWorkflow->initialization($db);
+        foreach ($this->collection as $migration) {
+            $this->actionWorkflow->initialization($migration);
         }
     }
 
     #[Override]
     public function up(InputArgs $args = new InputArgs()): void
     {
-        foreach ($this->selectDb($args) as $db) {
-            $this->actionWorkflow->up($db, $args);
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->up($migration, $args);
 
             if ($args->hasRepeatable) {
-                $this->actionWorkflow->repeatable($db, $args);
+                $this->actionWorkflow->repeatable($migration, $args);
             }
         }
     }
@@ -55,8 +55,8 @@ final readonly class Migrator implements MigratorInterface
     #[Override]
     public function down(InputArgs $args = new InputArgs()): void
     {
-        foreach ($this->selectDb($args) as $db) {
-            $this->actionWorkflow->down($db, $args);
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->down($migration, $args);
         }
     }
 
@@ -70,8 +70,8 @@ final readonly class Migrator implements MigratorInterface
     #[Override]
     public function fixture(InputArgs $args = new InputArgs()): void
     {
-        foreach ($this->selectDb($args) as $db) {
-            $this->actionWorkflow->fixture($db, $args);
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->fixture($migration, $args);
         }
     }
 
@@ -82,12 +82,12 @@ final readonly class Migrator implements MigratorInterface
     private function selectDb(InputArgs $args): iterable
     {
         if ($args->dbName === null) {
-            return $this->dbCollection;
+            return $this->collection;
         }
 
-        $db = $this->dbCollection->get($args->dbName);
-        if ($db instanceof Migration) {
-            return [$db];
+        $migration = $this->collection->get($args->dbName);
+        if ($migration instanceof Migration) {
+            return [$migration];
         }
 
         $exception = new ConfigurationException(

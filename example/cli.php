@@ -26,7 +26,7 @@ $container = new Container(
     [
         MigratorInterface::class => factory(
             fn(): MigratorInterface => new Migrator(
-                dbCollection: new MigrationCollection(
+                collection: new MigrationCollection(
                     new Migration(
                         path: __DIR__ . '/migration/sqlite/memory',
                         driver: new PdoDriver(

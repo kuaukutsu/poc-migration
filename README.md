@@ -26,7 +26,7 @@ mkdir -p ./migration/pgsql/{main,main-fixture}
 Описываем конфигурацию:
 ```php
 $migrator = new Migrator(
-    dbCollection: new MigrationCollection(
+    collection: new MigrationCollection(
         new Migration(
             path: __DIR__ . '/migration/postgres/main',
             driver: new PdoDriver(
@@ -92,7 +92,7 @@ $container = new Container(
     [
         Migrator::class => factory(
             fn(): Migrator => new Migrator(
-                dbCollection: new MigrationCollection(
+                collection: new MigrationCollection(
                     new Migration(
                         path: __DIR__ . '/migration/sqlite/memory',
                         driver: new PdoDriver(
