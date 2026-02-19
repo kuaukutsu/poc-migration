@@ -26,8 +26,8 @@ mkdir -p ./migration/pgsql/{main,main-fixture}
 Описываем конфигурацию:
 ```php
 $migrator = new Migrator(
-    dbCollection: new DbCollection(
-        new Db(
+    dbCollection: new MigrationCollection(
+        new Migration(
             path: __DIR__ . '/migration/postgres/main',
             driver: new PdoDriver(
                 dsn: 'pgsql:host=postgres;port=5432;dbname=main',
