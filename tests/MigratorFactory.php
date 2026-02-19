@@ -20,7 +20,7 @@ final readonly class MigratorFactory
     public static function makeFromDriver(DriverInterface $driver): MigratorInterface
     {
         return new Migrator(
-            dbCollection: new MigrationCollection(
+            collection: new MigrationCollection(
                 new Migration(
                     path: __DIR__ . '/migration/sqlite/memory',
                     driver: $driver
@@ -35,7 +35,7 @@ final readonly class MigratorFactory
     public static function makeFromEvent(DriverInterface $driver, array $eventSubscribers = []): MigratorInterface
     {
         return new Migrator(
-            dbCollection: new MigrationCollection(
+            collection: new MigrationCollection(
                 new Migration(
                     path: __DIR__ . '/migration/sqlite/event',
                     driver: $driver

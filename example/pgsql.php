@@ -11,7 +11,7 @@ use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $migrator = new Migrator(
-    dbCollection: new MigrationCollection(
+    collection: new MigrationCollection(
         new Migration(
             path: __DIR__ . '/migration/postgres/main',
             driver: new PdoDriver(
