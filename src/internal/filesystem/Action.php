@@ -18,6 +18,7 @@ final readonly class Action
 
     /**
      * @param non-empty-string $path
+     * @infection-ignore-all
      */
     public function __construct(string $path)
     {

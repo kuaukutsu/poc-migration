@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\stub;
 
+use RuntimeException;
+
 final class TestStorage
 {
     /**
@@ -26,9 +28,14 @@ final class TestStorage
 
     /**
      * @param non-empty-string $key
+     * @throws RuntimeException
      */
     public function saveMigration(string $key): void
     {
+        if (array_key_exists($key, $this->table)) {
+            throw new RuntimeException("record exists");
+        }
+
         $this->table[$key] = true;
     }
 

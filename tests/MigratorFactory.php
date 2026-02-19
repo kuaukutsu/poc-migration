@@ -17,7 +17,7 @@ final readonly class MigratorFactory
     {
     }
 
-    public static function makeFromDriver(DriverInterface $driver): MigratorInterface
+    public static function makeFromDriver(DriverInterface $driver, array $eventSubscribers = []): MigratorInterface
     {
         return new Migrator(
             collection: new MigrationCollection(
@@ -26,6 +26,7 @@ final readonly class MigratorFactory
                     driver: $driver
                 ),
             ),
+            eventSubscribers: $eventSubscribers,
         );
     }
 

@@ -113,4 +113,91 @@ final class EventTest extends TestCase
             $eventSubscriber->get(Event::MigrateError)
         );
     }
+
+    public function testMigrationDryRun(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ]
+        );
+
+        $migrator->init();
+
+        try {
+            $migrator->up(new InputArgs(dryRun: true));
+        } catch (Throwable) {
+        }
+
+        self::assertStringContainsString(
+            '202501021025_account_error.sql',
+            $eventSubscriber->get(Event::MigrateSuccess)
+        );
+
+        self::assertStringContainsString(
+            'the directory [/app/tests/migration/sqlite/event-repeatable/] does not exist.',
+            $eventSubscriber->get(Event::FilesystemNotice)
+        );
+    }
+
+    public function testMigrationDoesNotContainFiles(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromDriver(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ]
+        );
+
+        $migrator->init();
+
+        $migrator->up();
+        // migration completed in the previous step
+        $migrator->up();
+        self::assertStringContainsString(
+            'does not contain migration files',
+            $eventSubscriber->get(Event::FilesystemNotice)
+        );
+
+        $eventSubscriber->clear();
+
+        $migrator->down();
+        // migration completed in the previous step
+        $migrator->down();
+        self::assertStringContainsString(
+            'does not contain migration files',
+            $eventSubscriber->get(Event::FilesystemNotice)
+        );
+    }
+
+    public function testDirectoryDoesNotExistError(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ]
+        );
+
+        $migrator->init();
+        try {
+            $migrator->fixture();
+        } catch (Throwable) {
+        }
+
+        self::assertStringContainsString(
+            'does not exist',
+            $eventSubscriber->get(Event::FilesystemError)
+        );
+    }
 }

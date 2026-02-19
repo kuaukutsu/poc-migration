@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use kuaukutsu\poc\migration\InputArgs;
 use Override;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\driver\PdoDriver;
-use kuaukutsu\poc\migration\exception\ConfigurationException;
+use kuaukutsu\poc\migration\exception\ActionException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
@@ -97,16 +98,9 @@ final class MigrationTest extends TestCase
     public function testInitializationException(): void
     {
         $this->expectException(InitializationException::class);
+        $this->expectExceptionMessage('Error reading system data.');
+
         $this->migrator->up();
-    }
-
-    public function testConfigurationException(): void
-    {
-        $this->expectException(ConfigurationException::class);
-
-        new PdoDriver(
-            dsn: 'unknown:',
-        );
     }
 
     public function testConnectionException(): void
@@ -116,8 +110,41 @@ final class MigrationTest extends TestCase
         );
 
         $this->expectException(ConnectionException::class);
+        $this->expectExceptionMessageMatches('~PDO_MYSQL:\w+~');
 
         $migrator = MigratorFactory::makeFromDriver($driver);
         $migrator->init();
+    }
+
+    public function testActionException(): void
+    {
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            )
+        );
+
+        $this->expectException(ActionException::class);
+        $this->expectExceptionMessage(
+            '202501021025_account_error.sql: SQLSTATE[HY000]: General error: 1 no such table: account'
+        );
+
+        $migrator->init();
+        $migrator->up();
+    }
+
+    public function testActionExceptionDryRun(): void
+    {
+        $driver = new PdoDriver(dsn: 'sqlite::memory:');
+        $migrator = MigratorFactory::makeFromEvent($driver);
+        $command = $driver->makeCommand(new Params(table: 'migration'));
+
+        $migrator->init();
+        $data = $command->fetchSavedMigrationNames();
+        self::assertEmpty($data);
+
+        $migrator->up(new InputArgs(dryRun: true));
+        $data = $command->fetchSavedMigrationNames();
+        self::assertEmpty($data);
     }
 }

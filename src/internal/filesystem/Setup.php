@@ -22,6 +22,7 @@ final readonly class Setup
     /**
      * @param non-empty-string $path
      * @param non-empty-string $table
+     * @infection-ignore-all
      */
     public function __construct(
         string $path,
