@@ -7,16 +7,16 @@ namespace kuaukutsu\poc\migration\tests\internal;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\internal\ActionFilesystem;
+use kuaukutsu\poc\migration\internal\filesystem\Action;
 
 final class FilesRepeatableTest extends TestCase
 {
-    private ActionFilesystem $fs;
+    private Action $fs;
 
     #[Override]
     protected function setUp(): void
     {
-        $this->fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/main');
+        $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
     public function testRepeatableFile(): void
@@ -70,7 +70,7 @@ final class FilesRepeatableTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        $fs = new ActionFilesystem(dirname(__DIR__) . '/migration/postgres/not-exists');
+        $fs = new Action(dirname(__DIR__) . '/migration/postgres/not-exists');
         $fs->repeatable()->valid();
     }
 }

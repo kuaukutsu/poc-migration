@@ -5,22 +5,19 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration;
 
 use Override;
-use kuaukutsu\poc\migration\connection\Command;
-use kuaukutsu\poc\migration\connection\Params;
-use kuaukutsu\poc\migration\event\ConfigurationEvent;
+use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventDispatcher;
 use kuaukutsu\poc\migration\event\EventSubscriberInterface;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\internal\ActionWorkflow;
+use kuaukutsu\poc\migration\internal\action\Workflow;
 
 /**
  * @api
  */
 final readonly class Migrator implements MigratorInterface
 {
-    private ActionWorkflow $actionWorkflow;
+    private Workflow $actionWorkflow;
 
     private EventDispatcher $eventDispatcher;
 
@@ -28,69 +25,68 @@ final readonly class Migrator implements MigratorInterface
      * @param list<EventSubscriberInterface> $eventSubscribers
      */
     public function __construct(
-        private DbCollection $dbCollection,
+        private MigrationCollection $dbCollection,
         array $eventSubscribers = [],
     ) {
         $this->eventDispatcher = new EventDispatcher($eventSubscribers);
-        $this->actionWorkflow = new ActionWorkflow($this->eventDispatcher);
+        $this->actionWorkflow = new Workflow($this->eventDispatcher);
     }
 
     #[Override]
     public function init(): void
     {
         foreach ($this->dbCollection as $db) {
-            $this->actionWorkflow->initialization($db, $this->makeCommand($db));
+            $this->actionWorkflow->initialization($db);
         }
     }
 
     #[Override]
-    public function up(MigratorArgs $args = new MigratorArgs()): void
+    public function up(InputArgs $args = new InputArgs()): void
     {
         foreach ($this->selectDb($args) as $db) {
-            $command = $this->makeCommand($db);
-            $this->actionWorkflow->up($db, $command, $args);
+            $this->actionWorkflow->up($db, $args);
 
             if ($args->hasRepeatable) {
-                $this->actionWorkflow->repeatable($db, $command, $args);
+                $this->actionWorkflow->repeatable($db, $args);
             }
         }
     }
 
     #[Override]
-    public function down(MigratorArgs $args = new MigratorArgs()): void
+    public function down(InputArgs $args = new InputArgs()): void
     {
         foreach ($this->selectDb($args) as $db) {
-            $this->actionWorkflow->down($db, $this->makeCommand($db), $args);
+            $this->actionWorkflow->down($db, $args);
         }
     }
 
     #[Override]
-    public function redo(MigratorArgs $args = new MigratorArgs()): void
+    public function redo(InputArgs $args = new InputArgs()): void
     {
         $this->down($args);
         $this->up($args->withResetLimit());
     }
 
     #[Override]
-    public function fixture(MigratorArgs $args = new MigratorArgs()): void
+    public function fixture(InputArgs $args = new InputArgs()): void
     {
         foreach ($this->selectDb($args) as $db) {
-            $this->actionWorkflow->fixture($db, $this->makeCommand($db), $args);
+            $this->actionWorkflow->fixture($db, $args);
         }
     }
 
     /**
-     * @return iterable<Db>
+     * @return iterable<Migration>
      * @throws ConfigurationException
      */
-    private function selectDb(MigratorArgs $args): iterable
+    private function selectDb(InputArgs $args): iterable
     {
         if ($args->dbName === null) {
             return $this->dbCollection;
         }
 
         $db = $this->dbCollection->get($args->dbName);
-        if ($db instanceof Db) {
+        if ($db instanceof Migration) {
             return [$db];
         }
 
@@ -100,36 +96,9 @@ final readonly class Migrator implements MigratorInterface
 
         $this->eventDispatcher->trigger(
             Event::ConfigurationError,
-            new ConfigurationEvent($args->dbName, $exception)
+            new ExceptionEvent($args->dbName, $exception)
         );
 
         throw $exception;
-    }
-
-    /**
-     * @throws ConfigurationException
-     * @throws ConnectionException
-     */
-    private function makeCommand(Db $db): Command
-    {
-        try {
-            return $db->driver->makeCommand(
-                new Params(table: $db->table)
-            );
-        } catch (ConnectionException $exception) {
-            $this->eventDispatcher->trigger(
-                Event::ConnectionError,
-                new ConfigurationEvent($db->getName(), $exception)
-            );
-
-            throw $exception;
-        } catch (ConfigurationException $exception) {
-            $this->eventDispatcher->trigger(
-                Event::ConfigurationError,
-                new ConfigurationEvent($db->getName(), $exception)
-            );
-
-            throw $exception;
-        }
     }
 }

@@ -6,14 +6,14 @@ namespace kuaukutsu\poc\migration\example\presentation;
 
 use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
-use kuaukutsu\poc\migration\MigratorArgs;
+use kuaukutsu\poc\migration\InputArgs;
 
 trait CommandOptions
 {
     /**
      * @throws InvalidArgumentException
      */
-    protected function getArguments(InputInterface $input): MigratorArgs
+    protected function getArguments(InputInterface $input): InputArgs
     {
         $options = [];
         if ($input->hasOption('limit')) {
@@ -32,7 +32,7 @@ trait CommandOptions
             $options['hasRepeatable'] = $this->getOptionWithoutRepeatable($input) === false; // inversion
         }
 
-        return new MigratorArgs(...$options);
+        return new InputArgs(...$options);
     }
 
     /**

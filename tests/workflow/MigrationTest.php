@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use Override;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\TestCase;
+use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
-use Override;
-use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\connection\Command;
-use kuaukutsu\poc\migration\connection\Params;
-use kuaukutsu\poc\migration\connection\PdoDriver;
 use kuaukutsu\poc\migration\exception\InitializationException;
+use kuaukutsu\poc\migration\internal\command\CommandInterface;
+use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 
@@ -22,7 +23,7 @@ final class MigrationTest extends TestCase
 {
     private MigratorInterface $migrator;
 
-    private Command $command;
+    private CommandInterface $command;
 
     #[Override]
     protected function setUp(): void
@@ -35,6 +36,14 @@ final class MigrationTest extends TestCase
         $this->command = $driver->makeCommand(new Params(table: 'migration'));
     }
 
+    public function testInit(): void
+    {
+        $this->migrator->init();
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertEmpty($data);
+    }
+
+    #[Depends('testInit')]
     public function testUp(): void
     {
         $this->migrator->init();
@@ -53,6 +62,7 @@ final class MigrationTest extends TestCase
         self::assertCount(3, $data);
     }
 
+    #[Depends('testInit')]
     public function testDown(): void
     {
         $this->migrator->init();
@@ -68,6 +78,7 @@ final class MigrationTest extends TestCase
         self::assertEmpty($data);
     }
 
+    #[Depends('testInit')]
     public function testRedo(): void
     {
         $this->migrator->init();
@@ -91,14 +102,11 @@ final class MigrationTest extends TestCase
 
     public function testConfigurationException(): void
     {
-        $driver = new PdoDriver(
-            dsn: 'unknown:',
-        );
-
         $this->expectException(ConfigurationException::class);
 
-        $migrator = MigratorFactory::makeFromDriver($driver);
-        $migrator->init();
+        new PdoDriver(
+            dsn: 'unknown:',
+        );
     }
 
     public function testConnectionException(): void

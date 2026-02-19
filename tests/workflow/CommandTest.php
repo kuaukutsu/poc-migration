@@ -5,24 +5,26 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
+use Throwable;
 use PDO;
 use PDOException;
-use Throwable;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\connection\sqlite\SqliteCommand;
-use kuaukutsu\poc\migration\connection\Command;
-use kuaukutsu\poc\migration\connection\CommandArgs;
-use kuaukutsu\poc\migration\connection\Params;
+use kuaukutsu\poc\migration\driver\DriverType;
+use kuaukutsu\poc\migration\internal\command\Args;
+use kuaukutsu\poc\migration\internal\command\Command;
+use kuaukutsu\poc\migration\internal\command\CommandInterface;
+use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\internal\connection\PDO\Connection;
 
 final class CommandTest extends TestCase
 {
-    private Command $command;
+    private CommandInterface $command;
 
     #[Override]
     protected function setUp(): void
     {
-        $this->command = new SqliteCommand(
-            new PDO(dsn: 'sqlite::memory:'),
+        $this->command = new Command(
+            new Connection(new PDO(dsn: 'sqlite::memory:'), DriverType::PDO_SQLITE),
             new Params(table: 'migration'),
         );
     }
@@ -87,13 +89,13 @@ final class CommandTest extends TestCase
         $this->execUp('table3');
 
         $data = $this->command->fetchSavedMigrationNames(
-            new CommandArgs(limit: 1)
+            new Args(limit: 1)
         );
         self::assertCount(1, $data);
         self::assertEquals('test-table3', $data[0]);
 
         $data = $this->command->fetchSavedMigrationNames(
-            new CommandArgs(limit: 2)
+            new Args(limit: 2)
         );
         self::assertCount(2, $data);
         self::assertEquals('test-table3', $data[0]);

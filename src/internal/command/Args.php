@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal;
+namespace kuaukutsu\poc\migration\internal\command;
 
-use kuaukutsu\poc\migration\MigratorArgs;
+use kuaukutsu\poc\migration\InputArgs;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
-final readonly class FilesystemArgs
+final readonly class Args
 {
     /**
      * @param non-negative-int $limit
@@ -20,7 +20,7 @@ final readonly class FilesystemArgs
         assert($this->limit >= 0);
     }
 
-    public static function makeFromMigrateArgs(MigratorArgs $args): self
+    public static function makeFromInput(InputArgs $args): self
     {
         return new self(
             limit: $args->limit,

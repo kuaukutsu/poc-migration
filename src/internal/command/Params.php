@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\connection;
+namespace kuaukutsu\poc\migration\internal\command;
 
+/**
+ * @psalm-internal kuaukutsu\poc\migration
+ */
 final readonly class Params
 {
     /**

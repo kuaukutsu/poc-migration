@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal;
+namespace kuaukutsu\poc\migration\internal\action;
 
 use Iterator;
 use Throwable;
-use kuaukutsu\poc\migration\connection\Command;
-use kuaukutsu\poc\migration\connection\CommandArgs;
-use kuaukutsu\poc\migration\event\ConfigurationEvent;
+use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventAction;
 use kuaukutsu\poc\migration\event\EventDispatcher;
@@ -18,13 +16,17 @@ use kuaukutsu\poc\migration\exception\ActionException;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\Db;
-use kuaukutsu\poc\migration\MigratorArgs;
+use kuaukutsu\poc\migration\internal\command;
+use kuaukutsu\poc\migration\internal\command\CommandInterface;
+use kuaukutsu\poc\migration\internal\filesystem;
+use kuaukutsu\poc\migration\Context;
+use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\Migration;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
-final readonly class ActionWorkflow
+final readonly class Workflow
 {
     public function __construct(private EventDispatcher $eventDispatcher)
     {
@@ -36,28 +38,21 @@ final readonly class ActionWorkflow
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function up(Db $db, Command $command, MigratorArgs $args): void
+    public function up(Migration $migration, InputArgs $args): void
     {
-        try {
-            $savedMigration = $command->fetchSavedMigrationNames();
-        } catch (Throwable $exception) {
-            $this->eventDispatcher->trigger(
-                Event::InitializationError,
-                new ConfigurationEvent($db->getName(), $exception)
-            );
+        $command = $this->makeCommand($migration);
 
-            throw new InitializationException('Error reading system data.', $exception);
-        }
-
-        $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->up(
+        $savedMigration = $this->fetchSavedMigration($migration, $command, new command\Args());
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->up(
             $savedMigration,
-            FilesystemArgs::makeFromMigrateArgs($args)
+            filesystem\Args::makeFromInput($args)
         );
-        foreach ($this->iteratorHandler($db, $fsHandler) as $filename => $queryString) {
-            $this->handler(
+
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+            $this->run(
                 $command->up(...),
-                new MigrateContext(
-                    dbName: $db->getName(),
+                new Context(
+                    dbName: $migration->getName(),
                     filename: $filename,
                     queryString: $queryString,
                     dryRun: $args->dryRun,
@@ -73,29 +68,18 @@ final readonly class ActionWorkflow
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function down(Db $db, Command $command, MigratorArgs $args): void
+    public function down(Migration $migration, InputArgs $args): void
     {
-        try {
-            $savedMigration = $command->fetchSavedMigrationNames(
-                CommandArgs::makeFromMigrateArgs($args)
-            );
-        } catch (Throwable $exception) {
-            $this->eventDispatcher->trigger(
-                Event::InitializationError,
-                new ConfigurationEvent($db->getName(), $exception)
-            );
+        $command = $this->makeCommand($migration);
 
-            throw new InitializationException('Error reading system data.', $exception);
-        }
+        $savedMigration = $this->fetchSavedMigration($migration, $command, command\Args::makeFromInput($args));
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($savedMigration);
 
-        $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->down(
-            $savedMigration
-        );
-        foreach ($this->iteratorHandler($db, $fsHandler) as $filename => $queryString) {
-            $this->handler(
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+            $this->run(
                 $command->down(...),
-                new MigrateContext(
-                    dbName: $db->getName(),
+                new Context(
+                    dbName: $migration->getName(),
                     filename: $filename,
                     queryString: $queryString,
                     dryRun: $args->dryRun,
@@ -110,16 +94,19 @@ final readonly class ActionWorkflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function fixture(Db $db, Command $command, MigratorArgs $args): void
+    public function fixture(Migration $migration, InputArgs $args): void
     {
-        $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->fixture(
-            FilesystemArgs::makeFromMigrateArgs($args)
+        $command = $this->makeCommand($migration);
+
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->fixture(
+            filesystem\Args::makeFromInput($args)
         );
-        foreach ($this->iteratorHandler($db, $fsHandler) as $filename => $queryString) {
-            $this->handler(
+
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+            $this->run(
                 $command->exec(...),
-                new MigrateContext(
-                    dbName: $db->getName(),
+                new Context(
+                    dbName: $migration->getName(),
                     filename: $filename,
                     queryString: $queryString,
                     dryRun: $args->dryRun,
@@ -134,14 +121,17 @@ final readonly class ActionWorkflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function repeatable(Db $db, Command $command, MigratorArgs $args): void
+    public function repeatable(Migration $migration, InputArgs $args): void
     {
-        $fsHandler = static fn(ActionFilesystem $fs): Iterator => $fs->repeatable();
-        foreach ($this->iteratorHandler($db, $fsHandler, false) as $filename => $queryString) {
-            $this->handler(
+        $command = $this->makeCommand($migration);
+
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->repeatable();
+
+        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $queryString) {
+            $this->run(
                 $command->exec(...),
-                new MigrateContext(
-                    dbName: $db->getName(),
+                new Context(
+                    dbName: $migration->getName(),
                     filename: $filename,
                     queryString: $queryString,
                     dryRun: $args->dryRun,
@@ -156,24 +146,26 @@ final readonly class ActionWorkflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function initialization(Db $db, Command $command): void
+    public function initialization(Migration $migration): void
     {
+        $command = $this->makeCommand($migration);
+
         try {
-            $files = SetupFilesystem::make($db)->all();
+            $files = (new filesystem\Setup($migration->getSetupPath(), $migration->table))->all();
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 Event::FilesystemError,
-                new ConfigurationEvent($db->getName(), $exception)
+                new ExceptionEvent($migration->getName(), $exception)
             );
 
             throw $exception;
         }
 
         foreach ($files as $filename => $queryString) {
-            $this->handler(
+            $this->run(
                 $command->exec(...),
-                new MigrateContext(
-                    dbName: $db->getName(),
+                new Context(
+                    dbName: $migration->getName(),
                     filename: $filename,
                     queryString: $queryString,
                 ),
@@ -183,10 +175,28 @@ final readonly class ActionWorkflow
     }
 
     /**
+     * @return list<non-empty-string>
+     * @throws InitializationException
+     */
+    private function fetchSavedMigration(Migration $migration, CommandInterface $command, command\Args $args): array
+    {
+        try {
+            return $command->fetchSavedMigrationNames($args);
+        } catch (Throwable $exception) {
+            $this->eventDispatcher->trigger(
+                Event::InitializationError,
+                new ExceptionEvent($migration->getName(), $exception)
+            );
+
+            throw new InitializationException('Error reading system data.', $exception);
+        }
+    }
+
+    /**
      * @param callable(non-empty-string $queryString, non-empty-string $filename):bool $handler
      * @throws ActionException
      */
-    private function handler(callable $handler, MigrateContext $context, EventAction $action): void
+    private function run(callable $handler, Context $context, EventAction $action): void
     {
         if ($context->dryRun) {
             $this->eventDispatcher->trigger(
@@ -213,21 +223,21 @@ final readonly class ActionWorkflow
     }
 
     /**
-     * @param callable(ActionFilesystem):Iterator<non-empty-string, non-empty-string> $handler
+     * @param callable(filesystem\Action):Iterator<non-empty-string, non-empty-string> $handler
      * @return iterable<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    private function iteratorHandler(Db $db, callable $handler, bool $useException = true): iterable
+    private function iteratorHandler(Migration $migration, callable $handler, bool $useException = true): iterable
     {
         try {
-            $iterator = $handler(new ActionFilesystem($db->path));
+            $iterator = $handler(new filesystem\Action($migration->path));
             if ($iterator->valid() === false) {
                 $this->eventDispatcher->trigger(
                     Event::FilesystemNotice,
-                    new ConfigurationEvent(
-                        $db->getName(),
+                    new ExceptionEvent(
+                        $migration->getName(),
                         new ConfigurationException(
-                            sprintf('the directory [%s] does not contain migration files.', $db->path)
+                            sprintf('the directory [%s] does not contain migration files.', $migration->path)
                         )
                     )
                 );
@@ -237,7 +247,7 @@ final readonly class ActionWorkflow
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 $useException ? Event::FilesystemError : Event::FilesystemNotice,
-                new ConfigurationEvent($db->getName(), $exception)
+                new ExceptionEvent($migration->getName(), $exception)
             );
 
             if ($useException) {
@@ -248,5 +258,23 @@ final readonly class ActionWorkflow
         }
 
         return $iterator;
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws ConnectionException
+     */
+    private function makeCommand(Migration $migration): CommandInterface
+    {
+        try {
+            return $migration->getCommand();
+        } catch (ConnectionException $exception) {
+            $this->eventDispatcher->trigger(
+                Event::ConnectionError,
+                new ExceptionEvent($migration->getName(), $exception)
+            );
+
+            throw $exception;
+        }
     }
 }

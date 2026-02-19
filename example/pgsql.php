@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use kuaukutsu\poc\migration\connection\PdoDriver;
-use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
-use kuaukutsu\poc\migration\Db;
-use kuaukutsu\poc\migration\DbCollection;
+use kuaukutsu\poc\migration\Migration;
+use kuaukutsu\poc\migration\MigrationCollection;
+use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\Migrator;
+use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $migrator = new Migrator(
-    dbCollection: new DbCollection(
-        new Db(
+    dbCollection: new MigrationCollection(
+        new Migration(
             path: __DIR__ . '/migration/postgres/main',
             driver: new PdoDriver(
                 dsn: 'pgsql:host=postgres;port=5432;dbname=main',

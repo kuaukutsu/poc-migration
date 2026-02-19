@@ -6,13 +6,13 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
 use PHPUnit\Framework\TestCase;
+use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\connection\Command;
-use kuaukutsu\poc\migration\connection\Params;
-use kuaukutsu\poc\migration\connection\PdoDriver;
-use kuaukutsu\poc\migration\MigratorArgs;
-use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\internal\command\CommandInterface;
+use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
+use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\InputArgs;
 
 /**
  * Верхнеуровневая работа приложения.
@@ -21,7 +21,7 @@ final class ArgumentsTest extends TestCase
 {
     private MigratorInterface $migrator;
 
-    private Command $command;
+    private CommandInterface $command;
 
     #[Override]
     protected function setUp(): void
@@ -40,12 +40,12 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchSavedMigrationNames();
         self::assertEmpty($data);
 
-        $this->migrator->up(new MigratorArgs(limit: 1));
+        $this->migrator->up(new InputArgs(limit: 1));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(1, $data);
         self::assertEquals('202501011024_entity_create.sql', $data[0]);
 
-        $this->migrator->up(new MigratorArgs(limit: 2));
+        $this->migrator->up(new InputArgs(limit: 2));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(3, $data);
         self::assertEquals('202501021025_account_email.sql', $data[0]);
@@ -61,11 +61,11 @@ final class ArgumentsTest extends TestCase
 
         $this->migrator->up();
 
-        $this->migrator->down(new MigratorArgs(limit: 1));
+        $this->migrator->down(new InputArgs(limit: 1));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(2, $data);
 
-        $this->migrator->down(new MigratorArgs(limit: 2));
+        $this->migrator->down(new InputArgs(limit: 2));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertEmpty($data);
     }
@@ -80,7 +80,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(3, $data);
 
-        $this->migrator->down(new MigratorArgs(dryRun: true));
+        $this->migrator->down(new InputArgs(dryRun: true));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(3, $data);
 
@@ -95,7 +95,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchSavedMigrationNames();
         self::assertEmpty($data);
 
-        $this->migrator->up(new MigratorArgs(limit: 2, dbName: 'sqlite/memory'));
+        $this->migrator->up(new InputArgs(limit: 2, dbName: 'sqlite/memory'));
         $data = $this->command->fetchSavedMigrationNames();
         self::assertCount(2, $data);
     }
@@ -107,6 +107,6 @@ final class ArgumentsTest extends TestCase
         self::assertEmpty($data);
 
         $this->expectException(ConfigurationException::class);
-        $this->migrator->up(new MigratorArgs(dbName: 'sqlite/unknown'));
+        $this->migrator->up(new InputArgs(dbName: 'sqlite/unknown'));
     }
 }

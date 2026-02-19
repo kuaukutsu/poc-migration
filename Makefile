@@ -1,6 +1,7 @@
 PHP_VERSION ?= 8.3
 VERSION ?= $$(git rev-parse --verify HEAD)
 USER = $$(id -u)
+ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 # https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help

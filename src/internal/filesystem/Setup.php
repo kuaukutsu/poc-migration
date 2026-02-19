@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal;
+namespace kuaukutsu\poc\migration\internal\filesystem;
 
 use Iterator;
 use GlobIterator;
 use SplFileInfo;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\Db;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
-final readonly class SetupFilesystem
+final readonly class Setup
 {
     /**
      * @var non-empty-string
@@ -29,11 +28,6 @@ final readonly class SetupFilesystem
         private string $table,
     ) {
         $this->path = rtrim($path, '/') . '/';
-    }
-
-    public static function make(Db $db): self
-    {
-        return new self($db->getSetupFilepath(), $db->table);
     }
 
     /**

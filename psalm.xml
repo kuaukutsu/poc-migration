@@ -23,5 +23,10 @@
     <issueHandlers>
         <DocblockTypeContradiction errorLevel="info"/>
         <MixedAssignment errorLevel="suppress"/>
+        <UncaughtThrowInGlobalScope>
+            <errorLevel type="suppress">
+                <directory name="example"/>
+            </errorLevel>
+        </UncaughtThrowInGlobalScope>
     </issueHandlers>
 </psalm>

@@ -2,12 +2,9 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal;
+namespace kuaukutsu\poc\migration;
 
-/**
- * @psalm-internal kuaukutsu\poc\migration
- */
-final readonly class MigrateContext
+final readonly class Context
 {
     /**
      * @param non-empty-string $dbName
