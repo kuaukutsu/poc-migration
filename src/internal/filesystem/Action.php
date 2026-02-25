@@ -32,10 +32,12 @@ final readonly class Action
      */
     public function up(array $listSavedFilename, Args $args = new Args()): Iterator
     {
+        $excludeMap = array_flip($listSavedFilename);
+
         $_iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
             $filepath = $matchFilename[0];
-            if (in_array(basename($filepath), $listSavedFilename, true)) {
+            if (isset($excludeMap[basename($filepath)])) {
                 continue;
             }
 
@@ -115,7 +117,7 @@ final readonly class Action
              */
             return new RegexIterator(
                 new GlobIterator($path . '*.sql'),
-                '/.+(?<!skip)+\.sql/i',
+                '/.+(?<!skip)\.sql/i',
                 RegexIterator::GET_MATCH,
             );
         }
