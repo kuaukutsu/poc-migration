@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration;
 
 use Override;
+use kuaukutsu\ds\collection\CollectionOutOfRangeException;
 use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventDispatcher;
@@ -88,7 +89,12 @@ final readonly class Migrator implements MigratorInterface
             return $this->collection;
         }
 
-        $migration = $this->collection->get($args->dbName);
+        try {
+            $migration = $this->collection->get($args->dbName);
+        } catch (CollectionOutOfRangeException) {
+            $migration = null;
+        }
+
         if ($migration instanceof Migration) {
             return [$migration];
         }

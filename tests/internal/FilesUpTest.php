@@ -20,7 +20,7 @@ final class FilesUpTest extends TestCase
         $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
-    public function testUpFile(): void
+    public function testUp(): void
     {
         $iterator = $this->fs->up([]);
         self::assertTrue($iterator->valid());
@@ -32,7 +32,7 @@ final class FilesUpTest extends TestCase
         }
     }
 
-    public function testLimitFile(): void
+    public function testLimit(): void
     {
         $iterator = $this->fs->up([], new Args(limit: 1));
         self::assertTrue($iterator->valid());
@@ -58,7 +58,14 @@ final class FilesUpTest extends TestCase
         self::assertEquals('202501021024_account_create.sql', $files[1]);
     }
 
-    public function testOrderFile(): void
+    public function testUpLimitSkipZero(): void
+    {
+        $iterator = $this->fs->up([], new Args(limit: 0));
+        self::assertTrue($iterator->valid());
+        self::assertNotEmpty(iterator_count($iterator));
+    }
+
+    public function testOrder(): void
     {
         $iterator = $this->fs->up([]);
         self::assertTrue($iterator->valid());
@@ -74,23 +81,16 @@ final class FilesUpTest extends TestCase
         self::assertEquals('202501021025_account_email.sql', $files[2]);
     }
 
-    public function testSkipFile(): void
+    public function testSkip(): void
     {
         $listFilename = [];
         foreach ($this->fs->up([]) as $filename => $_) {
             $listFilename[] = $filename;
         }
 
+        // filename
         self::assertNotContains('202501011025_skip.sql', $listFilename);
-    }
-
-    public function testSkipSection(): void
-    {
-        $listFilename = [];
-        foreach ($this->fs->up([]) as $filename => $_) {
-            $listFilename[] = $filename;
-        }
-
+        // section
         self::assertNotContains('202501011026_entity_duplicate.sql', $listFilename);
     }
 
