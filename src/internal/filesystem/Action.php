@@ -34,19 +34,21 @@ final readonly class Action
     {
         $excludeMap = array_flip($listSavedFilename);
 
-        $_iternum = 0;
+        $iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
             $filepath = $matchFilename[0];
             if (isset($excludeMap[basename($filepath)])) {
                 continue;
             }
 
-            if ($args->limit > 0 && $_iternum++ > $args->limit) {
-                break;
+            if ($args->limit > 0 && $iternum >= $args->limit) {
+                return;
             }
 
             $command = $this->prepareCommand($filepath, 'up');
             if ($command !== null) {
+                $iternum++;
+
                 /** @phpstan-ignore generator.keyType */
                 yield basename($filepath) => $command;
             }
@@ -74,15 +76,17 @@ final readonly class Action
      */
     public function fixture(Args $args = new Args()): Iterator
     {
-        $_iternum = 0;
+        $iternum = 0;
         foreach ($this->makeIterator(rtrim($this->path, '/') . '-fixture/') as $matchFilename) {
-            if ($args->limit > 0 && $_iternum++ > $args->limit) {
-                break;
+            if ($args->limit > 0 && $iternum >= $args->limit) {
+                return;
             }
 
             $filepath = $matchFilename[0];
             $command = $this->prepareCommand($filepath, 'up');
             if ($command !== null) {
+                $iternum++;
+
                 /** @phpstan-ignore generator.keyType */
                 yield basename($filepath) => $command;
             }

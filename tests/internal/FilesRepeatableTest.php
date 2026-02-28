@@ -19,7 +19,7 @@ final class FilesRepeatableTest extends TestCase
         $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
-    public function testRepeatableFile(): void
+    public function testRepeatable(): void
     {
         $iterator = $this->fs->repeatable();
         self::assertTrue($iterator->valid());
@@ -31,7 +31,7 @@ final class FilesRepeatableTest extends TestCase
         }
     }
 
-    public function testOrderFile(): void
+    public function testOrder(): void
     {
         $iterator = $this->fs->repeatable();
         self::assertTrue($iterator->valid());
@@ -46,7 +46,7 @@ final class FilesRepeatableTest extends TestCase
         self::assertEquals('202501011124_account_correction.sql', $files[1]);
     }
 
-    public function testSkipFile(): void
+    public function testSkip(): void
     {
         $listFilename = [];
         foreach ($this->fs->repeatable() as $filename => $_) {

@@ -75,7 +75,6 @@ infection:
 	- docker build --target tests -t app_cli .docker/php/cli
 	- docker run --init -it --rm \
 		--add-host=host.docker.internal:host-gateway \
-		--env-file .docker/base.env \
 		-u $(USER) \
 		-v "$$(pwd):/app" \
 		-w /app \

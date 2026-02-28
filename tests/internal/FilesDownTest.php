@@ -19,7 +19,7 @@ final class FilesDownTest extends TestCase
         $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
-    public function testDownFile(): void
+    public function testDown(): void
     {
         $iterator = $this->fs->down(['202501011024_entity_create.sql']);
         self::assertTrue($iterator->valid());

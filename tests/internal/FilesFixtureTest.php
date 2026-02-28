@@ -20,7 +20,7 @@ final class FilesFixtureTest extends TestCase
         $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
     }
 
-    public function testFixtureFile(): void
+    public function testFixture(): void
     {
         $iterator = $this->fs->fixture();
         self::assertTrue($iterator->valid());
@@ -32,7 +32,7 @@ final class FilesFixtureTest extends TestCase
         }
     }
 
-    public function testLimitFile(): void
+    public function testLimit(): void
     {
         $iterator = $this->fs->fixture(new Args(limit: 1));
         self::assertTrue($iterator->valid());
@@ -58,23 +58,23 @@ final class FilesFixtureTest extends TestCase
         self::assertEquals('202501011034_entity_correction.sql', $files[1]);
     }
 
-    public function testSkipFile(): void
+    public function testLimitSkipZero(): void
     {
-        $listFilename = [];
-        foreach ($this->fs->fixture() as $filename => $_) {
-            $listFilename[] = $filename;
-        }
-
-        self::assertNotContains('202501011025_skip.sql', $listFilename);
+        $iterator = $this->fs->fixture(new Args(limit: 0));
+        self::assertTrue($iterator->valid());
+        self::assertNotEmpty(iterator_count($iterator));
     }
 
-    public function testSkipSection(): void
+    public function testSkip(): void
     {
         $listFilename = [];
         foreach ($this->fs->fixture() as $filename => $_) {
             $listFilename[] = $filename;
         }
 
+        // filename
+        self::assertNotContains('202501011025_skip.sql', $listFilename);
+        // section
         self::assertNotContains('202501011026_entity_ignore.sql', $listFilename);
     }
 
