@@ -22,7 +22,7 @@ final readonly class Action
      */
     public function __construct(string $path)
     {
-        $this->path = rtrim($path, '/') . '/';
+        $this->path = rtrim(trim($path), '/') . '/';
     }
 
     /**
@@ -150,8 +150,7 @@ final readonly class Action
             return null;
         }
 
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
-        if (preg_match_all('/^--\s?@(?<action>\w+)\s?\R(?<query>(?:(?!^--\s?@).)*)/ms', $queryString, $match)) {
+        if (preg_match_all('/^--\s?@(?<action>\w+)\s?\R(?<query>(?:(?!^--\s?@).)*)/ms', $queryString, $match) > 0) {
             /**
              * @var array{"action": non-empty-string[], "query": non-empty-string[]} $match
              * @phpstan-ignore varTag.differentVariable
@@ -161,7 +160,7 @@ final readonly class Action
                     /**
                      * @var non-empty-string
                      */
-                    return trim($match['query'][$key]);
+                    return $match['query'][$key];
                 }
             }
         } elseif ($actionKey === 'up') {

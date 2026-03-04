@@ -16,6 +16,11 @@ interface DriverInterface
     public function getName(): string;
 
     /**
+     * @return non-empty-lowercase-string
+     */
+    public function getDbName(): string;
+
+    /**
      * @return non-empty-string
      */
     public function getSetupPath(): string;

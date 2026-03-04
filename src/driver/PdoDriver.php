@@ -25,6 +25,11 @@ final class PdoDriver implements DriverInterface
 
     private readonly DriverType $driver;
 
+    /**
+     * @var non-empty-lowercase-string
+     */
+    private readonly string $dbname;
+
     private int $connectionTimer = 0;
 
     private ?Connection $connectionInstance = null;
@@ -43,26 +48,23 @@ final class PdoDriver implements DriverInterface
         array $options = [],
     ) {
         if (extension_loaded('PDO') === false) {
-            throw new ConfigurationException(
-                'PDO: extension not loaded.'
-            );
+            throw new ConfigurationException('PDO: extension not loaded.');
         }
 
+        [$this->driver, $this->dbname] = prepareDSN($dsn);
         $this->connectionFactory = static fn(): PDO => new PDO($dsn, $username, $password, $options);
-        $this->driver = match (true) {
-            str_starts_with($dsn, 'mysql:') => DriverType::PDO_MYSQL,
-            str_starts_with($dsn, 'pgsql:') => DriverType::PDO_PGSQL,
-            str_starts_with($dsn, 'sqlite:') => DriverType::PDO_SQLITE,
-            default => throw new ConfigurationException(
-                'PDODriver: is not implemented.'
-            ),
-        };
     }
 
     #[Override]
     public function getName(): string
     {
         return $this->driver->value();
+    }
+
+    #[Override]
+    public function getDbName(): string
+    {
+        return $this->dbname;
     }
 
     #[Override]
@@ -103,4 +105,44 @@ final class PdoDriver implements DriverInterface
 
         return $this->connectionInstance;
     }
+}
+
+/**
+ * @return array{0: DriverType, 1: non-empty-lowercase-string}
+ * @throws ConfigurationException
+ */
+function prepareDSN(string $dsn): array
+{
+    $dsn = strtolower($dsn);
+
+    $driver = match (true) {
+        str_starts_with($dsn, 'mysql:') => DriverType::PDO_MYSQL,
+        str_starts_with($dsn, 'pgsql:') => DriverType::PDO_PGSQL,
+        str_starts_with($dsn, 'sqlite:') => DriverType::PDO_SQLITE,
+        default => throw new ConfigurationException('PDODriver: is not implemented.'),
+    };
+
+    if ($driver === DriverType::PDO_SQLITE) {
+        $partName = str_replace('sqlite:', '', $dsn);
+        $dbName = str_starts_with($partName, ':')
+            ? trim($partName, ':')
+            : basename($partName, '.sqlite3');
+
+        if ($dbName === '') {
+            throw new ConfigurationException('PDODriver: dsn is incorrect.');
+        }
+
+        /**
+         * @var non-empty-lowercase-string $dbName
+         */
+        return [$driver, $dbName];
+    } elseif (preg_match('~dbname=(?<dbname>[^;]+)~i', $dsn, $matches) > 0) {
+        /**
+         * @var array{"dbname": non-empty-lowercase-string} $matches
+         * @phpstan-ignore varTag.nativeType
+         */
+        return [$driver, $matches['dbname']];
+    }
+
+    throw new ConfigurationException('PDODriver: dsn is incorrect.');
 }

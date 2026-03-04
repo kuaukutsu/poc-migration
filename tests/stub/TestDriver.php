@@ -22,6 +22,11 @@ final readonly class TestDriver implements DriverInterface
         return DriverType::PDO_SQLITE->value();
     }
 
+    public function getDbName(): string
+    {
+        return 'storage';
+    }
+
     #[Override]
     public function getSetupPath(): string
     {

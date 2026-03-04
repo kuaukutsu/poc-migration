@@ -25,7 +25,7 @@ final readonly class Migration
         private DriverInterface $driver,
         public string $table = 'migration',
     ) {
-        $this->name = $this->driver->getName() . '/' . basename($this->path);
+        $this->name = $this->driver->getName() . '/' . $this->driver->getDbName();
     }
 
     /**
