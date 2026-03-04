@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration\internal\command;
 
 use Throwable;
 use kuaukutsu\poc\migration\internal\command;
+use kuaukutsu\poc\migration\Context;
 
 interface CommandInterface
 {
@@ -15,23 +16,20 @@ interface CommandInterface
     public function fetchSavedMigrationNames(command\Args $args = new command\Args()): array;
 
     /**
-     * @param non-empty-string $queryString
-     * @param non-empty-string $filename
+     * @return bool true: request completed; false: request rejected
      * @throws Throwable
      */
-    public function up(string $queryString, string $filename): bool;
+    public function up(Context $context): bool;
 
     /**
-     * @param non-empty-string $queryString
-     * @param non-empty-string $filename
+     * @return bool true: request completed; false: request rejected
      * @throws Throwable
      */
-    public function down(string $queryString, string $filename): bool;
+    public function down(Context $context): bool;
 
     /**
-     * @param non-empty-string $queryString
-     * @param non-empty-string $filename
+     * @return bool true: request completed; false: request rejected
      * @throws Throwable
      */
-    public function exec(string $queryString, string $filename): bool;
+    public function exec(Context $context): bool;
 }

@@ -15,6 +15,7 @@ use kuaukutsu\poc\migration\internal\command\Command;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Connection;
+use kuaukutsu\poc\migration\Context;
 
 final class CommandTest extends TestCase
 {
@@ -105,6 +106,88 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    public function testUpDryRun(): void
+    {
+        $this->execInitialization();
+
+        $response = $this->command->up(
+            new Context(
+                dbName: 'test',
+                filename: 'test',
+                query: '--test',
+                dryRun: false,
+            )
+        );
+
+        self::assertTrue($response);
+
+        $response = $this->command->up(
+            new Context(
+                dbName: 'test',
+                filename: 'test',
+                query: '--test',
+                dryRun: true,
+            )
+        );
+
+        self::assertFalse($response);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testDownDryRun(): void
+    {
+        $this->execInitialization();
+
+        $response = $this->command->down(
+            new Context(
+                dbName: 'test',
+                filename: 'test',
+                query: '--test',
+                dryRun: false,
+            )
+        );
+
+        self::assertTrue($response);
+
+        $response = $this->command->down(
+            new Context(
+                dbName: 'test',
+                filename: 'test',
+                query: '--test',
+                dryRun: true,
+            )
+        );
+
+        self::assertFalse($response);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testRollbackTransaction(): void
+    {
+        $this->execInitialization();
+
+        $this->execUp('table1');
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertCount(1, $data);
+        self::assertEquals('test-table1', $data[0]);
+
+        try {
+            $this->execFailQuery();
+        } catch (Throwable) {
+        }
+
+        $data = $this->command->fetchSavedMigrationNames();
+        self::assertCount(1, $data);
+        self::assertEquals('test-table1', $data[0]);
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function testPDOException(): void
     {
         $this->expectException(PDOException::class);
@@ -120,12 +203,18 @@ final class CommandTest extends TestCase
 CREATE TABLE IF NOT EXISTS $tableName
 (
     name TEXT PRIMARY KEY,
+    version INT DEFAULT 0,
     atime TEXT
-)
+);
+
+CREATE INDEX IF NOT EXISTS i_{$tableName}_version ON $tableName(version);
 SQL;
         $this->command->exec(
-            queryString: $queryString,
-            filename: 'test',
+            new Context(
+                dbName: 'test',
+                filename: 'test',
+                query: $queryString,
+            )
         );
     }
 
@@ -141,8 +230,12 @@ CREATE TABLE IF NOT EXISTS $tableName
 )
 SQL;
         $this->command->up(
-            queryString: $queryString,
-            filename: 'test-' . $tableName,
+            new Context(
+                dbName: 'test',
+                filename: 'test-' . $tableName,
+                query: $queryString,
+                version: 1,
+            )
         );
     }
 
@@ -155,8 +248,30 @@ SQL;
 DROP TABLE IF EXISTS $tableName
 SQL;
         $this->command->down(
-            queryString: $queryString,
-            filename: 'test-' . $tableName,
+            new Context(
+                dbName: 'test',
+                filename: 'test-' . $tableName,
+                query: $queryString,
+            )
+        );
+    }
+
+    /**
+     * @note Моделируем ошибку вставки записи в таблицу логирования с последующим откатом транзакции.
+     * @throws Throwable
+     */
+    private function execFailQuery(): void
+    {
+        $queryString = <<<SQL
+DROP TABLE migration
+SQL;
+        $this->command->up(
+            new Context(
+                dbName: 'test',
+                filename: 'test-unknown',
+                query: $queryString,
+                version: 1,
+            )
         );
     }
 }

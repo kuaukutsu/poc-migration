@@ -7,6 +7,7 @@ namespace kuaukutsu\poc\migration\internal\command;
 use Override;
 use Throwable;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
+use kuaukutsu\poc\migration\Context;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
@@ -32,17 +33,22 @@ final readonly class Command implements CommandInterface
     }
 
     #[Override]
-    public function up(string $queryString, string $filename): bool
+    public function up(Context $context): bool
     {
+        if ($context->dryRun) {
+            return false;
+        }
+
         $transaction = $this->connection->beginTransaction();
 
         try {
-            $transaction->exec($queryString);
+            $transaction->exec($context->query);
             $transaction->exec(
                 sprintf(
-                    'INSERT INTO %s (name, atime) VALUES (\'%s\', \'%s\')',
+                    'INSERT INTO %s (name, version, atime) VALUES (\'%s\', %d, \'%s\')',
                     $this->params->table,
-                    $filename,
+                    $context->filename,
+                    $context->version,
                     gmdate('Y-m-d H:i:s'),
                 )
             );
@@ -56,17 +62,21 @@ final readonly class Command implements CommandInterface
     }
 
     #[Override]
-    public function down(string $queryString, string $filename): bool
+    public function down(Context $context): bool
     {
+        if ($context->dryRun) {
+            return false;
+        }
+
         $transaction = $this->connection->beginTransaction();
 
         try {
-            $transaction->exec($queryString);
+            $transaction->exec($context->query);
             $transaction->exec(
                 sprintf(
                     'DELETE FROM %s WHERE name=\'%s\'',
                     $this->params->table,
-                    $filename,
+                    $context->filename,
                 )
             );
         } catch (Throwable $exception) {
@@ -79,12 +89,16 @@ final readonly class Command implements CommandInterface
     }
 
     #[Override]
-    public function exec(string $queryString, string $filename): bool
+    public function exec(Context $context): bool
     {
+        if ($context->dryRun) {
+            return false;
+        }
+
         $transaction = $this->connection->beginTransaction();
 
         try {
-            $transaction->exec($queryString);
+            $transaction->exec($context->query);
         } catch (Throwable $exception) {
             $transaction->rollBack();
 

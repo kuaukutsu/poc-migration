@@ -28,10 +28,11 @@ final readonly class MigrateSuccessEvent implements EventInterface
     public function getMessage(): string
     {
         return sprintf(
-            "[%s] %s: %s",
+            "[%s] %s: %s, vers: %d",
             $this->context->dbName,
             $this->action,
             $this->context->filename,
+            $this->context->version,
         );
     }
 }

@@ -152,16 +152,13 @@ final readonly class Action
 
         if (preg_match_all('/^--\s?@(?<action>\w+)\s?\R(?<query>(?:(?!^--\s?@).)*)/ms', $queryString, $match) > 0) {
             /**
-             * @var array{"action": non-empty-string[], "query": non-empty-string[]} $match
-             * @phpstan-ignore varTag.differentVariable
+             * @var array{"action": non-empty-string[], "query": string[]} $match
+             * @phpstan-ignore varTag.nativeType
              */
-            foreach ($match['action'] as $key => $action) {
-                if ($action === $actionKey) {
-                    /**
-                     * @var non-empty-string
-                     */
-                    return $match['query'][$key];
-                }
+            $key = array_search($actionKey, $match['action'], true);
+            if ($key !== false) {
+                $query = $match['query'][$key];
+                return $query === '' ? null : $query;
             }
         } elseif ($actionKey === 'up') {
             return $queryString;

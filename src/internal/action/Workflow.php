@@ -48,13 +48,15 @@ final readonly class Workflow
             filesystem\Args::makeFromInput($args)
         );
 
-        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+        $version = time();
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
                 $command->up(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
+                    version: $version,
                     dryRun: $args->dryRun,
                 ),
                 EventAction::up,
@@ -75,13 +77,13 @@ final readonly class Workflow
         $savedMigration = $this->fetchSavedMigration($migration, $command, command\Args::makeFromInput($args));
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($savedMigration);
 
-        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
                 $command->down(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
                     dryRun: $args->dryRun,
                 ),
                 EventAction::down,
@@ -102,13 +104,13 @@ final readonly class Workflow
             filesystem\Args::makeFromInput($args)
         );
 
-        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
                 $command->exec(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
                     dryRun: $args->dryRun,
                 ),
                 EventAction::fixture,
@@ -127,13 +129,13 @@ final readonly class Workflow
 
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->repeatable();
 
-        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $queryString) {
+        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $query) {
             $this->run(
                 $command->exec(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
                     dryRun: $args->dryRun,
                 ),
                 EventAction::repeatable,
@@ -161,13 +163,13 @@ final readonly class Workflow
             throw $exception;
         }
 
-        foreach ($files as $filename => $queryString) {
+        foreach ($files as $filename => $query) {
             $this->run(
                 $command->exec(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
                 ),
                 EventAction::initialization,
             );
@@ -193,21 +195,13 @@ final readonly class Workflow
     }
 
     /**
-     * @param callable(non-empty-string $queryString, non-empty-string $filename):bool $handler
+     * @param callable(Context $context):bool $handler
      * @throws ActionException
      */
     private function run(callable $handler, Context $context, EventAction $action): void
     {
-        if ($context->dryRun) {
-            $this->eventDispatcher->trigger(
-                Event::MigrateSuccess,
-                new MigrateSuccessEvent($action->name, $context)
-            );
-            return;
-        }
-
         try {
-            $handler($context->queryString, $context->filename);
+            $handler($context);
             $this->eventDispatcher->trigger(
                 Event::MigrateSuccess,
                 new MigrateSuccessEvent($action->name, $context)

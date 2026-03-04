@@ -20,6 +20,7 @@
     "league/climate": "^3.10"
   },
   "require-dev": {
+    "buggregator/trap": "^1.15",
     "infection/infection": "^0.32.4",
     "php-di/php-di": "^7.0",
     "phpstan/phpstan": "^2.0",

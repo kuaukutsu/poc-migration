@@ -30,10 +30,11 @@ final readonly class MigrateErrorEvent implements EventInterface
     public function getMessage(): string
     {
         return sprintf(
-            "[%s] %s: %s\r\n%s",
+            "[%s] %s: %s, vers: %d\r\n%s",
             $this->context->dbName,
             $this->action,
             $this->context->filename,
+            $this->context->version,
             $this->exception->getMessage(),
         );
     }

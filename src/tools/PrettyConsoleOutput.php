@@ -73,7 +73,7 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
         );
 
         $this->output->red($event->exception->getMessage());
-        $this->output->out($event->context->queryString);
+        $this->output->out($event->context->query);
     }
 
     /**

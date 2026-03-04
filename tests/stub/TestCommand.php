@@ -7,6 +7,7 @@ namespace kuaukutsu\poc\migration\tests\stub;
 use Override;
 use kuaukutsu\poc\migration\internal\command;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
+use kuaukutsu\poc\migration\Context;
 
 final readonly class TestCommand implements CommandInterface
 {
@@ -15,9 +16,6 @@ final readonly class TestCommand implements CommandInterface
     ) {
     }
 
-    /**
-     * @inheritDoc
-     */
     #[Override]
     public function fetchSavedMigrationNames(command\Args $args = new command\Args()): array
     {
@@ -28,35 +26,26 @@ final readonly class TestCommand implements CommandInterface
         return $this->storage->getMigration();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[Override]
-    public function up(string $queryString, string $filename): bool
+    public function up(Context $context): bool
     {
-        $this->storage->set($filename, $queryString);
-        $this->storage->saveMigration($filename);
+        $this->storage->set($context->filename, $context->query);
+        $this->storage->saveMigration($context->filename);
         return true;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[Override]
-    public function down(string $queryString, string $filename): bool
+    public function down(Context $context): bool
     {
-        $this->storage->set($filename, $queryString);
-        $this->storage->dropMigration($filename);
+        $this->storage->set($context->filename, $context->query);
+        $this->storage->dropMigration($context->filename);
         return true;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[Override]
-    public function exec(string $queryString, string $filename): bool
+    public function exec(Context $context): bool
     {
-        $this->storage->set($filename, $queryString);
+        $this->storage->set($context->filename, $context->query);
         return true;
     }
 }
