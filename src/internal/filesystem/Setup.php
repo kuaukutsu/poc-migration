@@ -28,7 +28,7 @@ final readonly class Setup
         string $path,
         private string $table,
     ) {
-        $this->path = rtrim($path, '/') . '/';
+        $this->path = rtrim(trim($path), '/') . '/';
     }
 
     /**

@@ -43,7 +43,7 @@ final class EventTest extends TestCase
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
             new PdoDriver(
-                dsn: 'mysql::memory:',
+                dsn: 'mysql:host=example;dbname=example',
             ),
             [
                 $eventSubscriber,

@@ -14,7 +14,7 @@ final class FilesSetupTest extends TestCase
 {
     public function testSimple(): void
     {
-        $fs = new Setup(dirname(__DIR__) . '/migration/postgres/setup', 'test');
+        $fs = new Setup(dirname(__DIR__) . '/migration/postgres/setup/  ', 'test');
         self::assertTrue($fs->all()->valid());
 
         foreach ($fs->all() as $filename => $sql) {

@@ -19,6 +19,15 @@ $migrator = new Migrator(
                 username: 'postgres',
                 password: 'postgres',
             )
+        ),
+        // database copy, single data source migrations
+        new Migration(
+            path: __DIR__ . '/migration/postgres/main',
+            driver: new PdoDriver(
+                dsn: 'pgsql:host=postgres;port=5432;dbname=maincopy',
+                username: 'postgres',
+                password: 'postgres',
+            )
         )
     ),
     eventSubscribers: [

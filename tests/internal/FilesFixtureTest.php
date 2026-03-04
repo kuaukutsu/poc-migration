@@ -17,7 +17,7 @@ final class FilesFixtureTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main');
+        $this->fs = new Action(dirname(__DIR__) . '/migration/postgres/main/   ');
     }
 
     public function testFixture(): void
