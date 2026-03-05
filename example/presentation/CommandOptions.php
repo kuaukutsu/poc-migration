@@ -32,6 +32,10 @@ trait CommandOptions
             $options['hasRepeatable'] = $this->getOptionWithRepeatable($input);
         }
 
+        if ($input->hasOption('latest-version')) {
+            $options['applyLatestVersion'] = $this->getOptionApplyLatestVersion($input);
+        }
+
         return new InputArgs(...$options);
     }
 
@@ -56,6 +60,14 @@ trait CommandOptions
     private function getOptionDryRun(InputInterface $input): bool
     {
         return $input->getOption('dry-run') === true;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getOptionApplyLatestVersion(InputInterface $input): bool
+    {
+        return $input->getOption('latest-version') === true;
     }
 
     /**

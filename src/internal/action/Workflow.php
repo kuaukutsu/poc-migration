@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration\internal\action;
 
 use Iterator;
 use Throwable;
+use DateTimeImmutable;
 use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventAction;
@@ -48,7 +49,7 @@ final readonly class Workflow
             filesystem\Args::makeFromInput($args)
         );
 
-        $version = time();
+        $version = generateVersion();
         foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
                 $command->up(...),
@@ -187,7 +188,14 @@ final readonly class Workflow
     private function getAppliedMigrations(Migration $migration, CommandInterface $command, command\Args $args): array
     {
         try {
-            return $command->fetchAppliedMigrations($args);
+            if ($args->applyLatestVersion) {
+                $appliedMigrations = $command->fetchApplied(new command\Args(limit: 1));
+                if (count($appliedMigrations) === 1) {
+                    $args = $args->withVersion(current($appliedMigrations));
+                }
+            }
+
+            return $command->fetchApplied($args);
         } catch (Throwable $exception) {
             $this->eventDispatcher->trigger(
                 Event::InitializationError,
@@ -275,4 +283,16 @@ final readonly class Workflow
             throw $exception;
         }
     }
+}
+
+/**
+ * Unixtime + milleseconds
+ * @return positive-int
+ */
+function generateVersion(): int
+{
+    /**
+     * @var positive-int
+     */
+    return (int)(new DateTimeImmutable())->format('Uv');
 }

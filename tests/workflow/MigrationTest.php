@@ -40,7 +40,7 @@ final class MigrationTest extends TestCase
     public function testInit(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
 
@@ -48,11 +48,11 @@ final class MigrationTest extends TestCase
     public function testUp(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
         $names = array_keys($data);
@@ -61,7 +61,7 @@ final class MigrationTest extends TestCase
         self::assertEquals('202501011024_entity_create.sql', $names[2]);
 
         $this->migrator->up();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
     }
 
@@ -69,15 +69,15 @@ final class MigrationTest extends TestCase
     public function testDown(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
         $this->migrator->down();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
 
@@ -85,15 +85,15 @@ final class MigrationTest extends TestCase
     public function testRedo(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
         $this->migrator->redo();
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
     }
 
@@ -142,11 +142,11 @@ final class MigrationTest extends TestCase
         $command = $driver->makeCommand(new Params(table: 'migration'));
 
         $migrator->init();
-        $data = $command->fetchAppliedMigrations();
+        $data = $command->fetchApplied();
         self::assertEmpty($data);
 
         $migrator->up(new InputArgs(dryRun: true));
-        $data = $command->fetchAppliedMigrations();
+        $data = $command->fetchApplied();
         self::assertEmpty($data);
     }
 }

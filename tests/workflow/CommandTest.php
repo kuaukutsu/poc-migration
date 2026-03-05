@@ -37,7 +37,7 @@ final class CommandTest extends TestCase
     {
         $this->execInitialization();
 
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
 
@@ -50,7 +50,7 @@ final class CommandTest extends TestCase
 
         $this->execUp('table1');
 
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertNotEmpty($data['test-table1']);
     }
 
@@ -64,18 +64,18 @@ final class CommandTest extends TestCase
         $this->execUp('table1');
         $this->execUp('table2');
 
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
         self::assertNotEmpty($data['test-table1']);
         self::assertNotEmpty($data['test-table2']);
 
         $this->execDown('table1');
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table2']);
 
         $this->execDown('table2');
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
 
@@ -90,19 +90,51 @@ final class CommandTest extends TestCase
         $this->execUp('table2');
         $this->execUp('table3');
 
-        $data = $this->command->fetchAppliedMigrations(
+        $data = $this->command->fetchApplied(
             new Args(limit: 1)
         );
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table3']);
 
-        $data = $this->command->fetchAppliedMigrations(
+        $data = $this->command->fetchApplied(
             new Args(limit: 2)
         );
         self::assertCount(2, $data);
         $names = array_keys($data);
         self::assertEquals('test-table3', $names[0]);
         self::assertEquals('test-table2', $names[1]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testFetchVersion(): void
+    {
+        $this->execInitialization();
+
+        $this->execUp('table1', 111);
+        $this->execUp('table2', 111);
+        $this->execUp('table3', 222);
+
+        $data = $this->command->fetchApplied(
+            new Args(version: 111)
+        );
+        self::assertCount(2, $data);
+        self::assertNotEmpty($data['test-table1']);
+        self::assertNotEmpty($data['test-table2']);
+
+        $data = $this->command->fetchApplied(
+            new Args(version: 222)
+        );
+        self::assertCount(1, $data);
+        self::assertNotEmpty($data['test-table3']);
+
+        // сомнительный кейс, но допускаем
+        $data = $this->command->fetchApplied(
+            new Args(limit: 1, version: 111)
+        );
+        self::assertCount(1, $data);
+        self::assertNotEmpty($data['test-table2']);
     }
 
     /**
@@ -173,7 +205,7 @@ final class CommandTest extends TestCase
         $this->execInitialization();
 
         $this->execUp('table1');
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table1']);
 
@@ -182,7 +214,7 @@ final class CommandTest extends TestCase
         } catch (Throwable) {
         }
 
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table1']);
     }
@@ -195,7 +227,7 @@ final class CommandTest extends TestCase
         $this->execInitialization();
 
         $this->execUp('table1');
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table1']);
 
@@ -205,7 +237,7 @@ final class CommandTest extends TestCase
         } catch (Throwable) {
         }
 
-        $data = $this->command->fetchAppliedMigrations();
+        $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table1']);
     }
@@ -257,9 +289,10 @@ SQL;
     }
 
     /**
+     * @param non-negative-int $version
      * @throws Throwable
      */
-    private function execUp(string $tableName): void
+    private function execUp(string $tableName, int $version = 1): void
     {
         $queryString = <<<SQL
 CREATE TABLE IF NOT EXISTS $tableName
@@ -272,7 +305,7 @@ SQL;
                 dbName: 'test',
                 filename: 'test-' . $tableName,
                 query: $queryString,
-                version: 1,
+                version: $version,
             )
         );
     }

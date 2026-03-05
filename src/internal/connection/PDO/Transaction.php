@@ -36,10 +36,10 @@ final class Transaction implements TransactionInterface
     }
 
     #[Override]
-    public function fetchRecord(string $query): array
+    public function fetchRecord(string $query, array $params = []): array
     {
         $statement = $this->connection->prepare($query);
-        if ($statement->execute()) {
+        if ($statement->execute($params)) {
             /**
              * @var array<non-empty-string, non-negative-int>
              */

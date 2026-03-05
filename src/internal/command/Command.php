@@ -21,14 +21,22 @@ final readonly class Command implements CommandInterface
     }
 
     #[Override]
-    public function fetchAppliedMigrations(Args $args = new Args()): array
+    public function fetchApplied(Args $args = new Args()): array
     {
-        $query = sprintf('SELECT name, version FROM %s ORDER BY atime DESC, name DESC', $this->params->table);
+        $params = [];
+
+        $query = sprintf('SELECT name, version FROM %s', $this->params->table);
+        if ($args->version > 0) {
+            $query .= ' WHERE version=:version';
+            $params['version'] = $args->version;
+        }
+
+        $query .= ' ORDER BY atime DESC, name DESC';
         if ($args->limit > 0) {
             $query .= ' LIMIT ' . $args->limit;
         }
 
-        return $this->connection->fetchRecord($query);
+        return $this->connection->fetchRecord($query, $params);
     }
 
     #[Override]

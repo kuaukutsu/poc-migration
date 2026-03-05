@@ -41,6 +41,7 @@ final class DownCommand extends Command
     {
         $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'Name database');
         $this->addOption('limit', null, InputOption::VALUE_OPTIONAL, 'Number of files processed');
+        $this->addOption('latest-version', null, InputOption::VALUE_NONE, 'Apply to latest version');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Dry run');
     }
 
