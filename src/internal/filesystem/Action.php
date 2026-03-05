@@ -26,18 +26,16 @@ final readonly class Action
     }
 
     /**
-     * @param list<non-empty-string> $listSavedFilename
+     * @param array<non-empty-string, int> $listExcluded
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function up(array $listSavedFilename, Args $args = new Args()): Iterator
+    public function up(array $listExcluded, Args $args = new Args()): Iterator
     {
-        $excludeMap = array_flip($listSavedFilename);
-
         $iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
             $filepath = $matchFilename[0];
-            if (isset($excludeMap[basename($filepath)])) {
+            if (isset($listExcluded[basename($filepath)])) {
                 continue;
             }
 
@@ -56,15 +54,22 @@ final readonly class Action
     }
 
     /**
-     * @param list<non-empty-string> $listSavedFilename
+     * @param array<non-empty-string, int> $listApplied
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function down(array $listSavedFilename): Iterator
+    public function down(array $listApplied, Args $args = new Args()): Iterator
     {
-        foreach ($listSavedFilename as $filename) {
+        $iternum = 0;
+        foreach ($listApplied as $filename => $_) {
+            if ($args->limit > 0 && $iternum >= $args->limit) {
+                return;
+            }
+
             $command = $this->prepareCommand($this->path . $filename, 'down');
             if ($command !== null) {
+                $iternum++;
+
                 yield $filename => $command;
             }
         }

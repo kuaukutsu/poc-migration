@@ -11,9 +11,9 @@ use kuaukutsu\poc\migration\Context;
 interface CommandInterface
 {
     /**
-     * @return list<non-empty-string>
+     * @return array<non-empty-string, non-negative-int>
      */
-    public function fetchSavedMigrationNames(command\Args $args = new command\Args()): array;
+    public function fetchAppliedMigrations(command\Args $args = new command\Args()): array;
 
     /**
      * @return bool true: request completed; false: request rejected

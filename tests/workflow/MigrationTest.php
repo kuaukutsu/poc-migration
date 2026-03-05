@@ -40,7 +40,7 @@ final class MigrationTest extends TestCase
     public function testInit(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 
@@ -48,18 +48,20 @@ final class MigrationTest extends TestCase
     public function testUp(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
-        self::assertEquals('202501021025_account_email.sql', $data[0]);
-        self::assertEquals('202501021024_account_create.sql', $data[1]);
-        self::assertEquals('202501011024_entity_create.sql', $data[2]);
+
+        $names = array_keys($data);
+        self::assertEquals('202501021025_account_email.sql', $names[0]);
+        self::assertEquals('202501021024_account_create.sql', $names[1]);
+        self::assertEquals('202501011024_entity_create.sql', $names[2]);
 
         $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
     }
 
@@ -67,15 +69,15 @@ final class MigrationTest extends TestCase
     public function testDown(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
 
         $this->migrator->down();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 
@@ -83,15 +85,15 @@ final class MigrationTest extends TestCase
     public function testRedo(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
 
         $this->migrator->redo();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
     }
 
@@ -140,11 +142,11 @@ final class MigrationTest extends TestCase
         $command = $driver->makeCommand(new Params(table: 'migration'));
 
         $migrator->init();
-        $data = $command->fetchSavedMigrationNames();
+        $data = $command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $migrator->up(new InputArgs(dryRun: true));
-        $data = $command->fetchSavedMigrationNames();
+        $data = $command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 }

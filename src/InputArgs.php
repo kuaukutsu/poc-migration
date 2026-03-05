@@ -12,8 +12,8 @@ final readonly class InputArgs
     public function __construct(
         public int $limit = 0,
         public bool $dryRun = false,
-        public bool $hasRepeatable = true,
         public ?string $dbName = null,
+        private bool $hasRepeatable = false,
     ) {
         assert($this->limit >= 0);
     }
@@ -22,8 +22,13 @@ final readonly class InputArgs
     {
         return new self(
             dryRun: $this->dryRun,
-            hasRepeatable: $this->hasRepeatable,
             dbName: $this->dbName,
+            hasRepeatable: $this->hasRepeatable,
         );
+    }
+
+    public function hasRepeatable(): bool
+    {
+        return $this->hasRepeatable && $this->dryRun === false;
     }
 }

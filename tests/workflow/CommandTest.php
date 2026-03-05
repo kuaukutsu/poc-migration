@@ -37,7 +37,7 @@ final class CommandTest extends TestCase
     {
         $this->execInitialization();
 
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 
@@ -50,8 +50,8 @@ final class CommandTest extends TestCase
 
         $this->execUp('table1');
 
-        $data = $this->command->fetchSavedMigrationNames();
-        self::assertEquals('test-table1', $data[0]);
+        $data = $this->command->fetchAppliedMigrations();
+        self::assertNotEmpty($data['test-table1']);
     }
 
     /**
@@ -64,17 +64,18 @@ final class CommandTest extends TestCase
         $this->execUp('table1');
         $this->execUp('table2');
 
-        $data = $this->command->fetchSavedMigrationNames();
-        self::assertContains('test-table1', $data);
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(2, $data);
+        self::assertNotEmpty($data['test-table1']);
+        self::assertNotEmpty($data['test-table2']);
 
         $this->execDown('table1');
-        $data = $this->command->fetchSavedMigrationNames();
-        self::assertContains('test-table2', $data);
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(1, $data);
+        self::assertNotEmpty($data['test-table2']);
 
         $this->execDown('table2');
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 
@@ -89,18 +90,19 @@ final class CommandTest extends TestCase
         $this->execUp('table2');
         $this->execUp('table3');
 
-        $data = $this->command->fetchSavedMigrationNames(
+        $data = $this->command->fetchAppliedMigrations(
             new Args(limit: 1)
         );
         self::assertCount(1, $data);
-        self::assertEquals('test-table3', $data[0]);
+        self::assertNotEmpty($data['test-table3']);
 
-        $data = $this->command->fetchSavedMigrationNames(
+        $data = $this->command->fetchAppliedMigrations(
             new Args(limit: 2)
         );
         self::assertCount(2, $data);
-        self::assertEquals('test-table3', $data[0]);
-        self::assertEquals('test-table2', $data[1]);
+        $names = array_keys($data);
+        self::assertEquals('test-table3', $names[0]);
+        self::assertEquals('test-table2', $names[1]);
     }
 
     /**
@@ -166,32 +168,68 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function testRollbackTransaction(): void
+    public function testUpRollbackTransaction(): void
     {
         $this->execInitialization();
 
         $this->execUp('table1');
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(1, $data);
-        self::assertEquals('test-table1', $data[0]);
+        self::assertNotEmpty($data['test-table1']);
 
         try {
             $this->execFailQuery();
         } catch (Throwable) {
         }
 
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(1, $data);
-        self::assertEquals('test-table1', $data[0]);
+        self::assertNotEmpty($data['test-table1']);
     }
 
     /**
      * @throws Throwable
      */
-    public function testPDOException(): void
+    public function testDownRollbackTransaction(): void
+    {
+        $this->execInitialization();
+
+        $this->execUp('table1');
+        $data = $this->command->fetchAppliedMigrations();
+        self::assertCount(1, $data);
+        self::assertNotEmpty($data['test-table1']);
+
+        try {
+            // Моделируем ошибку вставки записи в таблицу логирования с последующим откатом транзакции.
+            $this->execDown('migration');
+        } catch (Throwable) {
+        }
+
+        $data = $this->command->fetchAppliedMigrations();
+        self::assertCount(1, $data);
+        self::assertNotEmpty($data['test-table1']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testUpPDOException(): void
     {
         $this->expectException(PDOException::class);
+        $this->expectExceptionMessage("SQLSTATE[HY000]: General error: 1 no such table");
         $this->execUp('table1');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testDownPDOException(): void
+    {
+        $this->execInitialization();
+
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage("SQLSTATE[HY000]: General error: 1 no such table");
+        $this->execDown('migration');
     }
 
     /**

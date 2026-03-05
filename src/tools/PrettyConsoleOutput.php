@@ -29,9 +29,9 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
         foreach (Event::cases() as $event) {
             $subscriptions[$event->value] = match ($event) {
                 Event::MigrateSuccess => $this->success(...),
-                Event::MigrateError => $this->errorMigration(...),
+                Event::MigrateError => $this->error(...),
                 Event::FilesystemNotice => $this->notice(...),
-                default => $this->error(...),
+                default => $this->failure(...),
             };
         }
 
@@ -48,20 +48,32 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
     public function success(Event $name, MigrateSuccessEvent $event): void
     {
         $this->output->out(
-            sprintf(
-                '[<bold>%s</bold>] %s: %s <green>%s</green>',
-                $event->context->dbName,
-                $event->action,
-                $event->context->filename,
-                $event->context->dryRun ? 'dry-run' : 'done',
-            )
+            match ($event->action) {
+                "up",
+                "down",
+                "repeatable" => sprintf(
+                    '[<bold>%s</bold>] %s: %s, vers: %d <green>%s</green>',
+                    $event->context->dbName,
+                    $event->action,
+                    $event->context->filename,
+                    $event->context->version,
+                    $event->context->dryRun ? 'dry-run' : 'done',
+                ),
+                default => sprintf(
+                    '[<bold>%s</bold>] %s: %s <green>%s</green>',
+                    $event->context->dbName,
+                    $event->action,
+                    $event->context->filename,
+                    $event->context->dryRun ? 'dry-run' : 'done',
+                )
+            }
         );
     }
 
     /**
      * @noinspection PhpUnusedParameterInspection
      */
-    public function errorMigration(Event $name, MigrateErrorEvent $event): void
+    public function error(Event $name, MigrateErrorEvent $event): void
     {
         $this->output->out(
             sprintf(
@@ -79,7 +91,7 @@ final readonly class PrettyConsoleOutput implements EventSubscriberInterface
     /**
      * @noinspection PhpUnusedParameterInspection
      */
-    public function error(Event $name, EventInterface $event): void
+    public function failure(Event $name, EventInterface $event): void
     {
         $this->output->out(
             sprintf(

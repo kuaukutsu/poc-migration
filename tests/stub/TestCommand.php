@@ -17,7 +17,7 @@ final readonly class TestCommand implements CommandInterface
     }
 
     #[Override]
-    public function fetchSavedMigrationNames(command\Args $args = new command\Args()): array
+    public function fetchAppliedMigrations(command\Args $args = new command\Args()): array
     {
         if ($args->limit > 0) {
             return array_slice($this->storage->getMigration(), 0, $args->limit);
@@ -30,7 +30,7 @@ final readonly class TestCommand implements CommandInterface
     public function up(Context $context): bool
     {
         $this->storage->set($context->filename, $context->query);
-        $this->storage->saveMigration($context->filename);
+        $this->storage->saveMigration($context->filename, $context->version);
         return true;
     }
 

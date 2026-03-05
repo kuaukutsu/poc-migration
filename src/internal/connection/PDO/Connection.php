@@ -28,14 +28,14 @@ final readonly class Connection implements ConnectionInterface
     }
 
     #[Override]
-    public function query(string $query): array
+    public function fetchRecord(string $query): array
     {
         $statement = $this->connection->prepare($query);
         if ($statement->execute()) {
             /**
-             * @var list<non-empty-string>
+             * @var array<non-empty-string, non-negative-int>
              */
-            return $statement->fetchAll(PDO::FETCH_COLUMN);
+            return $statement->fetchAll(PDO::FETCH_KEY_PAIR);
         }
 
         return [];

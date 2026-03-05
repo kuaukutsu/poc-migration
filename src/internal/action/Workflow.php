@@ -42,9 +42,9 @@ final readonly class Workflow
     {
         $command = $this->makeCommand($migration);
 
-        $savedMigration = $this->fetchSavedMigration($migration, $command, new command\Args());
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new command\Args());
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->up(
-            $savedMigration,
+            $appliedMigrations,
             filesystem\Args::makeFromInput($args)
         );
 
@@ -62,6 +62,10 @@ final readonly class Workflow
                 EventAction::up,
             );
         }
+
+        if ($args->hasRepeatable()) {
+            $this->repeatable($migration, $command, $version);
+        }
     }
 
     /**
@@ -74,8 +78,8 @@ final readonly class Workflow
     {
         $command = $this->makeCommand($migration);
 
-        $savedMigration = $this->fetchSavedMigration($migration, $command, command\Args::makeFromInput($args));
-        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($savedMigration);
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, command\Args::makeFromInput($args));
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($appliedMigrations);
 
         foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
@@ -84,6 +88,7 @@ final readonly class Workflow
                     dbName: $migration->getName(),
                     filename: $filename,
                     query: $query,
+                    version: $appliedMigrations[$filename],
                     dryRun: $args->dryRun,
                 ),
                 EventAction::down,
@@ -123,31 +128,6 @@ final readonly class Workflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function repeatable(Migration $migration, InputArgs $args): void
-    {
-        $command = $this->makeCommand($migration);
-
-        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->repeatable();
-
-        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $query) {
-            $this->run(
-                $command->exec(...),
-                new Context(
-                    dbName: $migration->getName(),
-                    filename: $filename,
-                    query: $query,
-                    dryRun: $args->dryRun,
-                ),
-                EventAction::repeatable,
-            );
-        }
-    }
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException
-     * @throws ConnectionException
-     */
     public function initialization(Migration $migration): void
     {
         $command = $this->makeCommand($migration);
@@ -177,13 +157,37 @@ final readonly class Workflow
     }
 
     /**
-     * @return list<non-empty-string>
+     * @param non-negative-int $version
+     * @throws ActionException
+     * @throws ConfigurationException
+     * @throws ConnectionException
+     */
+    private function repeatable(Migration $migration, CommandInterface $command, int $version): void
+    {
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->repeatable();
+
+        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $query) {
+            $this->run(
+                $command->exec(...),
+                new Context(
+                    dbName: $migration->getName(),
+                    filename: $filename,
+                    query: $query,
+                    version: $version,
+                ),
+                EventAction::repeatable,
+            );
+        }
+    }
+
+    /**
+     * @return array<non-empty-string, non-negative-int>
      * @throws InitializationException
      */
-    private function fetchSavedMigration(Migration $migration, CommandInterface $command, command\Args $args): array
+    private function getAppliedMigrations(Migration $migration, CommandInterface $command, command\Args $args): array
     {
         try {
-            return $command->fetchSavedMigrationNames($args);
+            return $command->fetchAppliedMigrations($args);
         } catch (Throwable $exception) {
             $this->eventDispatcher->trigger(
                 Event::InitializationError,

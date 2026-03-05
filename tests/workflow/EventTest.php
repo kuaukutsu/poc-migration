@@ -140,6 +140,29 @@ final class EventTest extends TestCase
             $eventSubscriber->get(Event::MigrateSuccess)
         );
 
+        // event-repeatable: does not exist, but does not start in dry-run mode
+        self::assertStringNotContainsString(
+            'does not exist.',
+            $eventSubscriber->get(Event::FilesystemNotice)
+        );
+    }
+
+    public function testMigrationFilesystemNotice(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ]
+        );
+
+        $migrator->init();
+        $migrator->up(new InputArgs(limit: 1, hasRepeatable: true));
+
+        // event-repeatable: does not exist
         self::assertStringContainsString(
             'does not exist.',
             $eventSubscriber->get(Event::FilesystemNotice)

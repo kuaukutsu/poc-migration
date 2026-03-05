@@ -58,7 +58,7 @@ final class FilesUpTest extends TestCase
         self::assertEquals('202501021024_account_create.sql', $files[1]);
     }
 
-    public function testUpLimitSkipZero(): void
+    public function testLimitSkipZero(): void
     {
         $iterator = $this->fs->up([], new Args(limit: 0));
         self::assertTrue($iterator->valid());
@@ -96,7 +96,7 @@ final class FilesUpTest extends TestCase
 
     public function testFilter(): void
     {
-        $savedFilenames = ['202501011024_entity_create.sql'];
+        $savedFilenames = ['202501011024_entity_create.sql' => 1];
 
         $listFilename = [];
         foreach ($this->fs->up($savedFilenames) as $filename => $_) {
@@ -108,7 +108,7 @@ final class FilesUpTest extends TestCase
 
     public function testFilterNotMatch(): void
     {
-        $savedFilenames = ['202501011024_not_match_filename.sql'];
+        $savedFilenames = ['202501011024_not_match_filename.sql' => 1];
 
         $listFilename = [];
         foreach ($this->fs->up($savedFilenames) as $filename => $_) {

@@ -46,10 +46,6 @@ final readonly class Migrator implements MigratorInterface
     {
         foreach ($this->selectDb($args) as $migration) {
             $this->actionWorkflow->up($migration, $args);
-
-            if ($args->hasRepeatable) {
-                $this->actionWorkflow->repeatable($migration, $args);
-            }
         }
     }
 

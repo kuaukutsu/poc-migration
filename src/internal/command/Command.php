@@ -21,15 +21,14 @@ final readonly class Command implements CommandInterface
     }
 
     #[Override]
-    public function fetchSavedMigrationNames(Args $args = new Args()): array
+    public function fetchAppliedMigrations(Args $args = new Args()): array
     {
-        // SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "migration" does not exist
-        $query = sprintf('SELECT name FROM %s ORDER BY atime DESC, name DESC', $this->params->table);
+        $query = sprintf('SELECT name, version FROM %s ORDER BY atime DESC, name DESC', $this->params->table);
         if ($args->limit > 0) {
             $query .= ' LIMIT ' . $args->limit;
         }
 
-        return $this->connection->query($query);
+        return $this->connection->fetchRecord($query);
     }
 
     #[Override]

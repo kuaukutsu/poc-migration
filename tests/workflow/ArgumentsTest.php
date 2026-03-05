@@ -37,73 +37,75 @@ final class ArgumentsTest extends TestCase
     public function testUpWithLimit(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up(new InputArgs(limit: 1));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(1, $data);
-        self::assertEquals('202501011024_entity_create.sql', $data[0]);
+        self::assertNotEmpty($data['202501011024_entity_create.sql']);
 
         $this->migrator->up(new InputArgs(limit: 2));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
-        self::assertEquals('202501021025_account_email.sql', $data[0]);
-        self::assertEquals('202501021024_account_create.sql', $data[1]);
-        self::assertEquals('202501011024_entity_create.sql', $data[2]);
+
+        $names = array_keys($data);
+        self::assertEquals('202501021025_account_email.sql', $names[0]);
+        self::assertEquals('202501021024_account_create.sql', $names[1]);
+        self::assertEquals('202501011024_entity_create.sql', $names[2]);
     }
 
     public function testDownWithLimit(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up();
 
         $this->migrator->down(new InputArgs(limit: 1));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(2, $data);
 
         $this->migrator->down(new InputArgs(limit: 2));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 
     public function testWithDryRun(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
 
         $this->migrator->down(new InputArgs(dryRun: true));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(3, $data);
 
         $this->migrator->down();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
     }
 
     public function testWithDb(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->migrator->up(new InputArgs(limit: 2, dbName: 'sqlite/memory'));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertCount(2, $data);
     }
 
     public function testWithUnknownDb(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchAppliedMigrations();
         self::assertEmpty($data);
 
         $this->expectException(ConfigurationException::class);
