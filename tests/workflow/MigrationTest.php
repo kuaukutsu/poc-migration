@@ -92,9 +92,20 @@ final class MigrationTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
+        $version = (int)current($data);
+        self::assertGreaterThan(0, $version);
+
+        usleep(10_000);
+
         $this->migrator->redo();
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
+
+        $versionNew = (int)current($data);
+        self::assertGreaterThan(0, $versionNew);
+
+        // новая версия больше старой
+        self::assertGreaterThan($version, $versionNew);
     }
 
     public function testInitializationException(): void

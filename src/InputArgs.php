@@ -15,6 +15,7 @@ final readonly class InputArgs
         public int $version = 0,
         public bool $dryRun = false,
         public ?string $dbName = null,
+        public bool $exactlyAll = false,
         private bool $hasRepeatable = false,
         private bool $applyLatestVersion = false,
     ) {
@@ -28,6 +29,7 @@ final readonly class InputArgs
             version: $this->version,
             dryRun: $this->dryRun,
             dbName: $this->dbName,
+            exactlyAll: $this->exactlyAll,
             hasRepeatable: $this->hasRepeatable,
             applyLatestVersion: $this->applyLatestVersion,
         );

@@ -51,17 +51,25 @@ final readonly class Workflow
 
         $version = generateVersion();
         foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
-            $this->run(
-                $command->up(...),
-                new Context(
-                    dbName: $migration->getName(),
-                    filename: $filename,
-                    query: $query,
-                    version: $version,
-                    dryRun: $args->dryRun,
-                ),
-                EventAction::up,
-            );
+            try {
+                $this->run(
+                    $command->up(...),
+                    new Context(
+                        dbName: $migration->getName(),
+                        filename: $filename,
+                        query: $query,
+                        version: $version,
+                        dryRun: $args->dryRun,
+                    ),
+                    EventAction::up,
+                );
+            } catch (ActionException $exception) {
+                if ($args->exactlyAll) {
+                    $this->down($migration, new InputArgs(version: $version));
+                }
+
+                throw $exception;
+            }
         }
 
         if ($args->hasRepeatable()) {

@@ -36,6 +36,10 @@ trait CommandOptions
             $options['applyLatestVersion'] = $this->getOptionApplyLatestVersion($input);
         }
 
+        if ($input->hasOption('exactly-all')) {
+            $options['exactlyAll'] = $this->getOptionExactlyAll($input);
+        }
+
         return new InputArgs(...$options);
     }
 
@@ -68,6 +72,14 @@ trait CommandOptions
     private function getOptionApplyLatestVersion(InputInterface $input): bool
     {
         return $input->getOption('latest-version') === true;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getOptionExactlyAll(InputInterface $input): bool
+    {
+        return $input->getOption('exactly-all') === true;
     }
 
     /**
