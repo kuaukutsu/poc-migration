@@ -103,13 +103,15 @@ final class EventTest extends TestCase
         } catch (Throwable) {
         }
 
+        $version = substr((string)time(), 0, -2);
+
         self::assertStringContainsString(
-            '202501011024_entity_create.sql',
+            '202501011024_entity_create.sql, vers: ' . $version,
             $eventSubscriber->get(Event::MigrateSuccess)
         );
 
         self::assertStringContainsString(
-            '202501021025_account_error.sql',
+            '202501021025_account_error.sql, vers: ' . $version,
             $eventSubscriber->get(Event::MigrateError)
         );
     }
@@ -138,6 +140,29 @@ final class EventTest extends TestCase
             $eventSubscriber->get(Event::MigrateSuccess)
         );
 
+        // event-repeatable: does not exist, but does not start in dry-run mode
+        self::assertStringNotContainsString(
+            'does not exist.',
+            $eventSubscriber->get(Event::FilesystemNotice)
+        );
+    }
+
+    public function testMigrationFilesystemNotice(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ]
+        );
+
+        $migrator->init();
+        $migrator->up(new InputArgs(limit: 1, hasRepeatable: true));
+
+        // event-repeatable: does not exist
         self::assertStringContainsString(
             'does not exist.',
             $eventSubscriber->get(Event::FilesystemNotice)

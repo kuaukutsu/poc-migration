@@ -37,76 +37,143 @@ final class ArgumentsTest extends TestCase
     public function testUpWithLimit(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up(new InputArgs(limit: 1));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
-        self::assertEquals('202501011024_entity_create.sql', $data[0]);
+        self::assertNotEmpty($data['202501011024_entity_create.sql']);
 
         $this->migrator->up(new InputArgs(limit: 2));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
-        self::assertEquals('202501021025_account_email.sql', $data[0]);
-        self::assertEquals('202501021024_account_create.sql', $data[1]);
-        self::assertEquals('202501011024_entity_create.sql', $data[2]);
+
+        $names = array_keys($data);
+        self::assertEquals('202501021025_account_email.sql', $names[0]);
+        self::assertEquals('202501021024_account_create.sql', $names[1]);
+        self::assertEquals('202501011024_entity_create.sql', $names[2]);
     }
 
     public function testDownWithLimit(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up();
 
         $this->migrator->down(new InputArgs(limit: 1));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
 
         $this->migrator->down(new InputArgs(limit: 2));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
 
     public function testWithDryRun(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
         $this->migrator->down(new InputArgs(dryRun: true));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
         $this->migrator->down();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
 
     public function testWithDb(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->migrator->up(new InputArgs(limit: 2, dbName: 'sqlite/memory'));
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
     }
 
     public function testWithUnknownDb(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchSavedMigrationNames();
+        $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
         $this->expectException(ConfigurationException::class);
         $this->migrator->up(new InputArgs(dbName: 'sqlite/unknown'));
+    }
+
+    public function testDownWithVersion(): void
+    {
+        $this->migrator->init();
+        $data = $this->command->fetchApplied();
+        self::assertEmpty($data);
+
+        $this->migrator->up(new InputArgs(limit: 2));
+        $data = $this->command->fetchApplied();
+        self::assertCount(2, $data);
+
+        $version = (int)current($data);
+        self::assertGreaterThan(0, $version);
+
+        // not found version
+        $this->migrator->down(new InputArgs(version: 2));
+        $data = $this->command->fetchApplied();
+        self::assertCount(2, $data);
+
+        // down with version
+        $this->migrator->down(new InputArgs(version: $version));
+        $data = $this->command->fetchApplied();
+        self::assertEmpty($data);
+    }
+
+    public function testDownWithLatestVersion(): void
+    {
+        $this->migrator->init();
+        $data = $this->command->fetchApplied();
+        self::assertEmpty($data);
+
+        $args = new InputArgs(limit: 1);
+        self::assertFalse($args->hasApplyLatestVersion());
+
+        $this->migrator->up($args);
+        $data = $this->command->fetchApplied();
+        self::assertCount(1, $data);
+
+        usleep(10_000);
+
+        $this->migrator->up($args);
+        $data = $this->command->fetchApplied();
+        self::assertCount(2, $data);
+
+        $this->migrator->up($args);
+        $data = $this->command->fetchApplied();
+        self::assertCount(3, $data);
+
+        $args = new InputArgs();
+        self::assertFalse($args->hasApplyLatestVersion());
+
+        $args = new InputArgs(version: 111, applyLatestVersion: true);
+        self::assertFalse($args->hasApplyLatestVersion());
+
+        $args = new InputArgs(limit: 1, applyLatestVersion: true);
+        self::assertFalse($args->hasApplyLatestVersion());
+
+        $args = new InputArgs(applyLatestVersion: true);
+        self::assertTrue($args->hasApplyLatestVersion());
+
+        // down with latest version
+        $this->migrator->down($args);
+        $data = $this->command->fetchApplied();
+        self::assertNotEmpty($data);
     }
 }

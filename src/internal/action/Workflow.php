@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration\internal\action;
 
 use Iterator;
 use Throwable;
+use DateTimeImmutable;
 use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventAction;
@@ -42,23 +43,37 @@ final readonly class Workflow
     {
         $command = $this->makeCommand($migration);
 
-        $savedMigration = $this->fetchSavedMigration($migration, $command, new command\Args());
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new command\Args());
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->up(
-            $savedMigration,
+            $appliedMigrations,
             filesystem\Args::makeFromInput($args)
         );
 
-        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
-            $this->run(
-                $command->up(...),
-                new Context(
-                    dbName: $migration->getName(),
-                    filename: $filename,
-                    queryString: $queryString,
-                    dryRun: $args->dryRun,
-                ),
-                EventAction::up,
-            );
+        $version = generateVersion();
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
+            try {
+                $this->run(
+                    $command->up(...),
+                    new Context(
+                        dbName: $migration->getName(),
+                        filename: $filename,
+                        query: $query,
+                        version: $version,
+                        dryRun: $args->dryRun,
+                    ),
+                    EventAction::up,
+                );
+            } catch (ActionException $exception) {
+                if ($args->exactlyAll) {
+                    $this->down($migration, new InputArgs(version: $version));
+                }
+
+                throw $exception;
+            }
+        }
+
+        if ($args->hasRepeatable()) {
+            $this->repeatable($migration, $command, $version);
         }
     }
 
@@ -72,16 +87,17 @@ final readonly class Workflow
     {
         $command = $this->makeCommand($migration);
 
-        $savedMigration = $this->fetchSavedMigration($migration, $command, command\Args::makeFromInput($args));
-        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($savedMigration);
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, command\Args::makeFromInput($args));
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($appliedMigrations);
 
-        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
                 $command->down(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
+                    version: $appliedMigrations[$filename],
                     dryRun: $args->dryRun,
                 ),
                 EventAction::down,
@@ -102,41 +118,16 @@ final readonly class Workflow
             filesystem\Args::makeFromInput($args)
         );
 
-        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $queryString) {
+        foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
             $this->run(
                 $command->exec(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
                     dryRun: $args->dryRun,
                 ),
                 EventAction::fixture,
-            );
-        }
-    }
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException
-     * @throws ConnectionException
-     */
-    public function repeatable(Migration $migration, InputArgs $args): void
-    {
-        $command = $this->makeCommand($migration);
-
-        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->repeatable();
-
-        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $queryString) {
-            $this->run(
-                $command->exec(...),
-                new Context(
-                    dbName: $migration->getName(),
-                    filename: $filename,
-                    queryString: $queryString,
-                    dryRun: $args->dryRun,
-                ),
-                EventAction::repeatable,
             );
         }
     }
@@ -161,13 +152,13 @@ final readonly class Workflow
             throw $exception;
         }
 
-        foreach ($files as $filename => $queryString) {
+        foreach ($files as $filename => $query) {
             $this->run(
                 $command->exec(...),
                 new Context(
                     dbName: $migration->getName(),
                     filename: $filename,
-                    queryString: $queryString,
+                    query: $query,
                 ),
                 EventAction::initialization,
             );
@@ -175,13 +166,44 @@ final readonly class Workflow
     }
 
     /**
-     * @return list<non-empty-string>
+     * @param non-negative-int $version
+     * @throws ActionException
+     * @throws ConfigurationException
+     * @throws ConnectionException
+     */
+    private function repeatable(Migration $migration, CommandInterface $command, int $version): void
+    {
+        $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->repeatable();
+
+        foreach ($this->iteratorHandler($migration, $fsHandler, false) as $filename => $query) {
+            $this->run(
+                $command->exec(...),
+                new Context(
+                    dbName: $migration->getName(),
+                    filename: $filename,
+                    query: $query,
+                    version: $version,
+                ),
+                EventAction::repeatable,
+            );
+        }
+    }
+
+    /**
+     * @return array<non-empty-string, non-negative-int>
      * @throws InitializationException
      */
-    private function fetchSavedMigration(Migration $migration, CommandInterface $command, command\Args $args): array
+    private function getAppliedMigrations(Migration $migration, CommandInterface $command, command\Args $args): array
     {
         try {
-            return $command->fetchSavedMigrationNames($args);
+            if ($args->applyLatestVersion) {
+                $appliedMigrations = $command->fetchApplied(new command\Args(limit: 1));
+                if (count($appliedMigrations) === 1) {
+                    $args = $args->withVersion(current($appliedMigrations));
+                }
+            }
+
+            return $command->fetchApplied($args);
         } catch (Throwable $exception) {
             $this->eventDispatcher->trigger(
                 Event::InitializationError,
@@ -193,21 +215,13 @@ final readonly class Workflow
     }
 
     /**
-     * @param callable(non-empty-string $queryString, non-empty-string $filename):bool $handler
+     * @param callable(Context $context):bool $handler
      * @throws ActionException
      */
     private function run(callable $handler, Context $context, EventAction $action): void
     {
-        if ($context->dryRun) {
-            $this->eventDispatcher->trigger(
-                Event::MigrateSuccess,
-                new MigrateSuccessEvent($action->name, $context)
-            );
-            return;
-        }
-
         try {
-            $handler($context->queryString, $context->filename);
+            $handler($context);
             $this->eventDispatcher->trigger(
                 Event::MigrateSuccess,
                 new MigrateSuccessEvent($action->name, $context)
@@ -277,4 +291,16 @@ final readonly class Workflow
             throw $exception;
         }
     }
+}
+
+/**
+ * Unixtime + milleseconds
+ * @return positive-int
+ */
+function generateVersion(): int
+{
+    /**
+     * @var positive-int
+     */
+    return (int)substr((new DateTimeImmutable())->format('Uv'), 0, -1);
 }

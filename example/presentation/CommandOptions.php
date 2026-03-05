@@ -28,8 +28,16 @@ trait CommandOptions
             $options['dbName'] = $this->getOptionDbName($input);
         }
 
-        if ($input->hasOption('without-repeatable')) {
-            $options['hasRepeatable'] = $this->getOptionWithoutRepeatable($input) === false; // inversion
+        if ($input->hasOption('with-repeatable')) {
+            $options['hasRepeatable'] = $this->getOptionWithRepeatable($input);
+        }
+
+        if ($input->hasOption('latest-version')) {
+            $options['applyLatestVersion'] = $this->getOptionApplyLatestVersion($input);
+        }
+
+        if ($input->hasOption('exactly-all')) {
+            $options['exactlyAll'] = $this->getOptionExactlyAll($input);
         }
 
         return new InputArgs(...$options);
@@ -61,9 +69,25 @@ trait CommandOptions
     /**
      * @throws InvalidArgumentException
      */
-    private function getOptionWithoutRepeatable(InputInterface $input): bool
+    private function getOptionApplyLatestVersion(InputInterface $input): bool
     {
-        return $input->getOption('without-repeatable') === true;
+        return $input->getOption('latest-version') === true;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getOptionExactlyAll(InputInterface $input): bool
+    {
+        return $input->getOption('exactly-all') === true;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getOptionWithRepeatable(InputInterface $input): bool
+    {
+        return $input->getOption('with-repeatable') === true;
     }
 
     /**

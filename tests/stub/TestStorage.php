@@ -9,7 +9,7 @@ use RuntimeException;
 final class TestStorage
 {
     /**
-     * @var array<non-empty-string, true>
+     * @var array<non-empty-string, non-negative-int>
      */
     private array $table = [];
 
@@ -19,24 +19,25 @@ final class TestStorage
     private array $memory = [];
 
     /**
-     * @return list<non-empty-string>
+     * @return array<non-empty-string, non-negative-int>
      */
     public function getMigration(): array
     {
-        return array_keys($this->table);
+        return $this->table;
     }
 
     /**
      * @param non-empty-string $key
+     * @param non-negative-int $version
      * @throws RuntimeException
      */
-    public function saveMigration(string $key): void
+    public function saveMigration(string $key, int $version): void
     {
         if (array_key_exists($key, $this->table)) {
             throw new RuntimeException("record exists");
         }
 
-        $this->table[$key] = true;
+        $this->table[$key] = $version;
     }
 
     /**

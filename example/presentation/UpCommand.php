@@ -40,9 +40,32 @@ final class UpCommand extends Command
     protected function configure(): void
     {
         $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'Name database');
-        $this->addOption('limit', null, InputOption::VALUE_OPTIONAL, 'Number of files processed');
-        $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Dry run');
-        $this->addOption('without-repeatable', null, InputOption::VALUE_NONE, 'Repeatable disable');
+        $this->addOption(
+            'limit',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Sets the maximum number of migrations to be executed or rolled back.'
+        );
+        $this->addOption(
+            'dry-run',
+            null,
+            InputOption::VALUE_NONE,
+            'Simulates the migration process without applying any changes to the database.'
+        );
+        $this->addOption(
+            'exactly-all',
+            null,
+            InputOption::VALUE_NONE,
+            'Ensures atomic execution of all migrations. ' .
+            'If any migration fails, the entire batch is rolled back, leaving the database unchanged.'
+        );
+        $this->addOption(
+            'with-repeatable',
+            null,
+            InputOption::VALUE_NONE,
+            'Includes migrations from the repeatable directory in the execution. ' .
+            'These scripts typically run every time their content changes, regardless of versioning.'
+        );
     }
 
     #[Override]

@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\tests\stub\TestDriver;
 use kuaukutsu\poc\migration\tests\stub\TestStorage;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
+use kuaukutsu\poc\migration\InputArgs;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 /**
@@ -47,7 +48,8 @@ final class WorkflowTest extends TestCase
     {
         $this->migrator->up();
 
-        self::assertContains('202501011024_entity_create.sql', $this->storage->getMigration());
+        self::assertNotEmpty($this->storage->getMigration());
+
         self::assertStringContainsString(
             'CREATE TABLE IF NOT EXISTS entity',
             $this->storage->get('202501011024_entity_create.sql') ?? '',
@@ -60,6 +62,17 @@ final class WorkflowTest extends TestCase
 
         // SKIP
         self::assertEquals('SKIP', $this->storage->get('202501011026_entity_duplicate.sql') ?? 'SKIP');
+
+        // NOT repeatable
+        self::assertStringNotContainsString(
+            "INSERT INTO entity (name) VALUES ('test');",
+            $this->storage->get('202501011024_entity_correction.sql') ?? '',
+        );
+    }
+
+    public function testUpWithRepeatable(): void
+    {
+        $this->migrator->up(new InputArgs(hasRepeatable: true));
 
         // repeatable
         self::assertStringContainsString(

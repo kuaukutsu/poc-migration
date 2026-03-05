@@ -40,8 +40,24 @@ final class DownCommand extends Command
     protected function configure(): void
     {
         $this->addOption('db', null, InputOption::VALUE_OPTIONAL, 'Name database');
-        $this->addOption('limit', null, InputOption::VALUE_OPTIONAL, 'Number of files processed');
-        $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Dry run');
+        $this->addOption(
+            'limit',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Sets the maximum number of migrations to be executed or rolled back.'
+        );
+        $this->addOption(
+            'latest-version',
+            null,
+            InputOption::VALUE_NONE,
+            'Targets the most recent version for rollback.'
+        );
+        $this->addOption(
+            'dry-run',
+            null,
+            InputOption::VALUE_NONE,
+            'Simulates the migration process without applying any changes to the database.'
+        );
     }
 
     #[Override]

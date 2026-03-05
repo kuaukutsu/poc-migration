@@ -36,14 +36,14 @@ final class Transaction implements TransactionInterface
     }
 
     #[Override]
-    public function query(string $query): array
+    public function fetchRecord(string $query, array $params = []): array
     {
         $statement = $this->connection->prepare($query);
-        if ($statement->execute()) {
+        if ($statement->execute($params)) {
             /**
-             * @var list<non-empty-string>
+             * @var array<non-empty-string, non-negative-int>
              */
-            return $statement->fetchAll(PDO::FETCH_COLUMN);
+            return $statement->fetchAll(PDO::FETCH_KEY_PAIR);
         }
 
         return [];
