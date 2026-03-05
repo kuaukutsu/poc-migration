@@ -37,7 +37,8 @@ jobs:
         run: vendor/bin/phpunit \
           --configuration phpunit.xml.dist \
           --coverage-xml=build/coverage-xml \
-          --coverage-clover=build/clover.xml
+          --coverage-clover=build/clover.xml \
+          --log-junit=build/phpunit.junit.xml
 
       - name: Infection Mutation Testing
         env:

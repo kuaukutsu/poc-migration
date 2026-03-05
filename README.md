@@ -209,11 +209,7 @@ If any migration fails, the entire batch is rolled back, leaving the database un
 To run static analysis:
 
 ```shell
-make psalm
-```
-
-```shell
-make phpstan
+make check
 ```
 
 ### Unit testing
@@ -221,5 +217,5 @@ make phpstan
 The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
 
 ```shell
-make phpunit
+make tests
 ```

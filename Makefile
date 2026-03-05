@@ -82,8 +82,27 @@ infection:
 .PHONY: infection
 
 tests:
-	- make phpunit
-	- make infection
+	- docker build --target tests -t app_cli .docker/php/cli
+	- docker run --init -it --rm \
+		--add-host=host.docker.internal:host-gateway \
+		-u $(USER) \
+		-v "$$(pwd):/app" \
+		-w /app \
+		app_cli ./vendor/bin/phpunit \
+			--configuration phpunit.xml.dist \
+			--coverage-xml=/app/runtime/coverage/coverage-xml \
+			--coverage-clover=/app/runtime/coverage/clover.xml \
+			--log-junit=/app/runtime/coverage/phpunit.junit.xml
+	- docker run --init -it --rm \
+		--add-host=host.docker.internal:host-gateway \
+		-u $(USER) \
+		-v "$$(pwd):/app" \
+		-w /app \
+		app_cli ./vendor/bin/infection \
+			--coverage=/app/runtime/coverage \
+			--threads=max \
+			--skip-initial-tests
+	- docker image rm -f app_cli
 .PHONY: tests
 
 ## App
