@@ -5,6 +5,7 @@
 [![License](http://poser.pugx.org/kuaukutsu/poc-migration/license)](https://packagist.org/packages/kuaukutsu/poc-migration)
 [![Psalm Level](https://shepherd.dev/github/kuaukutsu/poc-migration/level.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
 [![Psalm Type Coverage](https://shepherd.dev/github/kuaukutsu/poc-migration/coverage.svg)](https://shepherd.dev/github/kuaukutsu/poc-migration)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fkuaukutsu%2Fpoc-migration%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/kuaukutsu/poc-migration/main)
 
 Консольная программа для управления миграциями.
 

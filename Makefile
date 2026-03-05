@@ -70,7 +70,6 @@ rector: ## rector
 		ghcr.io/kuaukutsu/php:${PHP_VERSION}-cli \
 		./vendor/bin/rector
 
-.PHONY: infection
 infection:
 	- docker build --target tests -t app_cli .docker/php/cli
 	- docker run --init -it --rm \
@@ -80,7 +79,12 @@ infection:
 		-w /app \
 		app_cli ./vendor/bin/infection
 	- docker image rm -f app_cli
+.PHONY: infection
 
+tests:
+	- make phpunit
+	- make infection
+.PHONY: tests
 
 ## App
 

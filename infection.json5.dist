@@ -13,6 +13,9 @@
     "@default": true
   },
   "logs": {
-    "text": "runtime/logs/infection.log"
+    "text": "runtime/logs/infection.log",
+    "stryker": {
+      "report": "/^main$/"
+    }
   }
 }
