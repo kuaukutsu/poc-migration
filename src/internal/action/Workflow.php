@@ -294,5 +294,5 @@ function generateVersion(): int
     /**
      * @var positive-int
      */
-    return (int)(new DateTimeImmutable())->format('Uv');
+    return (int)substr((new DateTimeImmutable())->format('Uv'), 0, -1);
 }

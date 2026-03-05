@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS "%SYSTEM_TABLE%"
 (
     "name"  varchar(512) NOT NULL PRIMARY KEY,
-    "version" int DEFAULT 0,
+    "version" bigint DEFAULT 0,
     "atime" timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
-CREATE INDEX IF NOT EXISTS "i_%SYSTEM_TABLE%_version" ON %SYSTEM_TABLE% USING btree ("version");
+CREATE INDEX IF NOT EXISTS "i_%SYSTEM_TABLE%_version" ON %SYSTEM_TABLE% ("version");

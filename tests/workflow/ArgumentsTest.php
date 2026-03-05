@@ -149,7 +149,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
 
-        usleep(1000);
+        usleep(10_000);
 
         $this->migrator->up($args);
         $data = $this->command->fetchApplied();
