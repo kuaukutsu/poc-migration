@@ -57,9 +57,6 @@ final readonly class Migrator implements MigratorInterface
         }
     }
 
-    /**
-     * @infection-ignore-all
-     */
     #[Override]
     public function redo(InputArgs $args = new InputArgs()): void
     {
@@ -72,6 +69,27 @@ final readonly class Migrator implements MigratorInterface
     {
         foreach ($this->selectDb($args) as $migration) {
             $this->actionWorkflow->fixture($migration, $args);
+        }
+    }
+
+    #[Override]
+    public function create(InputArgs $args = new InputArgs()): void
+    {
+        if ($args->dbName === null) {
+            throw new ConfigurationException(
+                "DBName must be declared."
+            );
+        }
+
+        if ($args->migrationName === null) {
+            throw new ConfigurationException(
+                "Migration Name must be declared."
+            );
+        }
+
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->create($migration, $args->migrationName);
+            break;
         }
     }
 

@@ -3,6 +3,7 @@
     <description>The PSR12 coding standard.</description>
     <rule ref="PSR12"/>
 
+    <file>example</file>
     <file>src</file>
     <file>tests</file>
 

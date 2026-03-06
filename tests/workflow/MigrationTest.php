@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
-use kuaukutsu\poc\migration\InputArgs;
 use Override;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\driver\PdoDriver;
-use kuaukutsu\poc\migration\exception\ActionException;
-use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 
@@ -29,7 +25,7 @@ final class MigrationTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $driver = new PdoDriver(
+        $driver = new Driver(
             dsn: 'sqlite::memory:',
         );
 
@@ -104,49 +100,19 @@ final class MigrationTest extends TestCase
         self::assertGreaterThan($version, $versionNew);
     }
 
-    public function testInitializationException(): void
+    #[Depends('testInit')]
+    public function testFixture(): void
     {
-        $this->expectException(InitializationException::class);
-        $this->expectExceptionMessage('Error reading system data.');
+        $this->migrator->init();
 
         $this->migrator->up();
-    }
+        $data = $this->command->fetchApplied();
+        $countMigration = count($data);
+        self::assertGreaterThan(0, $countMigration);
 
-    public function testConnectionException(): void
-    {
-        $driver = new PdoDriver(dsn: 'mysql:host=mysql;dbname=main');
-        $migrator = MigratorFactory::makeFromEvent($driver);
-
-        $this->expectException(ConnectionException::class);
-        $this->expectExceptionMessageMatches('~PDO_MYSQL:\w+~');
-
-        $migrator->init();
-    }
-
-    public function testActionException(): void
-    {
-        $driver = new PdoDriver(dsn: 'sqlite::memory:');
-        $migrator = MigratorFactory::makeFromEvent($driver);
-
-        $this->expectException(ActionException::class);
-        $this->expectExceptionMessage(
-            '202501021025_account_error.sql: SQLSTATE[HY000]: General error: 1 no such table: account'
-        );
-
-        $migrator->init();
-        $migrator->up();
-    }
-
-    public function testActionNotExceptionDryRun(): void
-    {
-        $driver = new PdoDriver(dsn: 'sqlite::memory:');
-        $migrator = MigratorFactory::makeFromEvent($driver);
-        $command = $driver->makeCommand(new Params(table: 'migration'));
-
-        $migrator->init();
-
-        $migrator->up(new InputArgs(dryRun: true));
-        $data = $command->fetchApplied();
-        self::assertEmpty($data);
+        // applied fixture no saved
+        $this->migrator->fixture();
+        $data = $this->command->fetchApplied();
+        self::assertCount($countMigration, $data);
     }
 }

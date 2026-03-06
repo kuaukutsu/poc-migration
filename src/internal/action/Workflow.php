@@ -166,6 +166,29 @@ final readonly class Workflow
     }
 
     /**
+     * @param non-empty-string $name
+     * @throws ConfigurationException
+     */
+    public function create(Migration $migration, string $name): void
+    {
+        $factory = $migration->templFactory;
+
+        try {
+            (new filesystem\Action($migration->path))->create(
+                $factory->makeName($name),
+                $factory->makeBody(),
+            );
+        } catch (ConfigurationException $exception) {
+            $this->eventDispatcher->trigger(
+                Event::FilesystemError,
+                new ExceptionEvent($migration->getName(), $exception)
+            );
+
+            throw $exception;
+        }
+    }
+
+    /**
      * @param non-negative-int $version
      * @throws ActionException
      * @throws ConfigurationException

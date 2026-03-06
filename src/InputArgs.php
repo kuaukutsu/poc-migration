@@ -4,17 +4,23 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration;
 
+/**
+ * @api
+ */
 final readonly class InputArgs
 {
     /**
      * @param non-negative-int $limit
      * @param non-negative-int $version
+     * @param ?non-empty-string $dbName
+     * @param ?non-empty-string $migrationName
      */
     public function __construct(
         public int $limit = 0,
         public int $version = 0,
         public bool $dryRun = false,
         public ?string $dbName = null,
+        public ?string $migrationName = null,
         public bool $exactlyAll = false,
         private bool $hasRepeatable = false,
         private bool $applyLatestVersion = false,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use kuaukutsu\poc\migration\Migration;
 use kuaukutsu\poc\migration\MigrationCollection;
-use kuaukutsu\poc\migration\driver\PdoDriver;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\Migrator;
 use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 
@@ -14,7 +14,7 @@ $migrator = new Migrator(
     collection: new MigrationCollection(
         new Migration(
             path: __DIR__ . '/migration/mysql/main',
-            driver: new PdoDriver(
+            driver: new Driver(
                 dsn: 'mysql:host=mysql;dbname=main',
                 username: 'dbuser',
                 password: 'dbpassword',

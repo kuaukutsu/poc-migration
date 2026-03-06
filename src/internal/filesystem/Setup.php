@@ -22,19 +22,17 @@ final readonly class Setup
     /**
      * @param non-empty-string $path
      * @param non-empty-string $table
-     * @infection-ignore-all
      */
     public function __construct(
         string $path,
         private string $table,
     ) {
-        $this->path = rtrim(trim($path), '/') . '/';
+        $this->path = normalizePath($path);
     }
 
     /**
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException if path not exist
-     * @psalm-suppress MoreSpecificReturnType
      */
     public function all(): Iterator
     {
@@ -45,14 +43,15 @@ final readonly class Setup
         }
 
         /**
-         * @var Iterator<SplFileInfo> $iterator
+         * @var iterable<SplFileInfo> $iterator
          */
         $iterator = new GlobIterator($this->path . '*.sql');
         foreach ($iterator as $fileInfo) {
+            /** @var non-empty-string $filename */
+            $filename = $fileInfo->getFilename();
             $queryString = $this->prepareCommand($fileInfo->getPathname());
             if ($queryString !== null) {
-                /** @phpstan-ignore generator.keyType */
-                yield $fileInfo->getFilename() => $queryString;
+                yield $filename => $queryString;
             }
         }
     }

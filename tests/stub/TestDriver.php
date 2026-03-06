@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\tests\stub;
 
 use Override;
-use kuaukutsu\poc\migration\driver\DriverInterface;
-use kuaukutsu\poc\migration\driver\DriverType;
+use kuaukutsu\poc\migration\connection\DriverInterface;
+use kuaukutsu\poc\migration\connection\DriverType;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 

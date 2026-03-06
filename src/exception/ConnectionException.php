@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\exception;
 
 use Throwable;
-use kuaukutsu\poc\migration\driver\DriverType;
+use kuaukutsu\poc\migration\connection\DriverType;
 
 final class ConnectionException extends MigratorException
 {

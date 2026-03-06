@@ -6,7 +6,7 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Throwable;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\driver\PdoDriver;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\InputArgs;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
@@ -18,7 +18,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -42,7 +42,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'mysql:host=example;dbname=example',
             ),
             [
@@ -65,7 +65,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -88,7 +88,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -120,7 +120,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -151,7 +151,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -173,7 +173,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -197,7 +197,7 @@ final class EventTest extends TestCase
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -217,11 +217,11 @@ final class EventTest extends TestCase
         );
     }
 
-    public function testDirectoryDoesNotExistError(): void
+    public function testFixtureDirectoryDoesNotExistError(): void
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
+            new Driver(
                 dsn: 'sqlite::memory:',
             ),
             [
@@ -237,6 +237,31 @@ final class EventTest extends TestCase
 
         self::assertStringContainsString(
             'does not exist',
+            $eventSubscriber->get(Event::FilesystemError)
+        );
+    }
+
+    public function testCreateDirectoryDoesNotExistError(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new Driver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ],
+            dirname(__DIR__) . '/migration/sqlite/non'
+        );
+
+        $migrator->init();
+        try {
+            $migrator->create(new InputArgs(dbName: 'sqlite/memory', migrationName: 'test'));
+        } catch (Throwable) {
+        }
+
+        self::assertStringContainsString(
+            'is not exists.',
             $eventSubscriber->get(Event::FilesystemError)
         );
     }

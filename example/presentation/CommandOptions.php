@@ -40,6 +40,10 @@ trait CommandOptions
             $options['exactlyAll'] = $this->getOptionExactlyAll($input);
         }
 
+        if ($input->hasArgument('name')) {
+            $options['migrationName'] = $this->getMigrationName($input);
+        }
+
         return new InputArgs(...$options);
     }
 
@@ -91,11 +95,28 @@ trait CommandOptions
     }
 
     /**
+     * @return ?non-empty-string
      * @throws InvalidArgumentException
      */
     private function getOptionDbName(InputInterface $input): ?string
     {
         $value = $input->getOption('db');
+
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return ?non-empty-string
+     * @throws InvalidArgumentException
+     */
+    private function getMigrationName(InputInterface $input): ?string
+    {
+        $value = $input->getArgument('name');
+
         if (is_string($value) && $value !== '') {
             return $value;
         }

@@ -12,7 +12,7 @@ use kuaukutsu\poc\migration\connection\TransactionInterface;
  * @psalm-internal kuaukutsu\poc\migration
  * @infection-ignore-all вынести в отдельный пакет
  */
-final class Transaction implements TransactionInterface
+final class TransactionMysql implements TransactionInterface
 {
     private function __construct(
         private readonly PDO $connection,
@@ -22,7 +22,7 @@ final class Transaction implements TransactionInterface
 
     public static function begin(PDO $connection): TransactionInterface
     {
-        return new self($connection, $connection->beginTransaction());
+        return new self($connection, false);
     }
 
     #[Override]
@@ -48,6 +48,7 @@ final class Transaction implements TransactionInterface
     #[Override]
     public function exec(string $query): void
     {
+        $this->transactionActive = $this->tryBeginTransaction($query);
         $this->connection->exec($query);
     }
 
@@ -71,5 +72,15 @@ final class Transaction implements TransactionInterface
         }
 
         return true;
+    }
+
+    private function tryBeginTransaction(string $queryString): bool
+    {
+        $pattern = '/(?:create|alter|drop)\s+(?:table|(?:unique\s?)?index)\s+/i';
+        if (preg_match($pattern, $queryString, $_)) {
+            return false;
+        }
+
+        return $this->connection->beginTransaction();
     }
 }

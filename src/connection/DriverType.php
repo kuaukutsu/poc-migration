@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\driver;
+namespace kuaukutsu\poc\migration\connection;
 
 enum DriverType
 {

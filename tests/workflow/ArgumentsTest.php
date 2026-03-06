@@ -6,10 +6,10 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\InputArgs;
@@ -26,7 +26,7 @@ final class ArgumentsTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $driver = new PdoDriver(
+        $driver = new Driver(
             dsn: 'sqlite::memory:',
         );
 
