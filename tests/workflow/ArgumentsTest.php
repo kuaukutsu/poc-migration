@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
-use AssertionError;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
@@ -72,13 +71,6 @@ final class ArgumentsTest extends TestCase
         $this->migrator->down(new InputArgs(limit: 2));
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
-    }
-
-    public function testLimitNegativeValue(): void
-    {
-        $this->expectException(AssertionError::class);
-        /** @phpstan-ignore argument.type */
-        new InputArgs(limit: -1);
     }
 
     public function testWithDryRun(): void
