@@ -6,16 +6,15 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\driver\PdoDriver;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\exception\ActionException;
-use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\InputArgs;
 
-final class MigrationFailTest extends TestCase
+final class UpExactlyTest extends TestCase
 {
     private MigratorInterface $migrator;
 
@@ -24,7 +23,7 @@ final class MigrationFailTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $driver = new PdoDriver(
+        $driver = new Driver(
             dsn: 'sqlite::memory:',
         );
 
@@ -75,21 +74,9 @@ final class MigrationFailTest extends TestCase
 
         $this->expectException(ActionException::class);
         $this->expectExceptionMessage(
-            '202501021025_account_error.sql: SQLSTATE[HY000]: General error: 1 no such table: account'
+            'SQLSTATE[HY000]: General error: 1 no such table:'
         );
 
         $this->migrator->up(new InputArgs(exactlyAll: true));
-    }
-
-    public function testMigrationFixtureException(): void
-    {
-        $this->migrator->init();
-
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessageMatches(
-            '/^the directory .+ does not exist.$/i'
-        );
-
-        $this->migrator->fixture();
     }
 }

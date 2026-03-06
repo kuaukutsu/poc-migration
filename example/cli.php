@@ -5,8 +5,9 @@ declare(strict_types=1);
 use DI\Container;
 use kuaukutsu\poc\migration\Migration;
 use kuaukutsu\poc\migration\MigrationCollection;
-use kuaukutsu\poc\migration\driver\PdoDriver;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\example\presentation\DownCommand;
+use kuaukutsu\poc\migration\example\presentation\CreateCommand;
 use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
 use kuaukutsu\poc\migration\example\presentation\InitCommand;
 use kuaukutsu\poc\migration\example\presentation\RedoCommand;
@@ -29,7 +30,7 @@ $container = new Container(
                 collection: new MigrationCollection(
                     new Migration(
                         path: __DIR__ . '/migration/sqlite/memory',
-                        driver: new PdoDriver(
+                        driver: new Driver(
                             dsn: 'sqlite:' . __DIR__ . '/data/sqlite/db.sqlite3'
                         )
                     )
@@ -52,6 +53,7 @@ $console->setCommandLoader(
             'migrate:down' => DownCommand::class,
             'migrate:redo' => RedoCommand::class,
             'migrate:fixture' => FixtureCommand::class,
+            'migrate:create' => CreateCommand::class,
         ],
     )
 );

@@ -14,15 +14,17 @@ use kuaukutsu\poc\migration\exception\ConfigurationException;
  */
 final readonly class Action
 {
+    /**
+     * @var non-empty-string
+     */
     private string $path;
 
     /**
      * @param non-empty-string $path
-     * @infection-ignore-all
      */
     public function __construct(string $path)
     {
-        $this->path = rtrim(trim($path), '/') . '/';
+        $this->path = normalizePath($path);
     }
 
     /**
@@ -35,7 +37,8 @@ final readonly class Action
         $iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
             $filepath = $matchFilename[0];
-            if (isset($listExcluded[basename($filepath)])) {
+            $filename = basename($filepath);
+            if (isset($listExcluded[$filename])) {
                 continue;
             }
 
@@ -48,7 +51,7 @@ final readonly class Action
                 $iternum++;
 
                 /** @phpstan-ignore generator.keyType */
-                yield basename($filepath) => $command;
+                yield $filename => $command;
             }
         }
     }
@@ -82,7 +85,7 @@ final readonly class Action
     public function fixture(Args $args = new Args()): Iterator
     {
         $iternum = 0;
-        foreach ($this->makeIterator(rtrim($this->path, '/') . '-fixture/') as $matchFilename) {
+        foreach ($this->makeIterator(joinBasename($this->path, '-fixture')) as $matchFilename) {
             if ($args->limit > 0 && $iternum >= $args->limit) {
                 return;
             }
@@ -104,7 +107,7 @@ final readonly class Action
      */
     public function repeatable(): Iterator
     {
-        foreach ($this->makeIterator(rtrim($this->path, '/') . '-repeatable/') as $matchFilename) {
+        foreach ($this->makeIterator(joinBasename($this->path, '-repeatable')) as $matchFilename) {
             $filepath = $matchFilename[0];
             $command = $this->prepareCommand($filepath, 'up');
             if ($command !== null) {
@@ -112,6 +115,35 @@ final readonly class Action
                 yield basename($filepath) => $command;
             }
         }
+    }
+
+    /**
+     * @param non-empty-string $filename
+     * @return non-empty-string filepath
+     * @throws ConfigurationException
+     */
+    public function create(string $filename, string $body): string
+    {
+        if (file_exists($this->path) === false) {
+            throw new ConfigurationException(
+                sprintf('the dir [%s] is not exists.', $this->path)
+            );
+        }
+
+        $filepath = joinFile($this->path, $filename);
+        if (file_exists($filepath)) {
+            throw new ConfigurationException(
+                sprintf('the file [%s] is exists.', $filepath)
+            );
+        }
+
+        if (file_put_contents($filepath, $body) !== false) {
+            return $filepath;
+        }
+
+        throw new ConfigurationException(
+            sprintf('the file [%s] is not saved.', $filepath)
+        );
     }
 
     /**

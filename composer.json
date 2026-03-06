@@ -36,7 +36,10 @@
     "psr-4": {
       "kuaukutsu\\poc\\migration\\": "src",
       "kuaukutsu\\poc\\migration\\example\\": "example"
-    }
+    },
+    "files": [
+      "src/internal/filesystem/functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

@@ -74,7 +74,7 @@ DROP TABLE IF EXISTS public.entity;
 use DI\Container;
 use kuaukutsu\poc\migration\Migration;
 use kuaukutsu\poc\migration\MigrationCollection;
-use kuaukutsu\poc\migration\driver\PdoDriver;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\example\presentation\DownCommand;
 use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
 use kuaukutsu\poc\migration\example\presentation\InitCommand;
@@ -96,7 +96,7 @@ $container = new Container(
                 collection: new MigrationCollection(
                     new Migration(
                         path: __DIR__ . '/migration/sqlite/db',
-                        driver: new PdoDriver(
+                        driver: new Driver(
                             dsn: 'sqlite:' . __DIR__ . '/data/sqlite/db.sqlite3',
                         )
                     )

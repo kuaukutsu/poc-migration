@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\driver;
+namespace kuaukutsu\poc\migration\connection;
 
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;

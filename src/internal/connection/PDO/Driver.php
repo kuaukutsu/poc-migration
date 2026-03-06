@@ -2,28 +2,29 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\driver;
+namespace kuaukutsu\poc\migration\internal\connection\PDO;
 
 use Override;
 use Closure;
 use PDO;
 use PDOException;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
+use kuaukutsu\poc\migration\connection\DriverInterface;
+use kuaukutsu\poc\migration\connection\DriverType;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\internal\command\Command;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
-use kuaukutsu\poc\migration\internal\connection\PDO\Connection;
 
-final class PdoDriver implements DriverInterface
+final class Driver implements DriverInterface
 {
     /**
      * @var Closure():PDO
      */
     private readonly Closure $connectionFactory;
 
-    private readonly DriverType $driver;
+    private readonly DriverType $type;
 
     /**
      * @var non-empty-lowercase-string
@@ -51,14 +52,14 @@ final class PdoDriver implements DriverInterface
             throw new ConfigurationException('PDO: extension not loaded.');
         }
 
-        [$this->driver, $this->dbname] = prepareDSN($dsn);
+        [$this->type, $this->dbname] = prepareDSN($dsn);
         $this->connectionFactory = static fn(): PDO => new PDO($dsn, $username, $password, $options);
     }
 
     #[Override]
     public function getName(): string
     {
-        return $this->driver->value();
+        return $this->type->value();
     }
 
     #[Override]
@@ -70,7 +71,7 @@ final class PdoDriver implements DriverInterface
     #[Override]
     public function getSetupPath(): string
     {
-        return dirname(__DIR__) . sprintf('/connection/%s/migration/', $this->driver->value());
+        return dirname(__DIR__, 3) . sprintf('/connection/%s/migration/', $this->type->value());
     }
 
     #[Override]
@@ -96,10 +97,10 @@ final class PdoDriver implements DriverInterface
             try {
                 return $this->connectionInstance = new Connection(
                     ($this->connectionFactory)(),
-                    $this->driver,
+                    $this->type,
                 );
             } catch (PDOException $exception) {
-                throw new ConnectionException($this->driver, $exception);
+                throw new ConnectionException($this->type, $exception);
             }
         }
 
@@ -115,14 +116,14 @@ function prepareDSN(string $dsn): array
 {
     $dsn = strtolower($dsn);
 
-    $driver = match (true) {
+    $type = match (true) {
         str_starts_with($dsn, 'mysql:') => DriverType::PDO_MYSQL,
         str_starts_with($dsn, 'pgsql:') => DriverType::PDO_PGSQL,
         str_starts_with($dsn, 'sqlite:') => DriverType::PDO_SQLITE,
         default => throw new ConfigurationException('PDODriver: is not implemented.'),
     };
 
-    if ($driver === DriverType::PDO_SQLITE) {
+    if ($type === DriverType::PDO_SQLITE) {
         $partName = str_replace('sqlite:', '', $dsn);
         $dbName = str_starts_with($partName, ':')
             ? trim($partName, ':')
@@ -135,13 +136,13 @@ function prepareDSN(string $dsn): array
         /**
          * @var non-empty-lowercase-string $dbName
          */
-        return [$driver, $dbName];
+        return [$type, $dbName];
     } elseif (preg_match('~dbname=(?<dbname>[^;]+)~i', $dsn, $matches) > 0) {
         /**
          * @var array{"dbname": non-empty-lowercase-string} $matches
          * @phpstan-ignore varTag.nativeType
          */
-        return [$driver, $matches['dbname']];
+        return [$type, $matches['dbname']];
     }
 
     throw new ConfigurationException('PDODriver: dsn is incorrect.');

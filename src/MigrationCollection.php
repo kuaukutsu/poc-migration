@@ -8,6 +8,7 @@ use Override;
 use kuaukutsu\ds\collection\Collection;
 
 /**
+ * @api
  * @extends Collection<Migration>
  */
 final class MigrationCollection extends Collection

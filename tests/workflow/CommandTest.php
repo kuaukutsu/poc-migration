@@ -10,7 +10,7 @@ use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\driver\DriverType;
+use kuaukutsu\poc\migration\connection\DriverType;
 use kuaukutsu\poc\migration\internal\command\Args;
 use kuaukutsu\poc\migration\internal\command\Command;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;

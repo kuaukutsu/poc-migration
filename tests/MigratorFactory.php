@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests;
 
+use kuaukutsu\poc\migration\connection\DriverInterface;
+use kuaukutsu\poc\migration\event\EventSubscriberInterface;
 use kuaukutsu\poc\migration\Migration;
 use kuaukutsu\poc\migration\MigrationCollection;
-use kuaukutsu\poc\migration\driver\DriverInterface;
-use kuaukutsu\poc\migration\event\EventSubscriberInterface;
 use kuaukutsu\poc\migration\Migrator;
 use kuaukutsu\poc\migration\MigratorInterface;
 

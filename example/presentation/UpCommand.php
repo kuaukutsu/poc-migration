@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\example\presentation;
 
 use Override;
+use Symfony\Component\Console\Input\InputArgument;
 use Throwable;
 use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;

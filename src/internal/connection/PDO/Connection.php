@@ -7,8 +7,8 @@ namespace kuaukutsu\poc\migration\internal\connection\PDO;
 use Override;
 use PDO;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
+use kuaukutsu\poc\migration\connection\DriverType;
 use kuaukutsu\poc\migration\connection\TransactionInterface;
-use kuaukutsu\poc\migration\driver\DriverType;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
@@ -24,7 +24,9 @@ final readonly class Connection implements ConnectionInterface
     #[Override]
     public function beginTransaction(): TransactionInterface
     {
-        return Transaction::begin($this->connection, $this->driverType);
+        return $this->driverType === DriverType::PDO_MYSQL
+            ? TransactionMysql::begin($this->connection)
+            : Transaction::begin($this->connection);
     }
 
     #[Override]
