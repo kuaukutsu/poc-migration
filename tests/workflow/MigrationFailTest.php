@@ -8,6 +8,7 @@ use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\driver\PdoDriver;
 use kuaukutsu\poc\migration\exception\ActionException;
+use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
@@ -78,5 +79,17 @@ final class MigrationFailTest extends TestCase
         );
 
         $this->migrator->up(new InputArgs(exactlyAll: true));
+    }
+
+    public function testMigrationFixtureException(): void
+    {
+        $this->migrator->init();
+
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessageMatches(
+            '/^the directory .+ does not exist.$/i'
+        );
+
+        $this->migrator->fixture();
     }
 }

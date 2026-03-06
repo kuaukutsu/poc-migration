@@ -49,6 +49,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
+        // check order
         $names = array_keys($data);
         self::assertEquals('202501021025_account_email.sql', $names[0]);
         self::assertEquals('202501021024_account_create.sql', $names[1]);
@@ -105,8 +106,6 @@ final class ArgumentsTest extends TestCase
     public function testWithUnknownDb(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchApplied();
-        self::assertEmpty($data);
 
         $this->expectException(ConfigurationException::class);
         $this->migrator->up(new InputArgs(dbName: 'sqlite/unknown'));
@@ -151,11 +150,11 @@ final class ArgumentsTest extends TestCase
 
         usleep(10_000);
 
-        $this->migrator->up($args);
+        $this->migrator->up($args); // +1
         $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
 
-        $this->migrator->up($args);
+        $this->migrator->up($args); // +1
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 

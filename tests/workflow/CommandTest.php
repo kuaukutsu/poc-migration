@@ -8,6 +8,7 @@ use Override;
 use Throwable;
 use PDO;
 use PDOException;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\driver\DriverType;
 use kuaukutsu\poc\migration\internal\command\Args;
@@ -44,6 +45,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testUp(): void
     {
         $this->execInitialization();
@@ -51,12 +53,14 @@ final class CommandTest extends TestCase
         $this->execUp('table1');
 
         $data = $this->command->fetchApplied();
+        self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table1']);
     }
 
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testDown(): void
     {
         $this->execInitialization();
@@ -82,6 +86,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testFetchLimit(): void
     {
         $this->execInitialization();
@@ -100,6 +105,8 @@ final class CommandTest extends TestCase
             new Args(limit: 2)
         );
         self::assertCount(2, $data);
+
+        // sort order
         $names = array_keys($data);
         self::assertEquals('test-table3', $names[0]);
         self::assertEquals('test-table2', $names[1]);
@@ -108,6 +115,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testFetchVersion(): void
     {
         $this->execInitialization();
@@ -140,6 +148,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testUpDryRun(): void
     {
         $this->execInitialization();
@@ -170,6 +179,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testDownDryRun(): void
     {
         $this->execInitialization();
@@ -200,6 +210,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testUpRollbackTransaction(): void
     {
         $this->execInitialization();
@@ -222,6 +233,7 @@ final class CommandTest extends TestCase
     /**
      * @throws Throwable
      */
+    #[Depends('testInit')]
     public function testDownRollbackTransaction(): void
     {
         $this->execInitialization();

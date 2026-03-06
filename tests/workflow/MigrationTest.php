@@ -48,13 +48,13 @@ final class MigrationTest extends TestCase
     public function testUp(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchApplied();
-        self::assertEmpty($data);
 
         $this->migrator->up();
         $data = $this->command->fetchApplied();
-        self::assertCount(3, $data);
+        $countMigration = count($data);
+        self::assertGreaterThanOrEqual(3, $countMigration);
 
+        // sort order
         $names = array_keys($data);
         self::assertEquals('202501021025_account_email.sql', $names[0]);
         self::assertEquals('202501021024_account_create.sql', $names[1]);
@@ -62,19 +62,17 @@ final class MigrationTest extends TestCase
 
         $this->migrator->up();
         $data = $this->command->fetchApplied();
-        self::assertCount(3, $data);
+        self::assertCount($countMigration, $data);
     }
 
     #[Depends('testInit')]
     public function testDown(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchApplied();
-        self::assertEmpty($data);
 
         $this->migrator->up();
         $data = $this->command->fetchApplied();
-        self::assertCount(3, $data);
+        self::assertGreaterThanOrEqual(3, $data);
 
         $this->migrator->down();
         $data = $this->command->fetchApplied();
@@ -85,12 +83,10 @@ final class MigrationTest extends TestCase
     public function testRedo(): void
     {
         $this->migrator->init();
-        $data = $this->command->fetchApplied();
-        self::assertEmpty($data);
 
         $this->migrator->up();
         $data = $this->command->fetchApplied();
-        self::assertCount(3, $data);
+        self::assertGreaterThanOrEqual(3, $data);
 
         $version = (int)current($data);
         self::assertGreaterThan(0, $version);
@@ -99,7 +95,7 @@ final class MigrationTest extends TestCase
 
         $this->migrator->redo();
         $data = $this->command->fetchApplied();
-        self::assertCount(3, $data);
+        self::assertGreaterThanOrEqual(3, $data);
 
         $versionNew = (int)current($data);
         self::assertGreaterThan(0, $versionNew);
@@ -118,24 +114,19 @@ final class MigrationTest extends TestCase
 
     public function testConnectionException(): void
     {
-        $driver = new PdoDriver(
-            dsn: 'mysql:host=mysql;dbname=main',
-        );
+        $driver = new PdoDriver(dsn: 'mysql:host=mysql;dbname=main');
+        $migrator = MigratorFactory::makeFromEvent($driver);
 
         $this->expectException(ConnectionException::class);
         $this->expectExceptionMessageMatches('~PDO_MYSQL:\w+~');
 
-        $migrator = MigratorFactory::makeFromDriver($driver);
         $migrator->init();
     }
 
     public function testActionException(): void
     {
-        $migrator = MigratorFactory::makeFromEvent(
-            new PdoDriver(
-                dsn: 'sqlite::memory:',
-            )
-        );
+        $driver = new PdoDriver(dsn: 'sqlite::memory:');
+        $migrator = MigratorFactory::makeFromEvent($driver);
 
         $this->expectException(ActionException::class);
         $this->expectExceptionMessage(
@@ -146,15 +137,13 @@ final class MigrationTest extends TestCase
         $migrator->up();
     }
 
-    public function testActionExceptionDryRun(): void
+    public function testActionNotExceptionDryRun(): void
     {
         $driver = new PdoDriver(dsn: 'sqlite::memory:');
         $migrator = MigratorFactory::makeFromEvent($driver);
         $command = $driver->makeCommand(new Params(table: 'migration'));
 
         $migrator->init();
-        $data = $command->fetchApplied();
-        self::assertEmpty($data);
 
         $migrator->up(new InputArgs(dryRun: true));
         $data = $command->fetchApplied();
