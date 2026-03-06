@@ -169,7 +169,7 @@ final class EventTest extends TestCase
         );
     }
 
-    public function testMigrationDoesNotContainFiles(): void
+    public function testMigrationUpDoesNotContainFiles(): void
     {
         $eventSubscriber = new TestSubscriber();
         $migrator = MigratorFactory::makeFromEvent(
@@ -183,18 +183,32 @@ final class EventTest extends TestCase
         );
 
         $migrator->init();
-
         $migrator->up();
+
         // migration completed in the previous step
         $migrator->up();
         self::assertStringContainsString(
             'does not contain migration files',
             $eventSubscriber->get(Event::FilesystemNotice)
         );
+    }
 
-        $eventSubscriber->clear();
+    public function testMigrationDownDoesNotContainFiles(): void
+    {
+        $eventSubscriber = new TestSubscriber();
+        $migrator = MigratorFactory::makeFromEvent(
+            new PdoDriver(
+                dsn: 'sqlite::memory:',
+            ),
+            [
+                $eventSubscriber,
+            ],
+            dirname(__DIR__) . '/migration/sqlite/memory'
+        );
 
+        $migrator->init();
         $migrator->down();
+
         // migration completed in the previous step
         $migrator->down();
         self::assertStringContainsString(
