@@ -46,7 +46,7 @@ final class CreateTest extends TestCase
         $migrator = MigratorFactory::makeFromEvent(driver: $driver, path: $path);
 
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessageMatches('/^the dir .+ is not exists.$/i');
+        $this->expectExceptionMessageMatches('/^the dir .+ is not writable or does not exist.$/i');
 
         $migrator->create(new InputArgs(dbName: 'sqlite/memory', migrationName: 'test'));
     }

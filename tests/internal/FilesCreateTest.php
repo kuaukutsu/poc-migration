@@ -19,12 +19,22 @@ final class FilesCreateTest extends TestCase
         self::assertEquals('test.sql', basename($filepath));
     }
 
-    public function testDirNotExists(): void
+    public function testDirNotWritable(): void
     {
-        $fs = new Action(dirname(__DIR__) . '/migration/postgres/not-exists');
+        $fs = new Action('/var/run');
 
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessageMatches('/^the dir .+ is not exists.$/i');
+        $this->expectExceptionMessageMatches('/^the dir .+ is not writable or does not exist.$/i');
+
+        $fs->create('test.sql', 'body');
+    }
+
+    public function testDirNotExists(): void
+    {
+        $fs = new Action('/not-exists');
+
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessageMatches('/^the dir .+ is not writable or does not exist.$/i');
 
         $fs->create('test.sql', 'body');
     }
@@ -35,7 +45,7 @@ final class FilesCreateTest extends TestCase
         $fs->create('test.sql', 'body');
 
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessageMatches('/^the file .+ is exists.$/i');
+        $this->expectExceptionMessageMatches('/^the file .+ is exist.$/i');
 
         $fs->create('test.sql', 'body');
     }

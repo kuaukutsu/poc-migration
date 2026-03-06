@@ -92,12 +92,12 @@ final class FilesDownTest extends TestCase
         $this->fs->down($savedFilenames)->valid();
     }
 
-    public function testDirNotExists(): void
+    public function testFileNotExists(): void
     {
-        $savedFilenames = ['202501011024_entity_create.sql' => 1];
+        $savedFilenames = ['not-exists.sql' => 1];
         $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessageMatches('/^the file .+ is not readable or does not exist.$/i');
 
-        $fs = new Action(dirname(__DIR__) . '/migration/postgres/not-exists');
-        $fs->down($savedFilenames)->valid();
+        $this->fs->down($savedFilenames)->valid();
     }
 }

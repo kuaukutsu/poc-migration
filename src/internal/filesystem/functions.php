@@ -31,7 +31,7 @@ function joinBasename(string $path, string $postfix): string
  * @return non-empty-string
  * @infection-ignore-all
  */
-function joinFile(string $path, string $filename): string
+function joinFilename(string $path, string $filename): string
 {
     return rtrim(trim($path), '/') . '/' . $filename;
 }

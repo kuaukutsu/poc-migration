@@ -261,7 +261,7 @@ final class EventTest extends TestCase
         }
 
         self::assertStringContainsString(
-            'is not exists.',
+            'is not writable or does not exist.',
             $eventSubscriber->get(Event::FilesystemError)
         );
     }

@@ -81,6 +81,7 @@ final class FilesFixtureTest extends TestCase
     public function testDirNotExists(): void
     {
         $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessageMatches('/^the directory .+ does not exist.$/i');
 
         $fs = new Action(dirname(__DIR__) . '/migration/postgres/not-exists');
         $fs->fixture()->valid();

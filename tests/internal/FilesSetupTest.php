@@ -26,6 +26,7 @@ final class FilesSetupTest extends TestCase
     public function testDirNotExists(): void
     {
         $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessageMatches('/^the directory .+ does not exist.$/i');
 
         $fs = new Setup(dirname(__DIR__) . '/migration/postgres/not-exists', 'test');
         $fs->all()->valid();
