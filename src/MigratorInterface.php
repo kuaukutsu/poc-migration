@@ -46,6 +46,14 @@ interface MigratorInterface
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
+     * @throws InitializationException initialization step is required
+     */
+    public function verify(InputArgs $args = new InputArgs()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
      */
     public function fixture(InputArgs $args = new InputArgs()): void;
 

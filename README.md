@@ -14,9 +14,10 @@
 - **init** — инициализация проекта: создание папки для миграций и конфигурационного файла.
 - **up** — применение всех ожидающих миграций до самой свежей.
 - **down** — откат последней примененной миграции (или нескольких).
-- **redo** — последовательный запуск down и сразу up для последней миграции (удобно при разработке).
 - **fixture** — применение всех фикстур.
-- **create** — создание файла миграции.
+- **create** — создание файла миграции (удобно при разработке).
+- **verify** — последовательный запуск up и сразу down для последней версии миграций (удобно при разработке).
+- **redo** — последовательный запуск down и сразу up для последней миграции (удобно при разработке).
 
 ### setup
 
@@ -203,6 +204,47 @@ If any migration fails, the entire batch is rolled back, leaving the database un
 [sqlite/db] up: 202501021024_account_create.sql, vers: 1772723727397 done
 [sqlite/db] up: 202501021025_account_email.sql, vers: 1772723727397 done
 
+```
+
+#### Verify
+
+```shell
+/example $ php cli.php migrate:create test --db=sqlite/db                                                                                   
+/example $ php cli.php migrate:create test2 --db=sqlite/db        
+/example $ php cli.php migrate:create test3 --db=sqlite/db
+
+/example $ php cli.php migrate:verify
+[sqlite/db] up: 202603070850_test.sql, vers: 177287432696 done
+[sqlite/db] up: 202603070850_test2.sql, vers: 177287432696 done
+[sqlite/db] up: 202603070850_test3.sql, vers: 177287432696 done
+[sqlite/db] down: 202603070850_test3.sql, vers: 177287432696 done
+[sqlite/db] down: 202603070850_test2.sql, vers: 177287432696 done
+[sqlite/db] down: 202603070850_test.sql, vers: 177287432696 done
+```
+
+**With limit**
+
+```shell
+/example $ php cli.php migrate:verify --limit=1
+[sqlite/db] up: 202603070850_test.sql, vers: 177287441498 done
+[sqlite/db] down: 202603070850_test.sql, vers: 177287441498 done
+
+```
+
+**error**
+
+```shell
+
+/example $ php cli.php migrate:verify
+[sqlite/db] up: 202603070850_test.sql, vers: 177287479980 done
+[sqlite/db] up: 202603070850_test2.sql error
+SQLSTATE[HY000]: General error: 1 incomplete input
+-- SQL CODE
+INSERT INTO ededede
+
+
+[sqlite/db] down: 202603070850_test.sql, vers: 177287479980 done
+202603070850_test2.sql: SQLSTATE[HY000]: General error: 1 incomplete input
 ```
 
 ### Static analysis

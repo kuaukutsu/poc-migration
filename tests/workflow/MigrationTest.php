@@ -10,8 +10,9 @@ use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
-use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
+use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\InputArgs;
 
 /**
  * Верхнеуровневая работа приложения.
@@ -98,6 +99,29 @@ final class MigrationTest extends TestCase
 
         // новая версия больше старой
         self::assertGreaterThan($version, $versionNew);
+    }
+
+    #[Depends('testInit')]
+    public function testVerify(): void
+    {
+        $this->migrator->init();
+
+        $this->migrator->up(new InputArgs(limit: 1));
+        $data = $this->command->fetchApplied();
+        self::assertCount(1, $data);
+
+        $version = (int)current($data);
+        self::assertGreaterThan(0, $version);
+
+        usleep(10_000);
+
+        $this->migrator->verify();
+
+        $data = $this->command->fetchApplied();
+        self::assertCount(1, $data);
+
+        $versionNew = (int)current($data);
+        self::assertEquals($version, $versionNew);
     }
 
     #[Depends('testInit')]

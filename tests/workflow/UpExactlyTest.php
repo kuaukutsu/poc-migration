@@ -46,7 +46,7 @@ final class UpExactlyTest extends TestCase
         self::assertEmpty($data);
 
         try {
-            $this->migrator->up(new InputArgs());
+            $this->migrator->up();
         } catch (ActionException) {
         }
 
@@ -78,5 +78,40 @@ final class UpExactlyTest extends TestCase
         );
 
         $this->migrator->up(new InputArgs(exactlyAll: true));
+    }
+
+    public function testVerify(): void
+    {
+        $this->migrator->init();
+        $data = $this->command->fetchApplied();
+        self::assertEmpty($data);
+
+        $this->migrator->up(new InputArgs(limit: 1));
+        $data = $this->command->fetchApplied();
+        self::assertCount(1, $data);
+
+        // точность версионирования
+        usleep(10_000);
+
+        try {
+            $this->migrator->verify();
+        } catch (ActionException) {
+        }
+
+        // только первая миграция успешно
+        $data = $this->command->fetchApplied();
+        self::assertCount(1, $data);
+    }
+
+    public function testVerifyException(): void
+    {
+        $this->migrator->init();
+
+        $this->expectException(ActionException::class);
+        $this->expectExceptionMessage(
+            'SQLSTATE[HY000]: General error: 1 no such table:'
+        );
+
+        $this->migrator->verify();
     }
 }
