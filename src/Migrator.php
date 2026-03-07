@@ -89,7 +89,6 @@ final readonly class Migrator implements MigratorInterface
 
         foreach ($this->selectDb($args) as $migration) {
             $this->actionWorkflow->create($migration, $args->migrationName);
-            break;
         }
     }
 

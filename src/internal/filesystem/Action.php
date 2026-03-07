@@ -46,7 +46,7 @@ final readonly class Action
                 return;
             }
 
-            $command = $this->prepareCommand($filepath, 'up');
+            $command = $this->prepareCommand($filepath, ActionType::UP);
             if ($command !== null) {
                 $iternum++;
 
@@ -69,7 +69,7 @@ final readonly class Action
                 return;
             }
 
-            $command = $this->prepareCommand($this->path . $filename, 'down');
+            $command = $this->prepareCommand($this->path . $filename, ActionType::DOWN);
             if ($command !== null) {
                 $iternum++;
 
@@ -91,7 +91,7 @@ final readonly class Action
             }
 
             $filepath = $matchFilename[0];
-            $command = $this->prepareCommand($filepath, 'up');
+            $command = $this->prepareCommand($filepath, ActionType::UP);
             if ($command !== null) {
                 $iternum++;
 
@@ -109,7 +109,7 @@ final readonly class Action
     {
         foreach ($this->makeIterator(joinBasename($this->path, '-repeatable')) as $matchFilename) {
             $filepath = $matchFilename[0];
-            $command = $this->prepareCommand($filepath, 'up');
+            $command = $this->prepareCommand($filepath, ActionType::UP);
             if ($command !== null) {
                 /** @phpstan-ignore generator.keyType */
                 yield basename($filepath) => $command;
@@ -124,26 +124,26 @@ final readonly class Action
      */
     public function create(string $filename, string $body): string
     {
-        if (file_exists($this->path) === false) {
+        if (is_dir($this->path) === false || is_writable($this->path) === false) {
             throw new ConfigurationException(
-                sprintf('the dir [%s] is not exists.', $this->path)
+                sprintf('the dir [%s] is not writable or does not exist.', $this->path)
             );
         }
 
-        $filepath = joinFile($this->path, $filename);
+        $filepath = joinFilename($this->path, $filename);
         if (file_exists($filepath)) {
             throw new ConfigurationException(
-                sprintf('the file [%s] is exists.', $filepath)
+                sprintf('the file [%s] is exist.', $filepath)
             );
         }
 
-        if (file_put_contents($filepath, $body) !== false) {
-            return $filepath;
+        if (@file_put_contents($filepath, $body, LOCK_EX) === false) {
+            throw new ConfigurationException(
+                sprintf('the file [%s] is not saved.', $filepath)
+            );
         }
 
-        throw new ConfigurationException(
-            sprintf('the file [%s] is not saved.', $filepath)
-        );
+        return $filepath;
     }
 
     /**
@@ -170,35 +170,45 @@ final readonly class Action
 
     /**
      * @param non-empty-string $filepath
-     * @param non-empty-string $actionKey enum('up', 'down', 'skip')
      * @return non-empty-string|null
      * @throws ConfigurationException
      */
-    private function prepareCommand(string $filepath, string $actionKey): ?string
+    private function prepareCommand(string $filepath, ActionType $action): ?string
     {
-        if (file_exists($filepath) === false) {
+        if (is_readable($filepath) === false) {
             throw new ConfigurationException(
-                sprintf('the file [%s] does not exist.', $filepath)
+                sprintf('the file [%s] is not readable or does not exist.', $filepath)
             );
         }
 
-        $queryString = file_get_contents($filepath);
-        if ($queryString === '' || $queryString === false) {
+        $content = @file_get_contents($filepath);
+        if ($content === false) {
+            throw new ConfigurationException(
+                sprintf('failed to read file [%s].', $filepath)
+            );
+        }
+
+        if ($content === '') {
             return null;
         }
 
-        if (preg_match_all('/^--\s?@(?<action>\w+)\s?\R(?<query>(?:(?!^--\s?@).)*)/ms', $queryString, $match) > 0) {
+        // ?: preg_split(...)
+        if (preg_match_all('/^--\s?@(?<action>\w+)\s?\R(?<query>(?:(?!^--\s?@).)*)/ms', $content, $match) > 0) {
             /**
              * @var array{"action": non-empty-string[], "query": string[]} $match
              * @phpstan-ignore varTag.nativeType
              */
-            $key = array_search($actionKey, $match['action'], true);
-            if ($key !== false) {
-                $query = $match['query'][$key];
+            $index = array_search($action->value, $match['action'], true);
+            if ($index !== false) {
+                $query = $match['query'][$index];
                 return $query === '' ? null : $query;
             }
-        } elseif ($actionKey === 'up') {
-            return $queryString;
+
+            return null;
+        }
+
+        if ($action === ActionType::UP) {
+            return $content;
         }
 
         return null;

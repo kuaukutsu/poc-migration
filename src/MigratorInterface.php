@@ -50,7 +50,6 @@ interface MigratorInterface
     public function fixture(InputArgs $args = new InputArgs()): void;
 
     /**
-     * @throws ActionException
      * @throws ConfigurationException
      */
     public function create(InputArgs $args = new InputArgs()): void;

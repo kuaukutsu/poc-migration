@@ -14,7 +14,7 @@ final readonly class Factory implements FactoryInterface
     #[Override]
     public function makeName(string $name): string
     {
-        return sprintf('%d-%s.sql', gmdate('YmdHi'), $name);
+        return sprintf('%d_%s.sql', gmdate('YmdHi'), $name);
     }
 
     #[Override]

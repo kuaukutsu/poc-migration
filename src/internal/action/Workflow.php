@@ -171,12 +171,10 @@ final readonly class Workflow
      */
     public function create(Migration $migration, string $name): void
     {
-        $factory = $migration->templFactory;
-
         try {
             (new filesystem\Action($migration->path))->create(
-                $factory->makeName($name),
-                $factory->makeBody(),
+                $migration->templFactory->makeName($name),
+                $migration->templFactory->makeBody(),
             );
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
