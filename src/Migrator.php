@@ -65,6 +65,24 @@ final readonly class Migrator implements MigratorInterface
     }
 
     #[Override]
+    public function verify(InputArgs $args = new InputArgs()): void
+    {
+        foreach ($this->selectDb($args) as $migration) {
+            $version = $this->actionWorkflow->up(
+                $migration,
+                $args->withExactlyAll(),
+            );
+
+            if ($args->dryRun === false) {
+                $this->actionWorkflow->down(
+                    $migration,
+                    $args->withVersion($version),
+                );
+            }
+        }
+    }
+
+    #[Override]
     public function fixture(InputArgs $args = new InputArgs()): void
     {
         foreach ($this->selectDb($args) as $migration) {

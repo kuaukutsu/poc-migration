@@ -13,14 +13,15 @@ use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\exception\MigratorException;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 #[AsCommand(
-    name: 'migrate:fixture',
-    description: 'Fixture',
+    name: 'migrate:verify',
+    description: 'Up and Down migration',
 )]
-final class FixtureCommand extends Command
+final class VerifyCommand extends Command
 {
     use CommandOptions;
 
@@ -57,8 +58,11 @@ final class FixtureCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->fixture($this->getArguments($input));
+            $this->migrator->verify($this->getArguments($input));
         } catch (InvalidArgumentException | MigratorException $e) {
+            if ($e instanceof InitializationException) {
+                $output->writeln('Calling the command "migrate:init" may help fix the error.');
+            }
             $output->writeln($e->getMessage());
             return Command::INVALID;
         } catch (Throwable) {

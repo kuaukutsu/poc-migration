@@ -34,12 +34,13 @@ final readonly class Workflow
     }
 
     /**
+     * @return non-negative-int Version current transaction
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function up(Migration $migration, InputArgs $args): void
+    public function up(Migration $migration, InputArgs $args): int
     {
         $command = $this->makeCommand($migration);
 
@@ -75,6 +76,8 @@ final readonly class Workflow
         if ($args->hasRepeatable()) {
             $this->repeatable($migration, $command, $version);
         }
+
+        return $version;
     }
 
     /**

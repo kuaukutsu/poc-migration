@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration;
 
 /**
  * @api
+ * @infection-ignore-all
  */
 final readonly class InputArgs
 {
@@ -35,9 +36,36 @@ final readonly class InputArgs
             version: $this->version,
             dryRun: $this->dryRun,
             dbName: $this->dbName,
+            migrationName: $this->migrationName,
             exactlyAll: $this->exactlyAll,
             hasRepeatable: $this->hasRepeatable,
             applyLatestVersion: $this->applyLatestVersion,
+        );
+    }
+
+    /**
+     * @param non-negative-int $version
+     */
+    public function withVersion(int $version): self
+    {
+        return new self(
+            version: $version,
+            dryRun: $this->dryRun,
+            dbName: $this->dbName,
+            migrationName: $this->migrationName,
+        );
+    }
+
+    public function withExactlyAll(): self
+    {
+        return new self(
+            limit: $this->limit,
+            version: $this->version,
+            dryRun: $this->dryRun,
+            dbName: $this->dbName,
+            migrationName: $this->migrationName,
+            exactlyAll: true,
+            hasRepeatable: $this->hasRepeatable,
         );
     }
 

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use DI\Container;
+use kuaukutsu\poc\migration\example\presentation\VerifyCommand;
 use kuaukutsu\poc\migration\Migration;
 use kuaukutsu\poc\migration\MigrationCollection;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
@@ -52,6 +53,7 @@ $console->setCommandLoader(
             'migrate:up' => UpCommand::class,
             'migrate:down' => DownCommand::class,
             'migrate:redo' => RedoCommand::class,
+            'migrate:verify' => VerifyCommand::class,
             'migrate:fixture' => FixtureCommand::class,
             'migrate:create' => CreateCommand::class,
         ],
