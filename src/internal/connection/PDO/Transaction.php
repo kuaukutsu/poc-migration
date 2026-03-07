@@ -28,6 +28,8 @@ final class Transaction implements TransactionInterface
     #[Override]
     public function isActive(): bool
     {
+        $this->transactionActive = $this->transactionActive || $this->connection->inTransaction();
+
         return $this->transactionActive;
     }
 

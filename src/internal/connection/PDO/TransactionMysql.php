@@ -14,20 +14,23 @@ use kuaukutsu\poc\migration\connection\TransactionInterface;
  */
 final class TransactionMysql implements TransactionInterface
 {
+    private bool $transactionActive = false;
+
     private function __construct(
         private readonly PDO $connection,
-        private bool $transactionActive,
     ) {
     }
 
     public static function begin(PDO $connection): TransactionInterface
     {
-        return new self($connection, false);
+        return new self($connection);
     }
 
     #[Override]
     public function isActive(): bool
     {
+        $this->transactionActive = $this->transactionActive || $this->connection->inTransaction();
+
         return $this->transactionActive;
     }
 
@@ -48,7 +51,10 @@ final class TransactionMysql implements TransactionInterface
     #[Override]
     public function exec(string $query): void
     {
-        $this->transactionActive = $this->tryBeginTransaction($query);
+        if ($this->isActive() === false) {
+            $this->transactionActive = $this->tryBeginTransaction($query);
+        }
+
         $this->connection->exec($query);
     }
 
