@@ -32,9 +32,9 @@ $container = new Container(
                     new Migration(
                         path: __DIR__ . '/migration/sqlite/memory',
                         driver: new Driver(
-                            dsn: 'sqlite:' . __DIR__ . '/data/sqlite/db.sqlite3'
+                            dsn: 'sqlite:' . __DIR__ . '/data/sqlite/db.sqlite3',
                         )
-                    )
+                    ),
                 ),
                 eventSubscribers: [
                     new PrettyConsoleOutput(),

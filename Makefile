@@ -127,10 +127,7 @@ build:
 remove: down _image_remove _container_remove _volume_remove
 
 app:
-	USER=$(USER) docker compose -f ./docker-compose.yml run --rm -u $(USER) -w /example cli sh
-
-mysql:
-	USER=$(USER) docker compose -f ./docker-compose.yml run --rm -u $(USER) -w /src mysql sh
+	USER=$(USER) docker compose -f ./docker-compose.yml run --rm -u $(USER) -w /example cli sh -l
 
 _image_remove:
 	docker image rm -f \
