@@ -10,7 +10,6 @@ use PDO;
 use PDOException;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
 use kuaukutsu\poc\migration\connection\DriverInterface;
-use kuaukutsu\poc\migration\connection\DriverType;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\internal\command\Command;
@@ -24,7 +23,7 @@ final class Driver implements DriverInterface
      */
     private readonly Closure $connectionFactory;
 
-    private readonly DriverType $type;
+    private readonly Type $type;
 
     /**
      * @var non-empty-lowercase-string
@@ -109,7 +108,7 @@ final class Driver implements DriverInterface
 }
 
 /**
- * @return array{0: DriverType, 1: non-empty-lowercase-string}
+ * @return array{0: Type, 1: non-empty-lowercase-string}
  * @throws ConfigurationException
  */
 function prepareDSN(string $dsn): array
@@ -117,13 +116,13 @@ function prepareDSN(string $dsn): array
     $dsn = strtolower($dsn);
 
     $type = match (true) {
-        str_starts_with($dsn, 'mysql:') => DriverType::PDO_MYSQL,
-        str_starts_with($dsn, 'pgsql:') => DriverType::PDO_PGSQL,
-        str_starts_with($dsn, 'sqlite:') => DriverType::PDO_SQLITE,
+        str_starts_with($dsn, 'mysql:') => Type::PDO_MYSQL,
+        str_starts_with($dsn, 'pgsql:') => Type::PDO_PGSQL,
+        str_starts_with($dsn, 'sqlite:') => Type::PDO_SQLITE,
         default => throw new ConfigurationException('PDODriver: is not implemented.'),
     };
 
-    if ($type === DriverType::PDO_SQLITE) {
+    if ($type === Type::PDO_SQLITE) {
         $partName = str_replace('sqlite:', '', $dsn);
         $dbName = str_starts_with($partName, ':')
             ? trim($partName, ':')

@@ -2,19 +2,15 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\connection;
+namespace kuaukutsu\poc\migration\internal\connection\PDO;
 
-enum DriverType
+enum Type
 {
     case PDO_PGSQL;
 
     case PDO_MYSQL;
 
     case PDO_SQLITE;
-
-    case AMPHP_PGSQL;
-
-    case AMPHP_MYSQL;
 
     case UNSUPPORTED;
 

@@ -15,7 +15,7 @@ EOF
 # workdir
 RUN <<EOF
     mkdir -p ${WORKDIR}
-    chown -R ${UID}:www-data ${WORKDIR}
+    chown -R developer:www-data ${WORKDIR}
 EOF
 # composer
 RUN <<EOF

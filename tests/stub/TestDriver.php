@@ -6,7 +6,6 @@ namespace kuaukutsu\poc\migration\tests\stub;
 
 use Override;
 use kuaukutsu\poc\migration\connection\DriverInterface;
-use kuaukutsu\poc\migration\connection\DriverType;
 use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 
@@ -19,7 +18,7 @@ final readonly class TestDriver implements DriverInterface
     #[Override]
     public function getName(): string
     {
-        return DriverType::PDO_SQLITE->value();
+        return 'test';
     }
 
     public function getDbName(): string
