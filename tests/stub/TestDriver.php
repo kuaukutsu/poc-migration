@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\tests\stub;
 
 use Override;
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\connection\DriverInterface;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 
 final readonly class TestDriver implements DriverInterface
@@ -21,7 +21,7 @@ final readonly class TestDriver implements DriverInterface
         return 'test';
     }
 
-    public function getDbName(): string
+    public function getSourceName(): string
     {
         return 'storage';
     }

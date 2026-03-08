@@ -6,10 +6,10 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\exception\ActionException;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\MigratorInterface;
 use kuaukutsu\poc\migration\InputOptions;

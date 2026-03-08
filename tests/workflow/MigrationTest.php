@@ -7,7 +7,7 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 use Override;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;

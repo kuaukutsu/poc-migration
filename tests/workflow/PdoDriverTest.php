@@ -17,28 +17,28 @@ final class PdoDriverTest extends TestCase
         );
 
         self::assertEquals('pgsql', $driver->getName());
-        self::assertEquals('main', $driver->getDbName());
+        self::assertEquals('main', $driver->getSourceName());
 
         $driver = new Driver(
             dsn: 'MYSQL:host=mysql;dbname=copyDb',
         );
 
         self::assertEquals('mysql', $driver->getName());
-        self::assertEquals('copydb', $driver->getDbName());
+        self::assertEquals('copydb', $driver->getSourceName());
 
         $driver = new Driver(
             dsn: 'sqlite::memory:',
         );
 
         self::assertEquals('sqlite', $driver->getName());
-        self::assertEquals('memory', $driver->getDbName());
+        self::assertEquals('memory', $driver->getSourceName());
 
         $driver = new Driver(
             dsn: 'sqlite:tests/data/sqlite/db.sqlite3',
         );
 
         self::assertEquals('sqlite', $driver->getName());
-        self::assertEquals('db', $driver->getDbName());
+        self::assertEquals('db', $driver->getSourceName());
     }
 
     public function testConfigurationException(): void

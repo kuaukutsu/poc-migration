@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration;
 
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\connection\DriverInterface;
 use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 
 /**
@@ -29,7 +29,7 @@ final readonly class Migration
         public string $table = 'migration',
         public template\FactoryInterface $templFactory = new template\Factory(),
     ) {
-        $this->name = $this->driver->getName() . '/' . $this->driver->getDbName();
+        $this->name = $this->driver->getName() . '/' . $this->driver->getSourceName();
     }
 
     /**

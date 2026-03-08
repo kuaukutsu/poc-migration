@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal\command;
+namespace kuaukutsu\poc\migration\command;
 
 use Throwable;
-use kuaukutsu\poc\migration\internal\command;
 use kuaukutsu\poc\migration\Context;
 
 interface CommandInterface
@@ -13,7 +12,7 @@ interface CommandInterface
     /**
      * @return array<non-empty-string, non-negative-int>
      */
-    public function fetchApplied(command\Options $options = new command\Options()): array;
+    public function fetchApplied(Options $options = new Options()): array;
 
     /**
      * @return bool true: request completed; false: request rejected

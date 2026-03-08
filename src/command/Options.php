@@ -2,13 +2,10 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal\command;
+namespace kuaukutsu\poc\migration\command;
 
 use kuaukutsu\poc\migration\InputOptions;
 
-/**
- * @psalm-internal kuaukutsu\poc\migration
- */
 final readonly class Options
 {
     /**

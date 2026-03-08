@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal\action;
 
-use Iterator;
 use Throwable;
 use DateTimeImmutable;
-use kuaukutsu\poc\migration\event\ExceptionEvent;
+use Iterator;
+use kuaukutsu\poc\migration\command\CommandInterface;
+use kuaukutsu\poc\migration\command\Options;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventAction;
 use kuaukutsu\poc\migration\event\EventDispatcher;
+use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\MigrateErrorEvent;
 use kuaukutsu\poc\migration\event\MigrateSuccessEvent;
 use kuaukutsu\poc\migration\exception\ActionException;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\internal\command;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\filesystem;
 use kuaukutsu\poc\migration\Context;
 use kuaukutsu\poc\migration\InputOptions;
@@ -44,7 +44,7 @@ final readonly class Workflow
     {
         $command = $this->makeCommand($migration);
 
-        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new command\Options());
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new Options());
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->up(
             $appliedMigrations,
             filesystem\Options::makeFromInput($options)
@@ -90,7 +90,7 @@ final readonly class Workflow
     {
         $command = $this->makeCommand($migration);
 
-        $commandOptions = command\Options::makeFromInput($options);
+        $commandOptions = Options::makeFromInput($options);
         if ($options->hasApplyLatestVersion()) {
             $commandOptions = $commandOptions->withVersion(
                 $this->getLastVersion($migration, $command)
@@ -224,11 +224,8 @@ final readonly class Workflow
      * @return array<non-empty-string, non-negative-int>
      * @throws InitializationException
      */
-    private function getAppliedMigrations(
-        Migration $migration,
-        CommandInterface $command,
-        command\Options $options,
-    ): array {
+    private function getAppliedMigrations(Migration $migration, CommandInterface $command, Options $options): array
+    {
         try {
             return $command->fetchApplied($options);
         } catch (Throwable $exception) {
@@ -247,7 +244,7 @@ final readonly class Workflow
      */
     private function getLastVersion(Migration $migration, CommandInterface $command): int
     {
-        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new command\Options(limit: 1));
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new Options(limit: 1));
         if (count($appliedMigrations) === 1) {
             return current($appliedMigrations);
         }

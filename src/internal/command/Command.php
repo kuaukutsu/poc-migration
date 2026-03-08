@@ -6,6 +6,8 @@ namespace kuaukutsu\poc\migration\internal\command;
 
 use Override;
 use Throwable;
+use kuaukutsu\poc\migration\command\CommandInterface;
+use kuaukutsu\poc\migration\command\Options;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
 use kuaukutsu\poc\migration\Context;
 
