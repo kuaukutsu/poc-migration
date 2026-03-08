@@ -12,7 +12,7 @@ use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\MigratorInterface;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 /**
  * Верхнеуровневая работа приложения.
@@ -40,12 +40,12 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
-        $this->migrator->up(new InputArgs(limit: 1));
+        $this->migrator->up(new InputOptions(limit: 1));
         $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
         self::assertNotEmpty($data['202501011024_entity_create.sql']);
 
-        $this->migrator->up(new InputArgs(limit: 2));
+        $this->migrator->up(new InputOptions(limit: 2));
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
@@ -64,11 +64,11 @@ final class ArgumentsTest extends TestCase
 
         $this->migrator->up();
 
-        $this->migrator->down(new InputArgs(limit: 1));
+        $this->migrator->down(new InputOptions(limit: 1));
         $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
 
-        $this->migrator->down(new InputArgs(limit: 2));
+        $this->migrator->down(new InputOptions(limit: 2));
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
@@ -83,7 +83,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
-        $this->migrator->down(new InputArgs(dryRun: true));
+        $this->migrator->down(new InputOptions(dryRun: true));
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
@@ -98,7 +98,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
-        $this->migrator->up(new InputArgs(limit: 2, dbName: 'sqlite/memory'));
+        $this->migrator->up(new InputOptions(limit: 2, dbName: 'sqlite/memory'));
         $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
     }
@@ -108,7 +108,7 @@ final class ArgumentsTest extends TestCase
         $this->migrator->init();
 
         $this->expectException(ConfigurationException::class);
-        $this->migrator->up(new InputArgs(dbName: 'sqlite/unknown'));
+        $this->migrator->up(new InputOptions(dbName: 'sqlite/unknown'));
     }
 
     public function testDownWithVersion(): void
@@ -117,7 +117,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
-        $this->migrator->up(new InputArgs(limit: 2));
+        $this->migrator->up(new InputOptions(limit: 2));
         $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
 
@@ -125,12 +125,12 @@ final class ArgumentsTest extends TestCase
         self::assertGreaterThan(0, $version);
 
         // not found version
-        $this->migrator->down(new InputArgs(version: 2));
+        $this->migrator->down(new InputOptions(version: 2));
         $data = $this->command->fetchApplied();
         self::assertCount(2, $data);
 
         // down with version
-        $this->migrator->down(new InputArgs(version: $version));
+        $this->migrator->down(new InputOptions(version: $version));
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
     }
@@ -141,7 +141,7 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
-        $args = new InputArgs(limit: 1);
+        $args = new InputOptions(limit: 1);
         self::assertFalse($args->hasApplyLatestVersion());
 
         $this->migrator->up($args);
@@ -158,16 +158,16 @@ final class ArgumentsTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertCount(3, $data);
 
-        $args = new InputArgs();
+        $args = new InputOptions();
         self::assertFalse($args->hasApplyLatestVersion());
 
-        $args = new InputArgs(version: 111, applyLatestVersion: true);
+        $args = new InputOptions(version: 111, applyLatestVersion: true);
         self::assertFalse($args->hasApplyLatestVersion());
 
-        $args = new InputArgs(limit: 1, applyLatestVersion: true);
+        $args = new InputOptions(limit: 1, applyLatestVersion: true);
         self::assertFalse($args->hasApplyLatestVersion());
 
-        $args = new InputArgs(applyLatestVersion: true);
+        $args = new InputOptions(applyLatestVersion: true);
         self::assertTrue($args->hasApplyLatestVersion());
 
         // down with latest version

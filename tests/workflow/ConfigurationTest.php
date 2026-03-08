@@ -12,7 +12,7 @@ use kuaukutsu\poc\migration\exception\InitializationException;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 final class ConfigurationTest extends TestCase
 {
@@ -71,7 +71,7 @@ final class ConfigurationTest extends TestCase
 
         $migrator->init();
 
-        $migrator->up(new InputArgs(dryRun: true));
+        $migrator->up(new InputOptions(dryRun: true));
         $data = $command->fetchApplied();
         self::assertEmpty($data);
     }
@@ -114,6 +114,6 @@ final class ConfigurationTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('Migration Name must be declared.');
 
-        $migrator->create(new InputArgs(dbName: 'test'));
+        $migrator->create(new InputOptions(dbName: 'test'));
     }
 }

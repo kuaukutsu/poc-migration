@@ -21,20 +21,35 @@ final readonly class Command implements CommandInterface
     }
 
     #[Override]
-    public function fetchApplied(Args $args = new Args()): array
+    public function fetchApplied(Options $options = new Options()): array
     {
         $params = [];
 
-        $query = sprintf('SELECT name, version FROM %s', $this->params->table);
-        if ($args->version > 0) {
-            $query .= ' WHERE version=:version';
-            $params['version'] = $args->version;
+        $where = '';
+        if ($options->version > 0) {
+            $where = 'WHERE version=:version';
+            $params['version'] = $options->version;
         }
 
-        $query .= ' ORDER BY atime DESC, name DESC';
-        if ($args->limit > 0) {
-            $query .= ' LIMIT ' . $args->limit;
+        $limit = '';
+        if ($options->limit > 0) {
+            $limit = 'LIMIT ' . $options->limit;
         }
+
+        /** @var non-empty-string $query */
+        $query = str_replace(
+            [
+                ':table',
+                '[WHERE]',
+                '[LIMIT]',
+            ],
+            [
+                $this->params->table,
+                $where,
+                $limit,
+            ],
+            'SELECT name, version FROM :table [WHERE] ORDER BY atime DESC, name DESC [LIMIT]',
+        );
 
         return $this->connection->fetchRecord($query, $params);
     }

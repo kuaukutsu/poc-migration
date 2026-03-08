@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal\command;
 
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
-final readonly class Args
+final readonly class Options
 {
     /**
      * @param non-negative-int $limit
@@ -18,18 +18,16 @@ final readonly class Args
     public function __construct(
         public int $limit = 0,
         public int $version = 0,
-        public bool $applyLatestVersion = false,
     ) {
         assert($this->limit >= 0);
         assert($this->version >= 0);
     }
 
-    public static function makeFromInput(InputArgs $args): self
+    public static function makeFromInput(InputOptions $args): self
     {
         return new self(
             limit: $args->limit,
             version: $args->version,
-            applyLatestVersion: $args->hasApplyLatestVersion(),
         );
     }
 

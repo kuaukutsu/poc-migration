@@ -13,7 +13,7 @@ interface CommandInterface
     /**
      * @return array<non-empty-string, non-negative-int>
      */
-    public function fetchApplied(command\Args $args = new command\Args()): array;
+    public function fetchApplied(command\Options $options = new command\Options()): array;
 
     /**
      * @return bool true: request completed; false: request rejected

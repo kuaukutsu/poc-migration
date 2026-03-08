@@ -8,7 +8,7 @@ use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\internal\filesystem\Action;
-use kuaukutsu\poc\migration\internal\filesystem\Args;
+use kuaukutsu\poc\migration\internal\filesystem\Options;
 
 final class FilesFixtureTest extends TestCase
 {
@@ -34,7 +34,7 @@ final class FilesFixtureTest extends TestCase
 
     public function testLimit(): void
     {
-        $iterator = $this->fs->fixture(new Args(limit: 1));
+        $iterator = $this->fs->fixture(new Options(limit: 1));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -45,7 +45,7 @@ final class FilesFixtureTest extends TestCase
         self::assertCount(1, $files);
         self::assertEquals('202501011024_entity_base.sql', $files[0]);
 
-        $iterator = $this->fs->fixture(new Args(limit: 2));
+        $iterator = $this->fs->fixture(new Options(limit: 2));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -60,7 +60,7 @@ final class FilesFixtureTest extends TestCase
 
     public function testLimitSkipZero(): void
     {
-        $iterator = $this->fs->fixture(new Args(limit: 0));
+        $iterator = $this->fs->fixture(new Options(limit: 0));
         self::assertTrue($iterator->valid());
         self::assertNotEmpty(iterator_count($iterator));
     }

@@ -17,10 +17,10 @@ final readonly class TestCommand implements CommandInterface
     }
 
     #[Override]
-    public function fetchApplied(command\Args $args = new command\Args()): array
+    public function fetchApplied(command\Options $options = new command\Options()): array
     {
-        if ($args->limit > 0) {
-            return array_slice($this->storage->getMigration(), 0, $args->limit);
+        if ($options->limit > 0) {
+            return array_slice($this->storage->getMigration(), 0, $options->limit);
         }
 
         return $this->storage->getMigration();

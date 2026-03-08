@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\tests\stub\TestDriver;
 use kuaukutsu\poc\migration\tests\stub\TestStorage;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 use kuaukutsu\poc\migration\MigratorInterface;
 
 /**
@@ -72,7 +72,7 @@ final class WorkflowTest extends TestCase
 
     public function testUpWithRepeatable(): void
     {
-        $this->migrator->up(new InputArgs(hasRepeatable: true));
+        $this->migrator->up(new InputOptions(hasRepeatable: true));
 
         // repeatable
         self::assertStringContainsString(

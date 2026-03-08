@@ -12,7 +12,7 @@ use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\MigratorInterface;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 final class UpExactlyTest extends TestCase
 {
@@ -37,7 +37,7 @@ final class UpExactlyTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
-        $this->migrator->up(new InputArgs(limit: 1));
+        $this->migrator->up(new InputOptions(limit: 1));
         $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
 
@@ -59,7 +59,7 @@ final class UpExactlyTest extends TestCase
         self::assertEmpty($data);
 
         try {
-            $this->migrator->up(new InputArgs(exactlyAll: true));
+            $this->migrator->up(new InputOptions(exactlyAll: true));
         } catch (ActionException) {
         }
 
@@ -77,7 +77,7 @@ final class UpExactlyTest extends TestCase
             'SQLSTATE[HY000]: General error: 1 no such table:'
         );
 
-        $this->migrator->up(new InputArgs(exactlyAll: true));
+        $this->migrator->up(new InputOptions(exactlyAll: true));
     }
 
     public function testVerify(): void
@@ -86,7 +86,7 @@ final class UpExactlyTest extends TestCase
         $data = $this->command->fetchApplied();
         self::assertEmpty($data);
 
-        $this->migrator->up(new InputArgs(limit: 1));
+        $this->migrator->up(new InputOptions(limit: 1));
         $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
 

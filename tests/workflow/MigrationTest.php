@@ -12,7 +12,7 @@ use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\MigratorInterface;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 /**
  * Верхнеуровневая работа приложения.
@@ -106,7 +106,7 @@ final class MigrationTest extends TestCase
     {
         $this->migrator->init();
 
-        $this->migrator->up(new InputArgs(limit: 1));
+        $this->migrator->up(new InputOptions(limit: 1));
         $data = $this->command->fetchApplied();
         self::assertCount(1, $data);
 

@@ -57,7 +57,7 @@ final class FixtureCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->fixture($this->getArguments($input));
+            $this->migrator->fixture($this->getOptions($input));
         } catch (InvalidArgumentException | MigratorException $e) {
             $output->writeln($e->getMessage());
             return Command::INVALID;

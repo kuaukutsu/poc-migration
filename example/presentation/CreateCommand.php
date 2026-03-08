@@ -47,7 +47,7 @@ final class CreateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->create($this->getArguments($input));
+            $this->migrator->create($this->getOptions($input));
         } catch (InvalidArgumentException | MigratorException $e) {
             $output->writeln($e->getMessage());
             return Command::INVALID;
