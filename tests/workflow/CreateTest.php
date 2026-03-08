@@ -6,10 +6,10 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use Override;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\internal\command\Params;
-use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
+use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
+use kuaukutsu\poc\migration\Config;
 use kuaukutsu\poc\migration\InputOptions;
 
 final class CreateTest extends TestCase
@@ -22,7 +22,7 @@ final class CreateTest extends TestCase
 
         $path = dirname(__DIR__) . '/migration/sqlite/memory';
         $migrator = MigratorFactory::makeFromEvent(driver: $driver, path: $path);
-        $command = $driver->makeCommand(new Params(table: 'migration'));
+        $command = $driver->makeCommand(new Config(table: 'migration'));
 
         $migrator->init();
 

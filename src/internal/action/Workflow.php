@@ -152,7 +152,7 @@ final readonly class Workflow
         $command = $this->makeCommand($migration);
 
         try {
-            $files = (new filesystem\Setup($migration->getSetupPath(), $migration->table))->all();
+            $files = (new filesystem\Setup($migration->getSetupPath(), $migration->config->table))->all();
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 Event::FilesystemError,
@@ -183,8 +183,8 @@ final readonly class Workflow
     {
         try {
             (new filesystem\Action($migration->path))->create(
-                $migration->templFactory->makeName($name),
-                $migration->templFactory->makeBody(),
+                $migration->config->templFactory->makeName($name),
+                $migration->config->templFactory->makeBody(),
             );
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(

@@ -74,17 +74,19 @@ DROP TABLE IF EXISTS public.entity;
 
 ```php
 use DI\Container;
-use kuaukutsu\poc\migration\Migration;
-use kuaukutsu\poc\migration\MigrationCollection;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\example\presentation\DownCommand;
+use kuaukutsu\poc\migration\example\presentation\CreateCommand;
 use kuaukutsu\poc\migration\example\presentation\FixtureCommand;
+use kuaukutsu\poc\migration\example\presentation\VerifyCommand;
 use kuaukutsu\poc\migration\example\presentation\InitCommand;
 use kuaukutsu\poc\migration\example\presentation\RedoCommand;
 use kuaukutsu\poc\migration\example\presentation\UpCommand;
+use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
+use kuaukutsu\poc\migration\Migration;
+use kuaukutsu\poc\migration\MigrationCollection;
 use kuaukutsu\poc\migration\Migrator;
 use kuaukutsu\poc\migration\MigratorInterface;
-use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
@@ -120,7 +122,9 @@ $console->setCommandLoader(
             'migrate:up' => UpCommand::class,
             'migrate:down' => DownCommand::class,
             'migrate:redo' => RedoCommand::class,
+            'migrate:verify' => VerifyCommand::class,
             'migrate:fixture' => FixtureCommand::class,
+            'migrate:create' => CreateCommand::class,
         ],
     )
 );

@@ -12,10 +12,10 @@ use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\command\Options;
-use kuaukutsu\poc\migration\internal\command\Command;
-use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\internal\action\Command;
 use kuaukutsu\poc\migration\internal\connection\PDO\Connection;
 use kuaukutsu\poc\migration\internal\connection\PDO\Type;
+use kuaukutsu\poc\migration\Config;
 use kuaukutsu\poc\migration\Context;
 
 final class CommandTest extends TestCase
@@ -27,7 +27,7 @@ final class CommandTest extends TestCase
     {
         $this->command = new Command(
             new Connection(new PDO(dsn: 'sqlite::memory:'), Type::PDO_SQLITE),
-            new Params(table: 'migration'),
+            new Config(table: 'migration'),
         );
     }
 

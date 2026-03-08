@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal\command;
+namespace kuaukutsu\poc\migration\internal\action;
 
 use Override;
 use Throwable;
 use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\command\Options;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
+use kuaukutsu\poc\migration\Config;
 use kuaukutsu\poc\migration\Context;
 
 /**
@@ -18,7 +19,7 @@ final readonly class Command implements CommandInterface
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private Params $params,
+        private Config $config,
     ) {
     }
 
@@ -46,7 +47,7 @@ final readonly class Command implements CommandInterface
                 '[LIMIT]',
             ],
             [
-                $this->params->table,
+                $this->config->table,
                 $where,
                 $limit,
             ],
@@ -70,7 +71,7 @@ final readonly class Command implements CommandInterface
             $transaction->exec(
                 sprintf(
                     'INSERT INTO %s (name, version, atime) VALUES (\'%s\', %d, \'%s\')',
-                    $this->params->table,
+                    $this->config->table,
                     $context->filename,
                     $context->version,
                     gmdate('Y-m-d H:i:s'),
@@ -99,7 +100,7 @@ final readonly class Command implements CommandInterface
             $transaction->exec(
                 sprintf(
                     'DELETE FROM %s WHERE name=\'%s\'',
-                    $this->params->table,
+                    $this->config->table,
                     $context->filename,
                 )
             );

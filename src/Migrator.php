@@ -42,6 +42,26 @@ final readonly class Migrator implements MigratorInterface
     }
 
     #[Override]
+    public function create(InputOptions $args = new InputOptions()): void
+    {
+        if ($args->dbName === null) {
+            throw new ConfigurationException(
+                "DBName must be declared."
+            );
+        }
+
+        if ($args->migrationName === null) {
+            throw new ConfigurationException(
+                "Migration Name must be declared."
+            );
+        }
+
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->create($migration, $args->migrationName);
+        }
+    }
+
+    #[Override]
     public function up(InputOptions $args = new InputOptions()): void
     {
         foreach ($this->selectDb($args) as $migration) {
@@ -54,6 +74,14 @@ final readonly class Migrator implements MigratorInterface
     {
         foreach ($this->selectDb($args) as $migration) {
             $this->actionWorkflow->down($migration, $args);
+        }
+    }
+
+    #[Override]
+    public function fixture(InputOptions $args = new InputOptions()): void
+    {
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->fixture($migration, $args);
         }
     }
 
@@ -79,34 +107,6 @@ final readonly class Migrator implements MigratorInterface
                     $args->withVersion($version),
                 );
             }
-        }
-    }
-
-    #[Override]
-    public function fixture(InputOptions $args = new InputOptions()): void
-    {
-        foreach ($this->selectDb($args) as $migration) {
-            $this->actionWorkflow->fixture($migration, $args);
-        }
-    }
-
-    #[Override]
-    public function create(InputOptions $args = new InputOptions()): void
-    {
-        if ($args->dbName === null) {
-            throw new ConfigurationException(
-                "DBName must be declared."
-            );
-        }
-
-        if ($args->migrationName === null) {
-            throw new ConfigurationException(
-                "Migration Name must be declared."
-            );
-        }
-
-        foreach ($this->selectDb($args) as $migration) {
-            $this->actionWorkflow->create($migration, $args->migrationName);
         }
     }
 

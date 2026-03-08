@@ -8,11 +8,11 @@ use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\exception\ActionException;
-use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use kuaukutsu\poc\migration\MigratorInterface;
+use kuaukutsu\poc\migration\Config;
 use kuaukutsu\poc\migration\InputOptions;
+use kuaukutsu\poc\migration\MigratorInterface;
 
 final class UpExactlyTest extends TestCase
 {
@@ -28,7 +28,7 @@ final class UpExactlyTest extends TestCase
         );
 
         $this->migrator = MigratorFactory::makeFromEvent($driver);
-        $this->command = $driver->makeCommand(new Params(table: 'migration'));
+        $this->command = $driver->makeCommand(new Config(table: 'migration'));
     }
 
     public function testUpExactlyAll(): void

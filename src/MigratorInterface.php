@@ -19,6 +19,11 @@ interface MigratorInterface
     public function init(): void;
 
     /**
+     * @throws ConfigurationException
+     */
+    public function create(InputOptions $args = new InputOptions()): void;
+
+    /**
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
@@ -38,6 +43,13 @@ interface MigratorInterface
      * @throws ActionException
      * @throws ConfigurationException If the driver is not implemented
      * @throws ConnectionException
+     */
+    public function fixture(InputOptions $args = new InputOptions()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
      * @throws InitializationException initialization step is required
      */
     public function redo(InputOptions $args = new InputOptions()): void;
@@ -49,16 +61,4 @@ interface MigratorInterface
      * @throws InitializationException initialization step is required
      */
     public function verify(InputOptions $args = new InputOptions()): void;
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     */
-    public function fixture(InputOptions $args = new InputOptions()): void;
-
-    /**
-     * @throws ConfigurationException
-     */
-    public function create(InputOptions $args = new InputOptions()): void;
 }
