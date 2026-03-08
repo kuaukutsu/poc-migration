@@ -6,14 +6,14 @@ namespace kuaukutsu\poc\migration\example\presentation;
 
 use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 trait CommandOptions
 {
     /**
      * @throws InvalidArgumentException
      */
-    protected function getArguments(InputInterface $input): InputArgs
+    protected function getOptions(InputInterface $input): InputOptions
     {
         $options = [];
         if ($input->hasOption('limit')) {
@@ -44,7 +44,7 @@ trait CommandOptions
             $options['migrationName'] = $this->getMigrationName($input);
         }
 
-        return new InputArgs(...$options);
+        return new InputOptions(...$options);
     }
 
     /**

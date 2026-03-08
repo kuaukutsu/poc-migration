@@ -58,7 +58,7 @@ final class VerifyCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->verify($this->getArguments($input));
+            $this->migrator->verify($this->getOptions($input));
         } catch (InvalidArgumentException | MigratorException $e) {
             if ($e instanceof InitializationException) {
                 $output->writeln('Calling the command "migrate:init" may help fix the error.');

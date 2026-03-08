@@ -42,56 +42,7 @@ final readonly class Migrator implements MigratorInterface
     }
 
     #[Override]
-    public function up(InputArgs $args = new InputArgs()): void
-    {
-        foreach ($this->selectDb($args) as $migration) {
-            $this->actionWorkflow->up($migration, $args);
-        }
-    }
-
-    #[Override]
-    public function down(InputArgs $args = new InputArgs()): void
-    {
-        foreach ($this->selectDb($args) as $migration) {
-            $this->actionWorkflow->down($migration, $args);
-        }
-    }
-
-    #[Override]
-    public function redo(InputArgs $args = new InputArgs()): void
-    {
-        $this->down($args);
-        $this->up($args->withResetLimit());
-    }
-
-    #[Override]
-    public function verify(InputArgs $args = new InputArgs()): void
-    {
-        foreach ($this->selectDb($args) as $migration) {
-            $version = $this->actionWorkflow->up(
-                $migration,
-                $args->withExactlyAll(),
-            );
-
-            if ($args->dryRun === false) {
-                $this->actionWorkflow->down(
-                    $migration,
-                    $args->withVersion($version),
-                );
-            }
-        }
-    }
-
-    #[Override]
-    public function fixture(InputArgs $args = new InputArgs()): void
-    {
-        foreach ($this->selectDb($args) as $migration) {
-            $this->actionWorkflow->fixture($migration, $args);
-        }
-    }
-
-    #[Override]
-    public function create(InputArgs $args = new InputArgs()): void
+    public function create(InputOptions $args = new InputOptions()): void
     {
         if ($args->dbName === null) {
             throw new ConfigurationException(
@@ -110,11 +61,60 @@ final readonly class Migrator implements MigratorInterface
         }
     }
 
+    #[Override]
+    public function up(InputOptions $args = new InputOptions()): void
+    {
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->up($migration, $args);
+        }
+    }
+
+    #[Override]
+    public function down(InputOptions $args = new InputOptions()): void
+    {
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->down($migration, $args);
+        }
+    }
+
+    #[Override]
+    public function fixture(InputOptions $args = new InputOptions()): void
+    {
+        foreach ($this->selectDb($args) as $migration) {
+            $this->actionWorkflow->fixture($migration, $args);
+        }
+    }
+
+    #[Override]
+    public function redo(InputOptions $args = new InputOptions()): void
+    {
+        $this->down($args);
+        $this->up($args->withResetLimit());
+    }
+
+    #[Override]
+    public function verify(InputOptions $args = new InputOptions()): void
+    {
+        foreach ($this->selectDb($args) as $migration) {
+            $version = $this->actionWorkflow->up(
+                $migration,
+                $args->withExactlyAll(),
+            );
+
+            if ($args->dryRun === false) {
+                $this->actionWorkflow->down(
+                    $migration,
+                    $args->withVersion($version),
+                );
+            }
+        }
+    }
+
     /**
      * @return iterable<Migration>
      * @throws ConfigurationException
      */
-    private function selectDb(InputArgs $args): iterable
+    private function selectDb(InputOptions $args): iterable
     {
         if ($args->dbName === null) {
             return $this->collection;

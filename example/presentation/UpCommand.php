@@ -72,7 +72,7 @@ final class UpCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->migrator->up($this->getArguments($input));
+            $this->migrator->up($this->getOptions($input));
         } catch (InvalidArgumentException | MigratorException $e) {
             if ($e instanceof InitializationException) {
                 $output->writeln('Calling the command "migrate:init" may help fix the error.');

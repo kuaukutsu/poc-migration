@@ -8,7 +8,7 @@ namespace kuaukutsu\poc\migration;
  * @api
  * @infection-ignore-all
  */
-final readonly class InputArgs
+final readonly class InputOptions
 {
     /**
      * @param non-negative-int $limit

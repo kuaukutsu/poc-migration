@@ -10,12 +10,12 @@ use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
-use kuaukutsu\poc\migration\internal\command\Args;
-use kuaukutsu\poc\migration\internal\command\Command;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
-use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\command\CommandInterface;
+use kuaukutsu\poc\migration\command\Options;
+use kuaukutsu\poc\migration\internal\action\Command;
 use kuaukutsu\poc\migration\internal\connection\PDO\Connection;
 use kuaukutsu\poc\migration\internal\connection\PDO\Type;
+use kuaukutsu\poc\migration\Config;
 use kuaukutsu\poc\migration\Context;
 
 final class CommandTest extends TestCase
@@ -27,7 +27,7 @@ final class CommandTest extends TestCase
     {
         $this->command = new Command(
             new Connection(new PDO(dsn: 'sqlite::memory:'), Type::PDO_SQLITE),
-            new Params(table: 'migration'),
+            new Config(table: 'migration'),
         );
     }
 
@@ -96,13 +96,13 @@ final class CommandTest extends TestCase
         $this->execUp('table3');
 
         $data = $this->command->fetchApplied(
-            new Args(limit: 1)
+            new Options(limit: 1)
         );
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table3']);
 
         $data = $this->command->fetchApplied(
-            new Args(limit: 2)
+            new Options(limit: 2)
         );
         self::assertCount(2, $data);
 
@@ -125,21 +125,21 @@ final class CommandTest extends TestCase
         $this->execUp('table3', 222);
 
         $data = $this->command->fetchApplied(
-            new Args(version: 111)
+            new Options(version: 111)
         );
         self::assertCount(2, $data);
         self::assertNotEmpty($data['test-table1']);
         self::assertNotEmpty($data['test-table2']);
 
         $data = $this->command->fetchApplied(
-            new Args(version: 222)
+            new Options(version: 222)
         );
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table3']);
 
         // сомнительный кейс, но допускаем
         $data = $this->command->fetchApplied(
-            new Args(limit: 1, version: 111)
+            new Options(limit: 1, version: 111)
         );
         self::assertCount(1, $data);
         self::assertNotEmpty($data['test-table2']);

@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace kuaukutsu\poc\migration\internal\command;
+namespace kuaukutsu\poc\migration\internal\action;
 
 use Override;
 use Throwable;
+use kuaukutsu\poc\migration\command\CommandInterface;
+use kuaukutsu\poc\migration\command\Options;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
+use kuaukutsu\poc\migration\Config;
 use kuaukutsu\poc\migration\Context;
 
 /**
@@ -16,25 +19,40 @@ final readonly class Command implements CommandInterface
 {
     public function __construct(
         private ConnectionInterface $connection,
-        private Params $params,
+        private Config $config,
     ) {
     }
 
     #[Override]
-    public function fetchApplied(Args $args = new Args()): array
+    public function fetchApplied(Options $options = new Options()): array
     {
         $params = [];
 
-        $query = sprintf('SELECT name, version FROM %s', $this->params->table);
-        if ($args->version > 0) {
-            $query .= ' WHERE version=:version';
-            $params['version'] = $args->version;
+        $where = '';
+        if ($options->version > 0) {
+            $where = 'WHERE version=:version';
+            $params['version'] = $options->version;
         }
 
-        $query .= ' ORDER BY atime DESC, name DESC';
-        if ($args->limit > 0) {
-            $query .= ' LIMIT ' . $args->limit;
+        $limit = '';
+        if ($options->limit > 0) {
+            $limit = 'LIMIT ' . $options->limit;
         }
+
+        /** @var non-empty-string $query */
+        $query = str_replace(
+            [
+                ':table',
+                '[WHERE]',
+                '[LIMIT]',
+            ],
+            [
+                $this->config->table,
+                $where,
+                $limit,
+            ],
+            'SELECT name, version FROM :table [WHERE] ORDER BY atime DESC, name DESC [LIMIT]',
+        );
 
         return $this->connection->fetchRecord($query, $params);
     }
@@ -53,7 +71,7 @@ final readonly class Command implements CommandInterface
             $transaction->exec(
                 sprintf(
                     'INSERT INTO %s (name, version, atime) VALUES (\'%s\', %d, \'%s\')',
-                    $this->params->table,
+                    $this->config->table,
                     $context->filename,
                     $context->version,
                     gmdate('Y-m-d H:i:s'),
@@ -82,7 +100,7 @@ final readonly class Command implements CommandInterface
             $transaction->exec(
                 sprintf(
                     'DELETE FROM %s WHERE name=\'%s\'',
-                    $this->params->table,
+                    $this->config->table,
                     $context->filename,
                 )
             );

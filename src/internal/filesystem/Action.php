@@ -32,7 +32,7 @@ final readonly class Action
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function up(array $listExcluded, Args $args = new Args()): Iterator
+    public function up(array $listExcluded, Options $options = new Options()): Iterator
     {
         $iternum = 0;
         foreach ($this->makeIterator($this->path) as $matchFilename) {
@@ -42,7 +42,7 @@ final readonly class Action
                 continue;
             }
 
-            if ($args->limit > 0 && $iternum >= $args->limit) {
+            if ($options->limit > 0 && $iternum >= $options->limit) {
                 return;
             }
 
@@ -61,11 +61,11 @@ final readonly class Action
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function down(array $listApplied, Args $args = new Args()): Iterator
+    public function down(array $listApplied, Options $options = new Options()): Iterator
     {
         $iternum = 0;
         foreach ($listApplied as $filename => $_) {
-            if ($args->limit > 0 && $iternum >= $args->limit) {
+            if ($options->limit > 0 && $iternum >= $options->limit) {
                 return;
             }
 
@@ -82,11 +82,11 @@ final readonly class Action
      * @return Iterator<non-empty-string, non-empty-string>
      * @throws ConfigurationException
      */
-    public function fixture(Args $args = new Args()): Iterator
+    public function fixture(Options $options = new Options()): Iterator
     {
         $iternum = 0;
         foreach ($this->makeIterator(joinBasename($this->path, '-fixture')) as $matchFilename) {
-            if ($args->limit > 0 && $iternum >= $args->limit) {
+            if ($options->limit > 0 && $iternum >= $options->limit) {
                 return;
             }
 

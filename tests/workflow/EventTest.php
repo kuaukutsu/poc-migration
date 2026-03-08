@@ -8,7 +8,7 @@ use Throwable;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\event\Event;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
 use kuaukutsu\poc\migration\tests\stub\TestSubscriber;
 
@@ -28,7 +28,7 @@ final class EventTest extends TestCase
 
         try {
             $migrator->init();
-            $migrator->up(new InputArgs(dbName: 'test'));
+            $migrator->up(new InputOptions(dbName: 'test'));
         } catch (Throwable) {
         }
 
@@ -131,7 +131,7 @@ final class EventTest extends TestCase
         $migrator->init();
 
         try {
-            $migrator->up(new InputArgs(dryRun: true));
+            $migrator->up(new InputOptions(dryRun: true));
         } catch (Throwable) {
         }
 
@@ -160,7 +160,7 @@ final class EventTest extends TestCase
         );
 
         $migrator->init();
-        $migrator->up(new InputArgs(limit: 1, hasRepeatable: true));
+        $migrator->up(new InputOptions(limit: 1, hasRepeatable: true));
 
         // event-repeatable: does not exist
         self::assertStringContainsString(
@@ -256,7 +256,7 @@ final class EventTest extends TestCase
 
         $migrator->init();
         try {
-            $migrator->create(new InputArgs(dbName: 'sqlite/memory', migrationName: 'test'));
+            $migrator->create(new InputOptions(dbName: 'sqlite/memory', migrationName: 'test'));
         } catch (Throwable) {
         }
 

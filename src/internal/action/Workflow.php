@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal\action;
 
-use Iterator;
 use Throwable;
 use DateTimeImmutable;
-use kuaukutsu\poc\migration\event\ExceptionEvent;
+use Iterator;
+use kuaukutsu\poc\migration\command\CommandInterface;
+use kuaukutsu\poc\migration\command\Options;
 use kuaukutsu\poc\migration\event\Event;
 use kuaukutsu\poc\migration\event\EventAction;
 use kuaukutsu\poc\migration\event\EventDispatcher;
+use kuaukutsu\poc\migration\event\ExceptionEvent;
 use kuaukutsu\poc\migration\event\MigrateErrorEvent;
 use kuaukutsu\poc\migration\event\MigrateSuccessEvent;
 use kuaukutsu\poc\migration\exception\ActionException;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\internal\command;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
 use kuaukutsu\poc\migration\internal\filesystem;
 use kuaukutsu\poc\migration\Context;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 use kuaukutsu\poc\migration\Migration;
 
 /**
@@ -40,14 +40,14 @@ final readonly class Workflow
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function up(Migration $migration, InputArgs $args): int
+    public function up(Migration $migration, InputOptions $options): int
     {
         $command = $this->makeCommand($migration);
 
-        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new command\Args());
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new Options());
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->up(
             $appliedMigrations,
-            filesystem\Args::makeFromInput($args)
+            filesystem\Options::makeFromInput($options)
         );
 
         $version = generateVersion();
@@ -60,20 +60,20 @@ final readonly class Workflow
                         filename: $filename,
                         query: $query,
                         version: $version,
-                        dryRun: $args->dryRun,
+                        dryRun: $options->dryRun,
                     ),
                     EventAction::up,
                 );
             } catch (ActionException $exception) {
-                if ($args->exactlyAll) {
-                    $this->down($migration, new InputArgs(version: $version));
+                if ($options->exactlyAll) {
+                    $this->down($migration, new InputOptions(version: $version));
                 }
 
                 throw $exception;
             }
         }
 
-        if ($args->hasRepeatable()) {
+        if ($options->hasRepeatable()) {
             $this->repeatable($migration, $command, $version);
         }
 
@@ -86,11 +86,18 @@ final readonly class Workflow
      * @throws ConnectionException
      * @throws InitializationException
      */
-    public function down(Migration $migration, InputArgs $args): void
+    public function down(Migration $migration, InputOptions $options): void
     {
         $command = $this->makeCommand($migration);
 
-        $appliedMigrations = $this->getAppliedMigrations($migration, $command, command\Args::makeFromInput($args));
+        $commandOptions = Options::makeFromInput($options);
+        if ($options->hasApplyLatestVersion()) {
+            $commandOptions = $commandOptions->withVersion(
+                $this->getLastVersion($migration, $command)
+            );
+        }
+
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, $commandOptions);
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->down($appliedMigrations);
 
         foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
@@ -101,7 +108,7 @@ final readonly class Workflow
                     filename: $filename,
                     query: $query,
                     version: $appliedMigrations[$filename],
-                    dryRun: $args->dryRun,
+                    dryRun: $options->dryRun,
                 ),
                 EventAction::down,
             );
@@ -113,12 +120,12 @@ final readonly class Workflow
      * @throws ConfigurationException
      * @throws ConnectionException
      */
-    public function fixture(Migration $migration, InputArgs $args): void
+    public function fixture(Migration $migration, InputOptions $options): void
     {
         $command = $this->makeCommand($migration);
 
         $fsHandler = static fn(filesystem\Action $fs): Iterator => $fs->fixture(
-            filesystem\Args::makeFromInput($args)
+            filesystem\Options::makeFromInput($options)
         );
 
         foreach ($this->iteratorHandler($migration, $fsHandler) as $filename => $query) {
@@ -128,7 +135,7 @@ final readonly class Workflow
                     dbName: $migration->getName(),
                     filename: $filename,
                     query: $query,
-                    dryRun: $args->dryRun,
+                    dryRun: $options->dryRun,
                 ),
                 EventAction::fixture,
             );
@@ -145,7 +152,7 @@ final readonly class Workflow
         $command = $this->makeCommand($migration);
 
         try {
-            $files = (new filesystem\Setup($migration->getSetupPath(), $migration->table))->all();
+            $files = (new filesystem\Setup($migration->getSetupPath(), $migration->config->table))->all();
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
                 Event::FilesystemError,
@@ -176,8 +183,8 @@ final readonly class Workflow
     {
         try {
             (new filesystem\Action($migration->path))->create(
-                $migration->templFactory->makeName($name),
-                $migration->templFactory->makeBody(),
+                $migration->config->templFactory->makeName($name),
+                $migration->config->templFactory->makeBody(),
             );
         } catch (ConfigurationException $exception) {
             $this->eventDispatcher->trigger(
@@ -217,17 +224,10 @@ final readonly class Workflow
      * @return array<non-empty-string, non-negative-int>
      * @throws InitializationException
      */
-    private function getAppliedMigrations(Migration $migration, CommandInterface $command, command\Args $args): array
+    private function getAppliedMigrations(Migration $migration, CommandInterface $command, Options $options): array
     {
         try {
-            if ($args->applyLatestVersion) {
-                $appliedMigrations = $command->fetchApplied(new command\Args(limit: 1));
-                if (count($appliedMigrations) === 1) {
-                    $args = $args->withVersion(current($appliedMigrations));
-                }
-            }
-
-            return $command->fetchApplied($args);
+            return $command->fetchApplied($options);
         } catch (Throwable $exception) {
             $this->eventDispatcher->trigger(
                 Event::InitializationError,
@@ -236,6 +236,20 @@ final readonly class Workflow
 
             throw new InitializationException('Error reading system data.', $exception);
         }
+    }
+
+    /**
+     * @return non-negative-int
+     * @throws InitializationException
+     */
+    private function getLastVersion(Migration $migration, CommandInterface $command): int
+    {
+        $appliedMigrations = $this->getAppliedMigrations($migration, $command, new Options(limit: 1));
+        if (count($appliedMigrations) === 1) {
+            return current($appliedMigrations);
+        }
+
+        return 0;
     }
 
     /**

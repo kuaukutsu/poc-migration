@@ -7,7 +7,7 @@ namespace kuaukutsu\poc\migration\tests\internal;
 use Override;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
-use kuaukutsu\poc\migration\internal\filesystem\Args;
+use kuaukutsu\poc\migration\internal\filesystem\Options;
 use kuaukutsu\poc\migration\internal\filesystem\Action;
 
 final class FilesDownTest extends TestCase
@@ -41,7 +41,7 @@ final class FilesDownTest extends TestCase
             '202501021025_account_email.sql' => 1,
         ];
 
-        $iterator = $this->fs->down($savedFilenames, new Args(limit: 1));
+        $iterator = $this->fs->down($savedFilenames, new Options(limit: 1));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -52,7 +52,7 @@ final class FilesDownTest extends TestCase
         self::assertCount(1, $files);
         self::assertEquals('202501011024_entity_create.sql', $files[0]);
 
-        $iterator = $this->fs->up([], new Args(limit: 2));
+        $iterator = $this->fs->up([], new Options(limit: 2));
         self::assertTrue($iterator->valid());
 
         $files = [];
@@ -69,7 +69,7 @@ final class FilesDownTest extends TestCase
     {
         $savedFilenames = ['202501011024_entity_create.sql' => 1];
 
-        $iterator = $this->fs->down($savedFilenames, new Args(limit: 0));
+        $iterator = $this->fs->down($savedFilenames, new Options(limit: 0));
         self::assertTrue($iterator->valid());
         self::assertNotEmpty(iterator_count($iterator));
     }

@@ -19,46 +19,46 @@ interface MigratorInterface
     public function init(): void;
 
     /**
-     * @throws ActionException
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     * @throws InitializationException initialization step is required
-     */
-    public function up(InputArgs $args = new InputArgs()): void;
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     * @throws InitializationException initialization step is required
-     */
-    public function down(InputArgs $args = new InputArgs()): void;
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     * @throws InitializationException initialization step is required
-     */
-    public function redo(InputArgs $args = new InputArgs()): void;
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     * @throws InitializationException initialization step is required
-     */
-    public function verify(InputArgs $args = new InputArgs()): void;
-
-    /**
-     * @throws ActionException
-     * @throws ConfigurationException If the driver is not implemented
-     * @throws ConnectionException
-     */
-    public function fixture(InputArgs $args = new InputArgs()): void;
-
-    /**
      * @throws ConfigurationException
      */
-    public function create(InputArgs $args = new InputArgs()): void;
+    public function create(InputOptions $args = new InputOptions()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
+     * @throws InitializationException initialization step is required
+     */
+    public function up(InputOptions $args = new InputOptions()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
+     * @throws InitializationException initialization step is required
+     */
+    public function down(InputOptions $args = new InputOptions()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
+     */
+    public function fixture(InputOptions $args = new InputOptions()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
+     * @throws InitializationException initialization step is required
+     */
+    public function redo(InputOptions $args = new InputOptions()): void;
+
+    /**
+     * @throws ActionException
+     * @throws ConfigurationException If the driver is not implemented
+     * @throws ConnectionException
+     * @throws InitializationException initialization step is required
+     */
+    public function verify(InputOptions $args = new InputOptions()): void;
 }

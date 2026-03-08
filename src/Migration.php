@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration;
 
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\connection\DriverInterface;
 use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
-use kuaukutsu\poc\migration\internal\command\Params;
 
 /**
  * @api
@@ -21,15 +20,13 @@ final readonly class Migration
 
     /**
      * @param non-empty-string $path
-     * @param non-empty-string $table
      */
     public function __construct(
         public string $path,
         private DriverInterface $driver,
-        public string $table = 'migration',
-        public template\FactoryInterface $templFactory = new template\Factory(),
+        public Config $config = new Config(),
     ) {
-        $this->name = $this->driver->getName() . '/' . $this->driver->getDbName();
+        $this->name = $this->driver->getName() . '/' . $this->driver->getSourceName();
     }
 
     /**
@@ -53,6 +50,6 @@ final readonly class Migration
      */
     public function getCommand(): CommandInterface
     {
-        return $this->driver->makeCommand(new Params(table: $this->table));
+        return $this->driver->makeCommand($this->config);
     }
 }

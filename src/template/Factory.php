@@ -20,12 +20,12 @@ final readonly class Factory implements FactoryInterface
     #[Override]
     public function makeBody(): string
     {
-        return <<<CODE
--- @up
--- SQL CODE
-
--- @down
--- SQL CODE
-CODE;
+        return <<<CODE_WRAP
+        -- @up
+        -- SQL CODE
+        
+        -- @down
+        -- SQL CODE
+        CODE_WRAP;
     }
 }

@@ -6,13 +6,13 @@ namespace kuaukutsu\poc\migration\tests\workflow;
 
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ActionException;
-use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
+use kuaukutsu\poc\migration\exception\ConnectionException;
 use kuaukutsu\poc\migration\exception\InitializationException;
-use kuaukutsu\poc\migration\internal\command\Params;
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tests\MigratorFactory;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\Config;
+use kuaukutsu\poc\migration\InputOptions;
 
 final class ConfigurationTest extends TestCase
 {
@@ -67,11 +67,11 @@ final class ConfigurationTest extends TestCase
     {
         $driver = new Driver(dsn: 'sqlite::memory:');
         $migrator = MigratorFactory::makeFromEvent($driver);
-        $command = $driver->makeCommand(new Params(table: 'migration'));
+        $command = $driver->makeCommand(new Config(table: 'migration'));
 
         $migrator->init();
 
-        $migrator->up(new InputArgs(dryRun: true));
+        $migrator->up(new InputOptions(dryRun: true));
         $data = $command->fetchApplied();
         self::assertEmpty($data);
     }
@@ -114,6 +114,6 @@ final class ConfigurationTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('Migration Name must be declared.');
 
-        $migrator->create(new InputArgs(dbName: 'test'));
+        $migrator->create(new InputOptions(dbName: 'test'));
     }
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\connection;
 
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
-use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\Config;
 
 interface DriverInterface
 {
@@ -18,7 +18,7 @@ interface DriverInterface
     /**
      * @return non-empty-lowercase-string
      */
-    public function getDbName(): string;
+    public function getSourceName(): string;
 
     /**
      * @return non-empty-string
@@ -28,5 +28,5 @@ interface DriverInterface
     /**
      * @throws ConnectionException
      */
-    public function makeCommand(Params $params): CommandInterface;
+    public function makeCommand(Config $config): CommandInterface;
 }

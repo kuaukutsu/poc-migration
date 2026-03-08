@@ -8,13 +8,13 @@ use Override;
 use Closure;
 use PDO;
 use PDOException;
+use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
 use kuaukutsu\poc\migration\connection\DriverInterface;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
-use kuaukutsu\poc\migration\internal\command\Command;
-use kuaukutsu\poc\migration\internal\command\CommandInterface;
-use kuaukutsu\poc\migration\internal\command\Params;
+use kuaukutsu\poc\migration\internal\action\Command;
+use kuaukutsu\poc\migration\Config;
 
 final class Driver implements DriverInterface
 {
@@ -62,7 +62,7 @@ final class Driver implements DriverInterface
     }
 
     #[Override]
-    public function getDbName(): string
+    public function getSourceName(): string
     {
         return $this->dbname;
     }
@@ -74,9 +74,9 @@ final class Driver implements DriverInterface
     }
 
     #[Override]
-    public function makeCommand(Params $params): CommandInterface
+    public function makeCommand(Config $config): CommandInterface
     {
-        return new Command($this->makeConnection(), $params);
+        return new Command($this->makeConnection(), $config);
     }
 
     /**

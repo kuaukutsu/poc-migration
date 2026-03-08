@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal\filesystem;
 
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 
 /**
  * @psalm-internal kuaukutsu\poc\migration
  */
-final readonly class Args
+final readonly class Options
 {
     /**
      * @param non-negative-int $limit
@@ -20,7 +20,7 @@ final readonly class Args
         assert($this->limit >= 0);
     }
 
-    public static function makeFromInput(InputArgs $args): self
+    public static function makeFromInput(InputOptions $args): self
     {
         return new self(
             limit: $args->limit,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use kuaukutsu\poc\migration\internal\connection\PDO\Driver;
 use kuaukutsu\poc\migration\tools\PrettyConsoleOutput;
-use kuaukutsu\poc\migration\InputArgs;
+use kuaukutsu\poc\migration\InputOptions;
 use kuaukutsu\poc\migration\Migration;
 use kuaukutsu\poc\migration\MigrationCollection;
 use kuaukutsu\poc\migration\Migrator;
@@ -28,7 +28,7 @@ $migrator = new Migrator(
 );
 
 foreach (range(1, 1000) as $row) {
-    $migrator->create(new InputArgs(dbName: "mysql/main", migrationName: $row . "-test"));
+    $migrator->create(new InputOptions(dbName: "mysql/main", migrationName: $row . "-test"));
 }
 
 try {
@@ -38,7 +38,7 @@ try {
 }
 
 try {
-    $migrator->up(new InputArgs(limit: 100));
+    $migrator->up(new InputOptions(limit: 100));
 } catch (Throwable $exception) {
     echo $exception->getMessage() . PHP_EOL;
 }
