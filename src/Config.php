@@ -19,7 +19,7 @@ final readonly class Config
         public string $table = 'migration',
         public template\FactoryInterface $templFactory = new template\Factory(),
     ) {
-        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) {
+        if (preg_match('/^\w+$/', $table) !== 1) {
             throw new ConfigurationException(
                 "Table name '$table' contains invalid characters."
             );
