@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace kuaukutsu\poc\migration\internal\connection\PDO;
 
 use PDO;
-use kuaukutsu\poc\migration\exception\PrepareException;
 use kuaukutsu\poc\migration\connection\StatementInterface;
 
 /**
@@ -13,6 +12,8 @@ use kuaukutsu\poc\migration\connection\StatementInterface;
  */
 abstract class Statement implements StatementInterface
 {
+    use ThrowPrepareException;
+
     protected function __construct(
         protected readonly PDO $connection,
         protected bool $transactionActive,
@@ -24,7 +25,7 @@ abstract class Statement implements StatementInterface
     {
         $statement = $this->connection->prepare($query);
         if ($statement === false) {
-            $this->prepareException();
+            $this->prepareException($this->connection);
         }
 
         if ($statement->execute($params)) {
@@ -47,23 +48,9 @@ abstract class Statement implements StatementInterface
 
         $statement = $this->connection->prepare($query);
         if ($statement === false) {
-            $this->prepareException();
+            $this->prepareException($this->connection);
         }
 
         $statement->execute($params);
-    }
-
-    /**
-     * @throws PrepareException
-     */
-    private function prepareException(): never
-    {
-        /**
-         * @var array{0: string, 1: int, 2: string} $info PDO::errorInfo Spec
-         */
-        $info = $this->connection->errorInfo();
-        throw new PrepareException(
-            (string)new ErrorInfo($info)
-        );
     }
 }

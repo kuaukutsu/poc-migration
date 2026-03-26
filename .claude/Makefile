@@ -1,3 +1,7 @@
+diff:
+	git diff main > runtime/changes.patch
+.PHONY: diff
+
 # claude --resume d9e98477-e022-4529-9f25-4ad53c269bf8
 claude: _claude_volume_create ## claude
 	docker build \

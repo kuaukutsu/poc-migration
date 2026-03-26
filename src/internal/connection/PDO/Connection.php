@@ -6,7 +6,6 @@ namespace kuaukutsu\poc\migration\internal\connection\PDO;
 
 use Override;
 use PDO;
-use kuaukutsu\poc\migration\exception\PrepareException;
 use kuaukutsu\poc\migration\connection\ConnectionInterface;
 use kuaukutsu\poc\migration\connection\TransactionInterface;
 
@@ -15,6 +14,8 @@ use kuaukutsu\poc\migration\connection\TransactionInterface;
  */
 final readonly class Connection implements ConnectionInterface
 {
+    use ThrowPrepareException;
+
     public function __construct(
         private PDO $connection,
         private Type $driverType,
@@ -33,7 +34,7 @@ final readonly class Connection implements ConnectionInterface
     {
         $statement = $this->connection->prepare($query);
         if ($statement === false) {
-            $this->prepareException();
+            $this->prepareException($this->connection);
         }
 
         if ($statement->execute($params)) {
@@ -56,23 +57,9 @@ final readonly class Connection implements ConnectionInterface
 
         $statement = $this->connection->prepare($query);
         if ($statement === false) {
-            $this->prepareException();
+            $this->prepareException($this->connection);
         }
 
         $statement->execute($params);
-    }
-
-    /**
-     * @throws PrepareException
-     */
-    private function prepareException(): never
-    {
-        /**
-         * @var array{0: string, 1: int, 2: string} $info PDO::errorInfo Spec
-         */
-        $info = $this->connection->errorInfo();
-        throw new PrepareException(
-            (string)new ErrorInfo($info)
-        );
     }
 }
