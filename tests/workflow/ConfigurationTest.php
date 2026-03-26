@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\tests\workflow;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use kuaukutsu\poc\migration\exception\ActionException;
 use kuaukutsu\poc\migration\exception\ConfigurationException;
@@ -115,5 +116,47 @@ final class ConfigurationTest extends TestCase
         $this->expectExceptionMessage('Migration Name must be declared.');
 
         $migrator->create(new InputOptions(dbName: 'test'));
+    }
+
+    /**
+     * @return iterable<non-empty-string[]>
+     */
+    public static function additionTableNameCases(): iterable
+    {
+        yield ['migrate'];
+        yield ['migrate_table'];
+        yield ['migrate22'];
+    }
+
+    /**
+     * @param non-empty-string $tableName
+     */
+    #[DataProvider('additionTableNameCases')]
+    public function testTableName(string $tableName): void
+    {
+        $config = new Config(table: $tableName);
+        self::assertNotEmpty($config);
+    }
+
+    /**
+     * @return iterable<non-empty-string[]>
+     */
+    public static function additionTableNameBadCases(): iterable
+    {
+        yield ['`migrate`'];
+        yield ['migrate space'];
+        yield ['{}'];
+    }
+
+    /**
+     * @param non-empty-string $tableName
+     */
+    #[DataProvider('additionTableNameBadCases')]
+    public function testTableNameException(string $tableName): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('contains invalid characters.');
+
+        new Config(table: $tableName);
     }
 }

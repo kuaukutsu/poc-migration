@@ -69,7 +69,7 @@ final readonly class Action
                 return;
             }
 
-            $command = $this->prepareCommand($this->path . $filename, ActionType::DOWN);
+            $command = $this->prepareCommand(joinFilename($this->path, $filename), ActionType::DOWN);
             if ($command !== null) {
                 $iternum++;
 

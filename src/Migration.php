@@ -6,6 +6,7 @@ namespace kuaukutsu\poc\migration;
 
 use kuaukutsu\poc\migration\command\CommandInterface;
 use kuaukutsu\poc\migration\connection\DriverInterface;
+use kuaukutsu\poc\migration\exception\ConfigurationException;
 use kuaukutsu\poc\migration\exception\ConnectionException;
 
 /**
@@ -20,6 +21,7 @@ final readonly class Migration
 
     /**
      * @param non-empty-string $path
+     * @throws ConfigurationException
      */
     public function __construct(
         public string $path,

@@ -69,13 +69,12 @@ final readonly class Command implements CommandInterface
         try {
             $transaction->exec($context->query);
             $transaction->exec(
-                sprintf(
-                    'INSERT INTO %s (name, version, atime) VALUES (\'%s\', %d, \'%s\')',
-                    $this->config->table,
-                    $context->filename,
-                    $context->version,
-                    gmdate('Y-m-d H:i:s'),
-                )
+                sprintf('INSERT INTO %s (name, version, atime) VALUES (:name, :version, :atime)', $this->config->table),
+                [
+                    'name' => $context->filename,
+                    'version' => $context->version,
+                    'atime' => gmdate('Y-m-d H:i:s'),
+                ],
             );
         } catch (Throwable $exception) {
             $transaction->rollBack();
@@ -98,11 +97,10 @@ final readonly class Command implements CommandInterface
         try {
             $transaction->exec($context->query);
             $transaction->exec(
-                sprintf(
-                    'DELETE FROM %s WHERE name=\'%s\'',
-                    $this->config->table,
-                    $context->filename,
-                )
+                sprintf('DELETE FROM %s WHERE name=:name', $this->config->table),
+                [
+                    'name' => $context->filename,
+                ],
             );
         } catch (Throwable $exception) {
             $transaction->rollBack();

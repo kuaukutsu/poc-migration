@@ -4,32 +4,23 @@ declare(strict_types=1);
 
 namespace kuaukutsu\poc\migration\internal\connection\PDO;
 
-use Override;
 use PDO;
-use kuaukutsu\poc\migration\connection\ConnectionInterface;
-use kuaukutsu\poc\migration\connection\TransactionInterface;
+use kuaukutsu\poc\migration\connection\StatementInterface;
 
 /**
- * @psalm-internal kuaukutsu\poc\migration
+ * @psalm-internal kuaukutsu\poc\migration\internal\connection\PDO
  */
-final readonly class Connection implements ConnectionInterface
+abstract class Statement implements StatementInterface
 {
     use ThrowPrepareException;
 
-    public function __construct(
-        private PDO $connection,
-        private Type $driverType,
+    protected function __construct(
+        protected readonly PDO $connection,
+        protected bool $transactionActive,
     ) {
     }
 
-    #[Override]
-    public function beginTransaction(): TransactionInterface
-    {
-        $class = $this->driverType->makeFactoryTransaction();
-        return $class::begin($this->connection);
-    }
-
-    #[Override]
+    #[\Override]
     public function fetchRecord(string $query, array $params = []): array
     {
         $statement = $this->connection->prepare($query);
@@ -47,7 +38,7 @@ final readonly class Connection implements ConnectionInterface
         return [];
     }
 
-    #[Override]
+    #[\Override]
     public function exec(string $query, array $params = []): void
     {
         if ($params === []) {

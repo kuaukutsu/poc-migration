@@ -30,4 +30,16 @@ enum Type
          */
         return strtolower($db);
     }
+
+    /**
+     * @return class-string<FactoryTransaction>
+     */
+    public function makeFactoryTransaction(): string
+    {
+        if ($this === self::PDO_MYSQL) {
+            return TransactionMysql::class;
+        }
+
+        return Transaction::class;
+    }
 }
