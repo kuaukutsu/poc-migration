@@ -1,6 +1,6 @@
-# claude --resume 1b667a73-02e0-4454-be22-a28282363e70
+# claude --resume d9e98477-e022-4529-9f25-4ad53c269bf8
 claude: _claude_volume_create ## claude
-	- docker build \
+	docker build \
 		--build-arg UID=$(USER) \
 		--build-arg WORKDIR=/app \
 		--target cli \
@@ -22,9 +22,11 @@ claude: _claude_volume_create ## claude
 		-v "$$(pwd)/README.md:/app/README.md" \
 		-v "$$(pwd)/rector.php:/app/rector.php" \
 		-v "$$(pwd)/.claude/CLAUDE.md:/app/CLAUDE.md" \
+		-v "$$(pwd)/.claude/REVIEW.md:/app/REVIEW.md" \
+		-v "$$(pwd)/runtime/changes.patch:/app/changes.patch" \
 		-w /app \
 		app_claude bash -l
-	- docker image rm -f app_claude
+	docker image rm -f app_claude
 
 claude_backup: _store-create _store-backup _store-remove
 
@@ -52,4 +54,4 @@ _store-restore:
 	docker run --rm --volumes-from claude_store \
 		-u $(USER) \
 		-v "$$(pwd)/.claude/backup:/backup" \
-		alpine bash -c "cd /data && rm -rf /data && tar xzvf /backup/claude.tar.gz --strip-components 1"
+		alpine sh -c "cd /data && rm -rf /data && tar xzvf /backup/claude.tar.gz --strip-components 1"

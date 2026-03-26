@@ -71,18 +71,18 @@ rector: ## rector
 		./vendor/bin/rector
 
 infection:
-	- docker build --target tests -t app_cli .docker/php/cli
+	docker build --target tests -t app_cli .docker/php/cli
 	- docker run --init -it --rm \
 		--add-host=host.docker.internal:host-gateway \
 		-u $(USER) \
 		-v "$$(pwd):/app" \
 		-w /app \
 		app_cli ./vendor/bin/infection
-	- docker image rm -f app_cli
+	docker image rm -f app_cli
 .PHONY: infection
 
 tests:
-	- docker build --target tests -t app_cli .docker/php/cli
+	docker build --target tests -t app_cli .docker/php/cli
 	- docker run --init -it --rm \
 		--add-host=host.docker.internal:host-gateway \
 		-u $(USER) \
@@ -102,7 +102,7 @@ tests:
 			--coverage=/app/runtime/coverage \
 			--threads=max \
 			--skip-initial-tests
-	- docker image rm -f app_cli
+	docker image rm -f app_cli
 .PHONY: tests
 
 ## App

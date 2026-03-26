@@ -332,7 +332,7 @@ final readonly class Workflow
 }
 
 /**
- * Unixtime + (milleseconds - 1 char), немного усекаем строку до 12 знаков.
+ * Unixtime + (milleseconds - 1 char)
  * @return positive-int
  */
 function generateVersion(): int

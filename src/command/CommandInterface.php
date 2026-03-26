@@ -11,6 +11,7 @@ interface CommandInterface
 {
     /**
      * @return array<non-empty-string, non-negative-int>
+     * @throws Throwable
      */
     public function fetchApplied(Options $options = new Options()): array;
 
