@@ -23,9 +23,8 @@ final readonly class Connection implements ConnectionInterface
     #[Override]
     public function beginTransaction(): TransactionInterface
     {
-        return $this->driverType === Type::PDO_MYSQL
-            ? TransactionMysql::begin($this->connection)
-            : Transaction::begin($this->connection);
+        $class = $this->driverType->makeFactoryTransaction();
+        return $class::begin($this->connection);
     }
 
     #[Override]
@@ -43,8 +42,13 @@ final readonly class Connection implements ConnectionInterface
     }
 
     #[Override]
-    public function exec(string $query): void
+    public function exec(string $query, array $params = []): void
     {
-        $this->connection->exec($query);
+        if ($params === []) {
+            $this->connection->exec($query);
+            return;
+        }
+
+        $this->connection->prepare($query)->execute($params);
     }
 }

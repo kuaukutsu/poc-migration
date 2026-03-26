@@ -129,6 +129,9 @@ remove: down _image_remove _container_remove _volume_remove
 app:
 	USER=$(USER) docker compose -f ./docker-compose.yml run --rm -u $(USER) -w /example cli sh -l
 
+## AI
+-include .claude/Makefile
+
 _image_remove:
 	docker image rm -f \
 		migration-cli \

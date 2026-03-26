@@ -332,7 +332,7 @@ final readonly class Workflow
 }
 
 /**
- * Unixtime + milleseconds
+ * Unixtime + (milleseconds - 1 char), немного усекаем строку до 12 знаков.
  * @return positive-int
  */
 function generateVersion(): int
@@ -340,5 +340,5 @@ function generateVersion(): int
     /**
      * @var positive-int
      */
-    return (int)substr((new DateTimeImmutable())->format('Uv'), 0, -1);
+    return (int)substr((new DateTimeImmutable())->format('Uv'), 0, 12);
 }

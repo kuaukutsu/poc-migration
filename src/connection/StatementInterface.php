@@ -15,6 +15,7 @@ interface StatementInterface
 
     /**
      * @param non-empty-string $query
+     * @param array<string, scalar|null> $params
      */
-    public function exec(string $query): void;
+    public function exec(string $query, array $params = []): void;
 }
